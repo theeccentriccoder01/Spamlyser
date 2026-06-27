@@ -122,6 +122,14 @@ class BatchProcessor:
         
         results = []
         
+        # Nothing to process: return zeroed throughput stats instead of
+        # spinning up an executor and dividing by a ~0 elapsed time (issue #13).
+        if not messages:
+            self.batch_stats['end_time'] = self.batch_stats['start_time']
+            self.batch_stats['processing_time'] = 0.0
+            self.batch_stats['messages_per_second'] = 0.0
+            return results, self.batch_stats
+        
         # Process messages in parallel batches
         with ThreadPoolExecutor(max_workers=min(batch_size, 10)) as executor:
             future_to_message = {executor.submit(self.process_message, msg): msg 
@@ -152,7 +160,10 @@ class BatchProcessor:
         self.batch_stats['end_time'] = datetime.now()
         processing_time = (self.batch_stats['end_time'] - self.batch_stats['start_time']).total_seconds()
         self.batch_stats['processing_time'] = processing_time
-        self.batch_stats['messages_per_second'] = self.batch_stats['total_messages'] / processing_time
+        self.batch_stats['messages_per_second'] = (
+            self.batch_stats['total_messages'] / processing_time
+            if processing_time > 0 else 0.0
+        )
         
         return results, self.batch_stats
     
