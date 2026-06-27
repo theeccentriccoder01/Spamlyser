@@ -33,6 +33,7 @@ try:
     from models.export_feature import export_results_button 
     from models.threat_analyzer import classify_threat_type, get_threat_specific_advice, THREAT_CATEGORIES
     from models.word_analyzer import WordAnalyzer
+    from models.label_normalizer import normalize_label
 except ImportError as e:
     st.error(f"Error importing model components: {str(e)}")
     st.info("Please ensure all required model files are present in the models directory.")
@@ -7801,7 +7802,7 @@ if analyse_btn and user_sms.strip():
             with st.spinner(f"🤖 Analyzing with {selected_model_name}..."):
                 time.sleep(0.5)
                 result = classifier(cleaned_sms)[0]
-                label = result['label'].upper()
+                label = normalize_label(result['label'], result.get('score'))
                 confidence = result['score']
                 
                 # Store prediction results in session state for explanation
@@ -7834,7 +7835,9 @@ if analyse_btn and user_sms.strip():
                         cleaned_sms, confidence
                     )
                 
-                st.session_state.model_stats[selected_model_name][label.lower()] += 1
+                key = label.lower()
+                if key in st.session_state.model_stats[selected_model_name]:
+                    st.session_state.model_stats[selected_model_name][key] += 1
                 st.session_state.model_stats[selected_model_name]['total'] += 1
                 st.session_state.classification_history.append({
                     'timestamp': datetime.now(),
