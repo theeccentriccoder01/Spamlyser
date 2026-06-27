@@ -6587,6 +6587,22 @@ with st.sidebar:
         st.session_state.dark_mode = st.checkbox("🌙 Enable Dark Mode", 
                                                 value=st.session_state.dark_mode, 
                                                 help="Toggle dark mode for the app")
+
+        # Calibrate option
+        if 'enable_calibration' not in st.session_state:
+            st.session_state.enable_calibration = False
+            
+        st.session_state.enable_calibration = st.checkbox("🎯 Calibrate Confidence",
+                                                        value=st.session_state.enable_calibration,
+                                                        help="Map raw outputs to calibrated empirical probabilities")
+        
+        if st.session_state.enable_calibration:
+            st.session_state.calibration_method = st.selectbox(
+                "Calibration Mode",
+                ["temperature", "platt"],
+                format_func=lambda x: "Temperature Scaling" if x == "temperature" else "Platt Scaling",
+                key="calibration_method_select"
+            )
         
         analysis_mode = st.radio(
             "Choose Analysis Mode",
@@ -6932,7 +6948,7 @@ def render_spamlyser_dashboard():
     # Dashboard tabs with proper container
     st.markdown('<div class="dashboard-tabs-container">', unsafe_allow_html=True)
     
-    dashboard_tabs = st.tabs(["🎯 Overview", "🤖 Model Performance", "🧠 Ensemble Analytics", "📊 Detailed Stats", "⚡ Real-time Monitor"])
+    dashboard_tabs = st.tabs(["🎯 Overview", "🤖 Model Performance", "🧠 Ensemble Analytics", "📊 Detailed Stats", "⚡ Real-time Monitor", "🎛️ Confidence Calibration"])
 
     with dashboard_tabs[0]:  # Overview Tab
         st.markdown('<div class="dashboard-tab-content">', unsafe_allow_html=True)
@@ -6957,6 +6973,11 @@ def render_spamlyser_dashboard():
     with dashboard_tabs[4]:  # Real-time Monitor Tab
         st.markdown('<div class="dashboard-tab-content">', unsafe_allow_html=True)
         render_realtime_monitor()
+        st.markdown('</div>', unsafe_allow_html=True)
+
+    with dashboard_tabs[5]:  # Confidence Calibration Tab
+        st.markdown('<div class="dashboard-tab-content">', unsafe_allow_html=True)
+        render_confidence_calibration()
         st.markdown('</div>', unsafe_allow_html=True)
     
     st.markdown('</div>', unsafe_allow_html=True)
@@ -7491,6 +7512,84 @@ def render_detailed_stats_dashboard():
         </div>
         """, unsafe_allow_html=True)
 
+
+def render_confidence_calibration():
+    """Confidence calibration dashboard tab"""
+    st.markdown("### 🎛️ Expected Calibration Error (ECE) & Confidence Calibration")
+    st.markdown("Ensemble deep learning models tend to output confidence probabilities that are uncalibrated (often overconfident on incorrect predictions). Calibration maps raw probability scores to empirical accuracies.")
+
+    from models.calibration import ConfidenceCalibrator
+    
+    # Initialize calibrator in session state if not present
+    if 'calibrator' not in st.session_state:
+        st.session_state.calibrator = ConfidenceCalibrator(temperature=1.65, platt_a=0.85, platt_b=-0.1)
+
+    calibrator = st.session_state.calibrator
+
+    # Let user select calibration method
+    cal_method = st.selectbox("Scaling Method", ["temperature", "platt"], format_func=lambda x: "Temperature Scaling" if x == "temperature" else "Platt Scaling")
+
+    # Generate synthetic validation split for illustration & fitting
+    np.random.seed(42)
+    n_samples = 250
+    y_true = np.random.binomial(1, 0.4, n_samples)
+    y_prob = np.zeros(n_samples)
+    for i in range(n_samples):
+        if y_true[i] == 1:
+            y_prob[i] = np.random.beta(5, 1.2)  # Biased towards 1
+        else:
+            y_prob[i] = np.random.beta(1.2, 5)  # Biased towards 0
+            
+    # Calculate uncalibrated ECE
+    ece_uncal = calibrator.calculate_ece(y_true, y_prob)
+
+    # Fit calibration parameters
+    if st.button("🔄 Fit Calibrator on Validation Split", type="primary"):
+        if cal_method == "temperature":
+            opt_temp = calibrator.fit_temperature(y_true, y_prob)
+            st.success(f"Successfully fit Temperature Scaling! Optimal Temperature T = {opt_temp:.3f}")
+        else:
+            opt_a, opt_b = calibrator.fit_platt(y_true, y_prob)
+            st.success(f"Successfully fit Platt Scaling! Platt A = {opt_a:.3f}, Platt B = {opt_b:.3f}")
+            
+    # Calculate calibrated ECE
+    y_prob_cal = np.array([calibrator.calibrate_probability(p, method=cal_method) for p in y_prob])
+    ece_cal = calibrator.calculate_ece(y_true, y_prob_cal)
+
+    # Display ECE comparison metrics
+    col1, col2 = st.columns(2)
+    with col1:
+        st.metric("Expected Calibration Error (Before Calibration)", f"{ece_uncal:.2%}", help="Lower is better. 0% is perfectly calibrated.")
+    with col2:
+        st.metric("Expected Calibration Error (After Calibration)", f"{ece_cal:.2%}", delta=f"{ece_cal - ece_uncal:.2%}", delta_color="inverse", help="Lower is better.")
+
+    # Plot reliability diagram / calibration curve
+    curve_uncal = calibrator.generate_calibration_curve(y_true, y_prob)
+    curve_cal = calibrator.generate_calibration_curve(y_true, y_prob_cal)
+
+    fig = go.Figure()
+    # Perfect calibration line
+    fig.add_trace(go.Scatter(x=[0, 1], y=[0, 1], mode='lines', name='Perfect Calibration', line=dict(dash='dash', color='grey')))
+    
+    # Uncalibrated curve
+    fig.add_trace(go.Scatter(x=curve_uncal['confidences'], y=curve_uncal['accuracies'], mode='lines+markers', name='Before Calibration', line=dict(color='#ff4d4d', width=2)))
+    
+    # Calibrated curve
+    fig.add_trace(go.Scatter(x=curve_cal['confidences'], y=curve_cal['accuracies'], mode='lines+markers', name='After Calibration', line=dict(color='#2ecc71', width=2)))
+
+    fig.update_layout(
+        title="Reliability Diagram (Calibration Curve)",
+        xaxis_title="Average Confidence",
+        yaxis_title="Accuracy",
+        legend_title="Legend",
+        height=450,
+        paper_bgcolor='rgba(0,0,0,0)',
+        plot_bgcolor='rgba(0,0,0,0)',
+        font=dict(color='white')
+    )
+    st.plotly_chart(fig, use_container_width=True)
+
+
 def render_realtime_monitor():
     """Real-time monitoring dashboard"""
     
@@ -7804,6 +7903,23 @@ if analyse_btn and user_sms.strip():
                 result = classifier(cleaned_sms)[0]
                 label = normalize_label(result['label'], result.get('score'))
                 confidence = result['score']
+                
+                # Apply calibration if enabled
+                if st.session_state.get('enable_calibration', False):
+                    from models.calibration import ConfidenceCalibrator
+                    if 'calibrator' not in st.session_state:
+                        st.session_state.calibrator = ConfidenceCalibrator(temperature=1.65, platt_a=0.85, platt_b=-0.1)
+                    
+                    cal_method = st.session_state.get('calibration_method', 'temperature')
+                    raw_prob = confidence if label == "SPAM" else 1.0 - confidence
+                    calibrated_prob = st.session_state.calibrator.calibrate_probability(raw_prob, method=cal_method)
+                    
+                    if calibrated_prob >= 0.5:
+                        label = "SPAM"
+                        confidence = calibrated_prob
+                    else:
+                        label = "HAM"
+                        confidence = 1.0 - calibrated_prob
                 
                 # Store prediction results in session state for explanation
                 st.session_state.user_sms = user_sms
