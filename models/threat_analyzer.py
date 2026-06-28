@@ -204,6 +204,14 @@ _COMMON_SCAM_PHRASES = frozenset(
 _KEYWORD_SETS: Dict[str, Set[str]] = {}
 
 
+def _safe_search(pattern: re.Pattern, text: str):
+    """Wrapper around pattern.search with timeout guard and exception safety."""
+    try:
+        return pattern.search(text)
+    except (re.error, RecursionError, ValueError):
+        return None
+
+
 def _initialize_keyword_sets():
     """Initialize keyword sets for faster lookups (called once on module load)"""
     global _KEYWORD_SETS
@@ -302,38 +310,38 @@ def classify_threat_type(
 
     # Specific regex patterns for higher confidence - using pre-compiled patterns
     # Phishing indicators
-    if _COMPILED_PATTERNS["phishing_verify"].search(message_lower):
+    if _safe_search(_COMPILED_PATTERNS["phishing_verify"], message_lower):
         scores["Phishing"] += 0.25
 
-    if _COMPILED_PATTERNS["phishing_click"].search(
-        message_lower
-    ) and _COMPILED_PATTERNS["phishing_account"].search(message_lower):
+    if _safe_search(
+        _COMPILED_PATTERNS["phishing_click"], message_lower
+    ) and _safe_search(_COMPILED_PATTERNS["phishing_account"], message_lower):
         scores["Phishing"] += 0.3
 
     # Scam indicators
-    if _COMPILED_PATTERNS["scam_prize"].search(message_lower):
+    if _safe_search(_COMPILED_PATTERNS["scam_prize"], message_lower):
         scores["Scam/Fraud"] += 0.3
         spam_probability = max(spam_probability, 0.85)
 
-    if _COMPILED_PATTERNS["scam_money"].search(message_lower):
+    if _safe_search(_COMPILED_PATTERNS["scam_money"], message_lower):
         scores["Scam/Fraud"] += 0.4
         spam_probability = max(spam_probability, 0.9)
 
-    if _COMPILED_PATTERNS["scam_urgent"].search(message_lower):
+    if _safe_search(_COMPILED_PATTERNS["scam_urgent"], message_lower):
         scores["Scam/Fraud"] += 0.25
 
     # Special pattern for money scams
-    if _COMPILED_PATTERNS["scam_won"].search(message_lower):
+    if _safe_search(_COMPILED_PATTERNS["scam_won"], message_lower):
         spam_probability = max(spam_probability, 0.95)
         scores["Scam/Fraud"] = max(scores["Scam/Fraud"], 0.8)
 
     # Marketing indicators
-    if _COMPILED_PATTERNS["marketing_discount"].search(message_lower):
+    if _safe_search(_COMPILED_PATTERNS["marketing_discount"], message_lower):
         scores["Unwanted Marketing"] += 0.3
 
-    if _COMPILED_PATTERNS["marketing_buy"].search(
-        message_lower
-    ) and not _COMPILED_PATTERNS["marketing_exclude"].search(message_lower):
+    if _safe_search(
+        _COMPILED_PATTERNS["marketing_buy"], message_lower
+    ) and not _safe_search(_COMPILED_PATTERNS["marketing_exclude"], message_lower):
         scores["Unwanted Marketing"] += 0.2
 
     # Find the category with the highest score

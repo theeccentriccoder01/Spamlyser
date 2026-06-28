@@ -1,4 +1,5 @@
 import re
+from .text_sanitizer import safe_regex_sub, safe_regex_findall
 
 ABBREVIATIONS = {
     "u": "you",
@@ -29,16 +30,18 @@ def expand_abbreviations(text: str) -> str:
 
 def correct_leetspeak(text: str) -> str:
     for k, v in LEETSPEAK.items():
-        text = re.sub(rf"{k}", v, text)
+        text = safe_regex_sub(rf"{k}", v, text, default=text)
     return text
 
 
 def count_suspicious_elements(text: str) -> dict:
     suspicious = {
         "all_caps": sum(1 for w in text.split() if w.isupper() and len(w) > 2),
-        "excessive_punct": len(re.findall(r"!{2,}|\?{2,}|\${2,}", text)),
-        "phone_numbers": len(re.findall(r"\b\d{10,}\b", text)),
-        "urls": len(re.findall(r"https?://|www\.", text)),
+        "excessive_punct": len(
+            safe_regex_findall(r"!{2,}|\?{2,}|\${2,}", text, default=[])
+        ),
+        "phone_numbers": len(safe_regex_findall(r"\b\d{10,}\b", text, default=[])),
+        "urls": len(safe_regex_findall(r"https?://|www\.", text, default=[])),
     }
     return suspicious
 

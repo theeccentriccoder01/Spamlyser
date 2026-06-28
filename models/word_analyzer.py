@@ -4,7 +4,9 @@ Provides sophisticated word-level analysis with context awareness
 """
 
 import re
+import html
 from typing import Dict, List, Any, Tuple
+from .text_sanitizer import safe_regex_search, safe_regex_findall, safe_regex_sub
 
 
 class WordAnalyzer:
@@ -259,7 +261,7 @@ class WordAnalyzer:
 
         for i, word in enumerate(words):
             # Clean word (remove punctuation but keep original for display)
-            clean_word = re.sub(r"[^\w]", "", word).lower()
+            clean_word = safe_regex_sub(r"[^\w]", "", word, default=word).lower()
             original_word = (
                 original_text.split()[i] if i < len(original_text.split()) else word
             )
@@ -293,7 +295,7 @@ class WordAnalyzer:
 
             # Check for suspicious patterns (case-sensitive for better detection)
             for pattern, weight in self.suspicious_patterns:
-                if re.search(pattern, original_word, re.IGNORECASE):
+                if safe_regex_search(pattern, original_word, flags=re.IGNORECASE):
                     pattern_weight = weight * context_multiplier
                     spam_score += pattern_weight
                     if word_type == "neutral":
@@ -447,10 +449,15 @@ class WordAnalyzer:
             "no catch": 0.7,
         }
         # Prepare cleaned, lower-cased tokens for matching
-        cleaned_words = [re.sub(r"[^\w]", "", w.lower()) for w in words]
+        cleaned_words = [
+            safe_regex_sub(r"[^\w]", "", w.lower(), default=w.lower()) for w in words
+        ]
 
         for phrase, weight in phrase_weights.items():
-            phrase_tokens = [re.sub(r"[^\w]", "", t.lower()) for t in phrase.split()]
+            phrase_tokens = [
+                safe_regex_sub(r"[^\w]", "", t.lower(), default=t.lower())
+                for t in phrase.split()
+            ]
             if not phrase_tokens:
                 continue
             L = len(phrase_tokens)
@@ -478,9 +485,11 @@ class WordAnalyzer:
     def _calculate_complexity_factor(self, text: str) -> float:
         """Calculate complexity factor based on text characteristics"""
         # Count special characters, numbers, caps
-        special_chars = len(re.findall(r'[!@#$%^&*(),.?":{}|<>]', text))
-        numbers = len(re.findall(r"\d", text))
-        caps = len(re.findall(r"[A-Z]", text))
+        special_chars = len(
+            safe_regex_findall(r'[!@#$%^&*(),.?":{}|<>]', text, default=[])
+        )
+        numbers = len(safe_regex_findall(r"\d", text, default=[]))
+        caps = len(safe_regex_findall(r"[A-Z]", text, default=[]))
 
         # Calculate complexity score
         complexity = (special_chars + numbers + caps) / len(text) if text else 0
@@ -531,7 +540,7 @@ class WordAnalyzer:
 
     def create_highlighted_html(self, analysis: Dict[str, Any]) -> str:
         """Create beautiful HTML with highlighted words based on analysis"""
-        words = analysis["text"].split()
+        words = [html.escape(w) for w in analysis["text"].split()]
         highlighted_words = []
 
         # Force ham prediction for non-spammy messages

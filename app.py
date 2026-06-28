@@ -1,3 +1,4 @@
+import html
 import streamlit as st
 import pandas as pd
 import plotly.express as px
@@ -42,6 +43,13 @@ try:
     )
     from models.word_analyzer import WordAnalyzer
     from models.label_normalizer import normalize_label
+    from models.text_sanitizer import (
+        sanitize_text,
+        validate_sms_message,
+        strip_html_unsafe,
+        safe_regex_search,
+        safe_regex_findall,
+    )
 except ImportError as e:
     st.error(f"Error importing model components: {str(e)}")
     st.info(
@@ -1422,7 +1430,9 @@ def show_analyzer_page():
                         # Update all metrics
                         update_metrics(progress)
 
-                    messages = df["message"].tolist()
+                    messages = [
+                        strip_html_unsafe(str(m))[:1000] for m in df["message"].tolist()
+                    ]
                     results, stats = processor.process_batch(
                         messages=messages,
                         batch_size=batch_size,
@@ -7720,14 +7730,19 @@ def analyse_message_features(message):
         "digit_ratio": sum(1 for c in message if c.isdigit()) / len(message)
         if message
         else 0,
-        "special_chars": len(re.findall(r'[!@#$%^&*(),.?":{}|<>]', message)),
+        "special_chars": len(
+            safe_regex_findall(r'[!@#$%^&*(),.?":{}|<>]', message, default=[])
+        ),
         "urls": len(
-            re.findall(
+            safe_regex_findall(
                 r"http[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*\\(\\),]|(?:%[0-9a-fA-F][0-9a-fA-F]))+",
                 message,
+                default=[],
             )
         ),
-        "phone_numbers": len(re.findall(r"\b\d{3}[-.]?\d{3}[-.]?\d{4}\b", message)),
+        "phone_numbers": len(
+            safe_regex_findall(r"\b\d{3}[-.]?\d{3}[-.]?\d{4}\b", message, default=[])
+        ),
         "exclamation_marks": message.count("!"),
         "question_marks": message.count("?"),
     }
@@ -8763,9 +8778,9 @@ def get_risk_indicators(message, prediction, threat_type=None):
             indicators.append("🔴 Excessive uppercase usage")
     if message.count("!") > 2:
         indicators.append("❗ Multiple exclamation marks")
-    if re.search(r"\b\d{3}[-.]?\d{3}[-.]?\d{4}\b", message):
+    if safe_regex_search(r"\b\d{3}[-.]?\d{3}[-.]?\d{4}\b", message):
         indicators.append("📞 Phone number detected")
-    if re.search(r"http[s]?://", message):
+    if safe_regex_search(r"http[s]?://", message):
         indicators.append("🔗 URL detected")
     return indicators
 
@@ -8850,9 +8865,15 @@ with col1:
         "SMS Message",
         value=user_sms_initial_value,
         height=120,
+        max_chars=1000,
         placeholder="Type or paste your SMS message here...",
-        help="Enter the SMS message you want to classify as spam or ham (legitimate)",
+        help="Enter the SMS message you want to classify as spam or ham (legitimate) — max 1000 characters",
     )
+    # Validate + sanitize input before downstream use
+    if user_sms:
+        is_valid, error_msg, user_sms = validate_sms_message(user_sms)
+        if not is_valid:
+            st.warning(error_msg)
     # Store current text_area value in session state for persistence
     st.session_state.user_sms_input_value = user_sms
 
@@ -8869,13 +8890,13 @@ with col1:
     if st.button("🔍 Word Analysis", key="test_word_analysis", type="primary"):
         st.markdown("### 🔍 Word Analysis")
 
-        # Use the current message from the text area
+        # Use the current message from the text area (already sanitized above)
         test_message = (
             user_sms
             if user_sms.strip()
-            else "Congratulations! You won a free prize, click now!"
+            else sanitize_text("Congratulations! You won a free prize, click now!")
         )
-        st.markdown(f"**Analyzing Message:** {test_message}")
+        st.markdown(f"**Analyzing Message:** {html.escape(test_message)}")
 
         # Create word analyzer
         analyzer = WordAnalyzer()
