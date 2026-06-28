@@ -35,7 +35,8 @@ def verify_model_availability() -> Tuple[bool, str, list]:
 
         if not torch.cuda.is_available():
             warnings.append(
-                "⚠️ CUDA not available. Using CPU for model inference (slower performance)."
+                "⚠️ CUDA not available. Using CPU with dynamic quantization (int8) for "
+                "balanced performance."
             )
     except ImportError as e:
         error_msg = (

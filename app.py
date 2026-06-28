@@ -7494,7 +7494,17 @@ def load_tokenizer(model_id):
 def load_model(model_id):
     try:
         device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-        return AutoModelForSequenceClassification.from_pretrained(model_id).to(device)
+        model = AutoModelForSequenceClassification.from_pretrained(model_id)
+        model = model.to(device)
+
+        # Apply dynamic quantization for CPU inference to reduce
+        # memory footprint and improve latency
+        if device.type == "cpu":
+            model = torch.quantization.quantize_dynamic(
+                model, {torch.nn.Linear}, dtype=torch.qint8
+            )
+
+        return model
     except Exception as e:
         st.error(f"❌ Error loading model {model_id}: {str(e)}")
         return None
@@ -7533,6 +7543,10 @@ def load_model_if_needed(model_name, _progress_callback=None):
         try:
             update_status(f"Starting to load {model_name}...")
             update_status(f"🔄 Loading tokenizer for {model_name}...")
+            if not torch.cuda.is_available():
+                update_status(
+                    f"⚡ Applying int8 quantization to {model_name} for faster CPU inference..."
+                )
             update_status(
                 f"🤖 Loading {model_name} model... (This may take a few minutes)"
             )
