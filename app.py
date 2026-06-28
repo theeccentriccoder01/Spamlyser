@@ -6215,6 +6215,79 @@ def show_settings_page():
         - Max Message Length: **{st.session_state.settings['max_message_length']} chars**
         """)
     
+    
+    st.markdown("---")
+    st.markdown("## 🛡️ Custom Threat Rules Editor")
+    st.markdown("Define custom allowlist and blocklist rules that evaluate immediately before the AI model inference to block malicious inputs or pass safe ones.")
+    
+    from models.custom_rules_manager import load_custom_rules, save_custom_rules
+    rules = load_custom_rules()
+    
+    col_allow, col_block = st.columns(2)
+    
+    with col_allow:
+        st.subheader("🟢 Domain Allowlist")
+        st.caption("Messages containing these domain names or keywords will be immediately classified as HAM (Legitimate).")
+        
+        new_allow = st.text_input("Add Safe Domain / Keyword", placeholder="e.g. internal-domain.org", key="new_allow_input")
+        if st.button("➕ Add to Allowlist", key="btn_add_allow"):
+            if new_allow.strip():
+                if new_allow.strip() not in rules["allowlist"]:
+                    rules["allowlist"].append(new_allow.strip())
+                    save_custom_rules(rules)
+                    st.success(f"Added '{new_allow}' to Allowlist!")
+                    st.rerun()
+                else:
+                    st.warning("This domain is already in the allowlist.")
+                    
+        st.markdown("##### Current Allowlisted Domains:")
+        if rules["allowlist"]:
+            for idx, domain in enumerate(rules["allowlist"]):
+                del_col1, del_col2 = st.columns([4, 1])
+                del_col1.markdown(f"- `{domain}`")
+                if del_col2.button("🗑️", key=f"del_allow_{idx}"):
+                    rules["allowlist"].remove(domain)
+                    save_custom_rules(rules)
+                    st.success(f"Removed '{domain}'!")
+                    st.rerun()
+        else:
+            st.info("No custom allowlist domains configured.")
+
+    with col_block:
+        st.subheader("🔴 Regex Blocklist")
+        st.caption("Messages matching these regular expressions or keywords will be immediately classified as SPAM.")
+        
+        new_block = st.text_input("Add Block Pattern (Regex or Keyword)", placeholder="e.g. \\burgent-claim-100k\\b", key="new_block_input")
+        if st.button("➕ Add to Blocklist", key="btn_add_block"):
+            if new_block.strip():
+                import re
+                try:
+                    re.compile(new_block.strip())
+                    if new_block.strip() not in rules["blocklist"]:
+                        rules["blocklist"].append(new_block.strip())
+                        save_custom_rules(rules)
+                        st.success(f"Added '{new_block}' to Blocklist!")
+                        st.rerun()
+                    else:
+                        st.warning("This pattern is already in the blocklist.")
+                except re.error as e:
+                    st.error(f"Invalid Regular Expression pattern: {str(e)}")
+                    
+        st.markdown("##### Current Blocklist Patterns:")
+        if rules["blocklist"]:
+            for idx, pattern in enumerate(rules["blocklist"]):
+                del_col1, del_col2 = st.columns([4, 1])
+                del_col1.markdown(f"- `{pattern}`")
+                if del_col2.button("🗑️", key=f"del_block_{idx}"):
+                    rules["blocklist"].remove(pattern)
+                    save_custom_rules(rules)
+                    st.success(f"Removed '{pattern}'!")
+                    st.rerun()
+        else:
+            st.info("No custom blocklist patterns configured.")
+            
+    st.markdown("---")
+    
     # Save confirmation
     if st.button("💾 Save All Settings", use_container_width=True, type="primary"):
         st.success("✅ All settings saved successfully!")
@@ -7901,26 +7974,34 @@ if analyse_btn and user_sms.strip():
         if classifier is not None:
             with st.spinner(f"🤖 Analyzing with {selected_model_name}..."):
                 time.sleep(0.5)
-                result = classifier(cleaned_sms)[0]
-                label = normalize_label(result['label'], result.get('score'))
-                confidence = result['score']
+                from models.custom_rules_manager import check_custom_rules
+                rule_match = check_custom_rules(cleaned_sms)
                 
-                # Apply calibration if enabled
-                if st.session_state.get('enable_calibration', False):
-                    from models.calibration import ConfidenceCalibrator
-                    if 'calibrator' not in st.session_state:
-                        st.session_state.calibrator = ConfidenceCalibrator(temperature=1.65, platt_a=0.85, platt_b=-0.1)
+                if rule_match is not None:
+                    label = rule_match
+                    confidence = 1.0
+                    st.info(f"💡 Matched custom {'Allowlist' if label == 'HAM' else 'Blocklist'} rule. ML model inference bypassed.")
+                else:
+                    result = classifier(cleaned_sms)[0]
+                    label = normalize_label(result['label'], result.get('score'))
+                    confidence = result['score']
                     
-                    cal_method = st.session_state.get('calibration_method', 'temperature')
-                    raw_prob = confidence if label == "SPAM" else 1.0 - confidence
-                    calibrated_prob = st.session_state.calibrator.calibrate_probability(raw_prob, method=cal_method)
-                    
-                    if calibrated_prob >= 0.5:
-                        label = "SPAM"
-                        confidence = calibrated_prob
-                    else:
-                        label = "HAM"
-                        confidence = 1.0 - calibrated_prob
+                    # Apply calibration if enabled
+                    if st.session_state.get('enable_calibration', False):
+                        from models.calibration import ConfidenceCalibrator
+                        if 'calibrator' not in st.session_state:
+                            st.session_state.calibrator = ConfidenceCalibrator(temperature=1.65, platt_a=0.85, platt_b=-0.1)
+                        
+                        cal_method = st.session_state.get('calibration_method', 'temperature')
+                        raw_prob = confidence if label == "SPAM" else 1.0 - confidence
+                        calibrated_prob = st.session_state.calibrator.calibrate_probability(raw_prob, method=cal_method)
+                        
+                        if calibrated_prob >= 0.5:
+                            label = "SPAM"
+                            confidence = calibrated_prob
+                        else:
+                            label = "HAM"
+                            confidence = 1.0 - calibrated_prob
                 
                 # Store prediction results in session state for explanation
                 st.session_state.user_sms = user_sms
@@ -8080,17 +8161,39 @@ if analyse_btn and user_sms.strip():
                             st.info("No significant word features could be extracted for LIME explanation.")
                 
     else: # Ensemble Analysis
-        with st.spinner("🤖 Loading all models for ensemble analysis..."):
-            models = {}
-            for model_name in MODEL_OPTIONS:
-                models[model_name] = load_model_if_needed(model_name)
-        if any(models.values()):
-            with st.spinner("🔍 Running ensemble analysis..."):
-                predictions = get_ensemble_predictions(user_sms, models)
-                if predictions:
-                    ensemble_result = st.session_state.ensemble_classifier.get_ensemble_prediction(
-                        predictions, selected_ensemble_method
-                    )
+        from models.custom_rules_manager import check_custom_rules
+        rule_match = check_custom_rules(user_sms)
+        
+        if rule_match is not None:
+            label = rule_match
+            confidence = 1.0
+            spam_prob = 1.0 if label == "SPAM" else 0.0
+            
+            ensemble_result = {
+                'label': label,
+                'confidence': confidence,
+                'spam_probability': spam_prob,
+                'method': 'Custom Rules Bypass',
+                'details': f"Message matched custom {'Allowlist' if label == 'HAM' else 'Blocklist'} rule.",
+                'metadata': {}
+            }
+            predictions = {
+                model_name: {'label': label, 'score': confidence} 
+                for model_name in MODEL_OPTIONS.keys()
+            }
+            st.info(f"💡 Matched custom {'Allowlist' if label == 'HAM' else 'Blocklist'} rule. Ensemble models bypassed.")
+        else:
+            with st.spinner("🤖 Loading all models for ensemble analysis..."):
+                models = {}
+                for model_name in MODEL_OPTIONS:
+                    models[model_name] = load_model_if_needed(model_name)
+            if any(models.values()):
+                with st.spinner("🔍 Running ensemble analysis..."):
+                    predictions = get_ensemble_predictions(user_sms, models)
+                    if predictions:
+                        ensemble_result = st.session_state.ensemble_classifier.get_ensemble_prediction(
+                            predictions, selected_ensemble_method
+                        )
                     
                     # If SPAM, classify the threat type
                     threat_type = None

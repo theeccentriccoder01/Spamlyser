@@ -8,3 +8,4 @@ from .export_feature import export_results_button
 from .threat_analyzer import classify_threat_type, get_threat_specific_advice, THREAT_CATEGORIES
 from .word_analyzer import WordAnalyzer
 from .calibration import ConfidenceCalibrator
+from .custom_rules_manager import load_custom_rules, save_custom_rules, check_custom_rules

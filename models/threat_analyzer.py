@@ -144,8 +144,10 @@ def _count_keyword_matches(message_lower: str, category: str) -> int:
     if category not in _KEYWORD_SETS:
         return 0
     
-    # Split message into words for exact matching
-    message_words = set(message_lower.split())
+    # Split message into words for exact matching, stripping punctuation
+    import string
+    cleaned_message = message_lower.translate(str.maketrans('', '', string.punctuation))
+    message_words = set(cleaned_message.split())
     
     # Count exact word matches
     exact_matches = len(message_words & _KEYWORD_SETS[category])
