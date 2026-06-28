@@ -1430,7 +1430,9 @@ def show_analyzer_page():
                         # Update all metrics
                         update_metrics(progress)
 
-                    messages = [strip_html_unsafe(str(m))[:1000] for m in df["message"].tolist()]
+                    messages = [
+                        strip_html_unsafe(str(m))[:1000] for m in df["message"].tolist()
+                    ]
                     results, stats = processor.process_batch(
                         messages=messages,
                         batch_size=batch_size,
@@ -7728,7 +7730,9 @@ def analyse_message_features(message):
         "digit_ratio": sum(1 for c in message if c.isdigit()) / len(message)
         if message
         else 0,
-        "special_chars": len(safe_regex_findall(r'[!@#$%^&*(),.?":{}|<>]', message, default=[])),
+        "special_chars": len(
+            safe_regex_findall(r'[!@#$%^&*(),.?":{}|<>]', message, default=[])
+        ),
         "urls": len(
             safe_regex_findall(
                 r"http[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*\\(\\),]|(?:%[0-9a-fA-F][0-9a-fA-F]))+",
@@ -7736,7 +7740,9 @@ def analyse_message_features(message):
                 default=[],
             )
         ),
-        "phone_numbers": len(safe_regex_findall(r"\b\d{3}[-.]?\d{3}[-.]?\d{4}\b", message, default=[])),
+        "phone_numbers": len(
+            safe_regex_findall(r"\b\d{3}[-.]?\d{3}[-.]?\d{4}\b", message, default=[])
+        ),
         "exclamation_marks": message.count("!"),
         "question_marks": message.count("?"),
     }

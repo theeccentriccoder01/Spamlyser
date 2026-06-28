@@ -313,9 +313,9 @@ def classify_threat_type(
     if _safe_search(_COMPILED_PATTERNS["phishing_verify"], message_lower):
         scores["Phishing"] += 0.25
 
-    if _safe_search(_COMPILED_PATTERNS["phishing_click"], message_lower) and _safe_search(
-        _COMPILED_PATTERNS["phishing_account"], message_lower
-    ):
+    if _safe_search(
+        _COMPILED_PATTERNS["phishing_click"], message_lower
+    ) and _safe_search(_COMPILED_PATTERNS["phishing_account"], message_lower):
         scores["Phishing"] += 0.3
 
     # Scam indicators
@@ -339,9 +339,9 @@ def classify_threat_type(
     if _safe_search(_COMPILED_PATTERNS["marketing_discount"], message_lower):
         scores["Unwanted Marketing"] += 0.3
 
-    if _safe_search(_COMPILED_PATTERNS["marketing_buy"], message_lower) and not _safe_search(
-        _COMPILED_PATTERNS["marketing_exclude"], message_lower
-    ):
+    if _safe_search(
+        _COMPILED_PATTERNS["marketing_buy"], message_lower
+    ) and not _safe_search(_COMPILED_PATTERNS["marketing_exclude"], message_lower):
         scores["Unwanted Marketing"] += 0.2
 
     # Find the category with the highest score

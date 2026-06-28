@@ -48,7 +48,9 @@ def safe_regex(
                 return default
             return result
         except (TimeoutError, re.error, RecursionError, ValueError) as exc:
-            logger.warning("Regex failed (%s): %s", exc.__class__.__name__, pattern[:60])
+            logger.warning(
+                "Regex failed (%s): %s", exc.__class__.__name__, pattern[:60]
+            )
             return default
     finally:
         if hasattr(signal, "SIGALRM"):
@@ -63,7 +65,9 @@ def safe_regex_search(
     flags: int = 0,
     default=None,
 ):
-    return safe_regex(pattern, text, method=re.search, timeout=timeout, flags=flags, default=default)
+    return safe_regex(
+        pattern, text, method=re.search, timeout=timeout, flags=flags, default=default
+    )
 
 
 def safe_regex_match(
@@ -73,7 +77,9 @@ def safe_regex_match(
     flags: int = 0,
     default=None,
 ):
-    return safe_regex(pattern, text, method=re.match, timeout=timeout, flags=flags, default=default)
+    return safe_regex(
+        pattern, text, method=re.match, timeout=timeout, flags=flags, default=default
+    )
 
 
 def safe_regex_findall(
@@ -83,7 +89,9 @@ def safe_regex_findall(
     flags: int = 0,
     default=None,
 ):
-    return safe_regex(pattern, text, method=re.findall, timeout=timeout, flags=flags, default=default)
+    return safe_regex(
+        pattern, text, method=re.findall, timeout=timeout, flags=flags, default=default
+    )
 
 
 def safe_regex_sub(
@@ -110,7 +118,9 @@ def safe_regex_sub(
                 return default if default is not None else text
             return result
         except (TimeoutError, re.error, RecursionError, ValueError) as exc:
-            logger.warning("Regex sub failed (%s): %s", exc.__class__.__name__, pattern[:60])
+            logger.warning(
+                "Regex sub failed (%s): %s", exc.__class__.__name__, pattern[:60]
+            )
             return default if default is not None else text
     finally:
         if hasattr(signal, "SIGALRM"):
@@ -142,5 +152,9 @@ def validate_sms_message(message: str) -> tuple:
     if not message or not message.strip():
         return False, "Message cannot be empty.", ""
     if len(message) > MAX_SMS_LENGTH:
-        return False, f"Message exceeds {MAX_SMS_LENGTH} characters ({len(message)} given).", strip_html_unsafe(message[:MAX_SMS_LENGTH])
+        return (
+            False,
+            f"Message exceeds {MAX_SMS_LENGTH} characters ({len(message)} given).",
+            strip_html_unsafe(message[:MAX_SMS_LENGTH]),
+        )
     return True, "", strip_html_unsafe(message)

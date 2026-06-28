@@ -37,7 +37,9 @@ def correct_leetspeak(text: str) -> str:
 def count_suspicious_elements(text: str) -> dict:
     suspicious = {
         "all_caps": sum(1 for w in text.split() if w.isupper() and len(w) > 2),
-        "excessive_punct": len(safe_regex_findall(r"!{2,}|\?{2,}|\${2,}", text, default=[])),
+        "excessive_punct": len(
+            safe_regex_findall(r"!{2,}|\?{2,}|\${2,}", text, default=[])
+        ),
         "phone_numbers": len(safe_regex_findall(r"\b\d{10,}\b", text, default=[])),
         "urls": len(safe_regex_findall(r"https?://|www\.", text, default=[])),
     }

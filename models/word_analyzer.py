@@ -449,10 +449,15 @@ class WordAnalyzer:
             "no catch": 0.7,
         }
         # Prepare cleaned, lower-cased tokens for matching
-        cleaned_words = [safe_regex_sub(r"[^\w]", "", w.lower(), default=w.lower()) for w in words]
+        cleaned_words = [
+            safe_regex_sub(r"[^\w]", "", w.lower(), default=w.lower()) for w in words
+        ]
 
         for phrase, weight in phrase_weights.items():
-            phrase_tokens = [safe_regex_sub(r"[^\w]", "", t.lower(), default=t.lower()) for t in phrase.split()]
+            phrase_tokens = [
+                safe_regex_sub(r"[^\w]", "", t.lower(), default=t.lower())
+                for t in phrase.split()
+            ]
             if not phrase_tokens:
                 continue
             L = len(phrase_tokens)
@@ -480,7 +485,9 @@ class WordAnalyzer:
     def _calculate_complexity_factor(self, text: str) -> float:
         """Calculate complexity factor based on text characteristics"""
         # Count special characters, numbers, caps
-        special_chars = len(safe_regex_findall(r'[!@#$%^&*(),.?":{}|<>]', text, default=[]))
+        special_chars = len(
+            safe_regex_findall(r'[!@#$%^&*(),.?":{}|<>]', text, default=[])
+        )
         numbers = len(safe_regex_findall(r"\d", text, default=[]))
         caps = len(safe_regex_findall(r"[A-Z]", text, default=[]))
 
