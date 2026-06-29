@@ -19,6 +19,17 @@ class PredictionResult:
     metadata: Dict[str, Any]
     threat_type: str = None  # Can be "Phishing", "Scam/Fraud", "Unwanted Marketing", "Other", or None for HAM
 
+    @property
+    def score(self) -> float:
+        """Alias for ``confidence``.
+
+        ``BatchProcessor.process_message()`` reads ``result.score`` on the
+        object returned by ``get_model_prediction()``.  This property keeps
+        both attribute names in sync without breaking existing callers that
+        already use ``.confidence``.
+        """
+        return self.confidence
+
 
 class EnsembleSpamClassifier:
     # Enhanced ensemble classifier that combines predictions from multiple spam detection models
@@ -489,6 +500,41 @@ class EnsembleSpamClassifier:
                 results[method] = self._fallback_prediction(predictions)
 
         return results
+
+    def get_model_prediction(self, model_name: str, message: str) -> "PredictionResult":
+        """Return a per-model prediction for *message*.
+
+        The actual transformer inference lives in ``app.py`` where the models
+        are loaded.  This base implementation returns a neutral fallback so
+        that ``BatchProcessor.process_message()`` does not crash with
+        ``AttributeError`` when no subclass or mock is provided.
+
+        Subclasses or test doubles should override this method to supply real
+        inference results.  The returned object must expose ``.label``,
+        ``.score``, and ``.spam_probability`` attributes (see
+        :class:`PredictionResult`).
+
+        Args:
+            model_name: One of the known model names (e.g. ``"DistilBERT"``).
+            message:    The raw SMS text to classify.
+
+        Returns:
+            A :class:`PredictionResult` with a neutral HAM default.
+        """
+        self.logger.warning(
+            "get_model_prediction() called on base EnsembleSpamClassifier for "
+            "model '%s'. Returning neutral fallback — override this method to "
+            "supply real inference.",
+            model_name,
+        )
+        return PredictionResult(
+            method=model_name,
+            label="HAM",
+            confidence=0.5,
+            spam_probability=0.0,
+            details="Fallback prediction — no inference pipeline attached",
+            metadata={"model_name": model_name, "fallback": True},
+        )
 
     def update_model_weights(self, new_weights: Dict[str, float]):
         """Update model weights"""
