@@ -17,12 +17,11 @@ def load_global_styles():
             st.warning(f"Could not load global styles from {css_path}: {e}")
 
 
-# Import the navigate_to function
-# This will be provided by app.py when importing this function
-navigate_to = None
+# navigate_to is intentionally NOT stored as a module-level variable.
+# Callers must pass it explicitly to show_feedback_page(navigate_to=...).
 
 
-def show_feedback_page():
+def show_feedback_page(navigate_to):
     """Feedback page for user comments, suggestions, and bug reports"""
     # Import the feedback handler
     try:
