@@ -596,6 +596,7 @@ class WordAnalyzer:
                         tooltip_text += (
                             f" | Context: {word_data['context_multiplier']:.1f}x"
                         )
+                    tooltip_text = html.escape(tooltip_text)
 
                     highlighted_word = f'''<span style="
                         background: linear-gradient(135deg, {bg_color}, {bg_color});
