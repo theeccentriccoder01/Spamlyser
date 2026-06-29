@@ -76,7 +76,7 @@ def verify_model_availability() -> Tuple[bool, str, list]:
         # Check if model is cached
         cache_dir = Path.home() / ".cache" / "huggingface" / "transformers"
         model_cached = cache_dir.exists() and any(
-            test_model_name in str(p) for p in cache_dir.glob("*")
+            test_model_name in str(p.parent) and p.is_dir() for p in cache_dir.rglob(f"*{test_model_name}*")
         )
 
         if not model_cached:
