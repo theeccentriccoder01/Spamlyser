@@ -340,7 +340,6 @@ class WordAnalyzer:
                     "word_type": word_type,
                     "is_spammy": is_spammy,
                     "is_hammy": is_hammy,
-                    "is_hammy": ham_weight > spam_weight and ham_weight > 0,
                     "is_influential": is_influential,
                     "context_multiplier": context_multiplier,
                     "context": context,
