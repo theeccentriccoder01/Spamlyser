@@ -3,31 +3,24 @@ Custom rules manager for Spamlyser Pro.
 Handles allowlist (domains) and blocklist (regexes) checking and persistence.
 """
 
-import json
 import os
 import re
 
+from .storage_manager import StorageManager
+
 RULES_FILE = "custom_rules.json"
+
+_storage = StorageManager()
 
 
 def load_custom_rules():
     if not os.path.exists(RULES_FILE):
-        # Default empty structure if file doesn't exist
         return {"allowlist": [], "blocklist": []}
-    try:
-        with open(RULES_FILE, encoding="utf-8") as f:
-            return json.load(f)
-    except Exception:
-        return {"allowlist": [], "blocklist": []}
+    return _storage.load_json(RULES_FILE, default={"allowlist": [], "blocklist": []})
 
 
 def save_custom_rules(rules):
-    try:
-        with open(RULES_FILE, "w", encoding="utf-8") as f:
-            json.dump(rules, f, indent=2)
-        return True
-    except Exception:
-        return False
+    return _storage.save_json(RULES_FILE, rules, backup=True)
 
 
 def check_custom_rules(text: str) -> str:

@@ -11,6 +11,7 @@ from .custom_rules_manager import (
     save_custom_rules,
 )
 from .export_feature import export_results_button
+from .storage_manager import StorageManager, default_json_validator
 from .threat_analyzer import (
     THREAT_CATEGORIES,
     classify_threat_type,
@@ -22,9 +23,11 @@ __all__ = [
     "THREAT_CATEGORIES",
     "BatchProcessor",
     "ConfidenceCalibrator",
+    "StorageManager",
     "WordAnalyzer",
     "check_custom_rules",
     "classify_threat_type",
+    "default_json_validator",
     "export_results_button",
     "get_threat_specific_advice",
     "load_custom_rules",
