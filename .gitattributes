@@ -1,0 +1,19 @@
+# Auto-detect text files and use LF line endings
+* text=auto eol=lf
+
+# Binary files
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.ico binary
+*.woff2 binary
+*.woff binary
+
+# Keep JSON, CSV, TOML with LF (consistent across platforms)
+*.json text eol=lf
+*.csv text eol=lf
+*.toml text eol=lf
+*.yaml text eol=lf
+*.yml text eol=lf
+*.md text eol=lf

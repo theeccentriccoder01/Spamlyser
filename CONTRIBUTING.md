@@ -1,82 +1,101 @@
 ## How to Contribute
 
-- Firstly, Star⭐ The Repository...
-- Take a look at the Existing [Issues] or create your own...
+- Firstly, Star the Repository.
+- Take a look at the Existing [Issues](https://github.com/theeccentriccoder01/Spamlyser/issues) or create your own.
 - Fork the Repo and create a Branch for any Issue that you are working upon.
 - Create a Pull Request which will be promptly reviewed and suggestions would be added to improve it.
 - Add Screenshots to help us know what this is all about.
 
-## How to make a Pull Request
+## Setting Up Your Development Environment
+
+### 1. Install Dependencies
+
+```bash
+pip install -r requirements.txt
+pip install -r requirements-dev.txt
+```
+
+### 2. Install Pre-commit Hooks (Recommended)
+
+This project uses [pre-commit](https://pre-commit.com) to automatically check
+code quality before each commit.
+
+```bash
+pip install pre-commit
+pre-commit install
+```
+
+Now Ruff (linter + formatter) and other checks run automatically on every
+`git commit`.  To run them manually across all files:
+
+```bash
+pre-commit run --all-files
+```
+
+### 3. Configure Your Editor
+
+Install the [EditorConfig](https://editorconfig.org) plugin for your IDE
+to automatically pick up the settings in `.editorconfig`.
+
+## How to Make a Pull Request
 
 **1.** Fork the repository by clicking on the Fork symbol at the top right corner.
 
 **2.** Clone the forked repository.
-```
-   git clone https://github.com/YOUR_USERNAME/Spamlyser.git
-```
-
-**3.** Navigate to the project directory.
-```
-   cd Spamlyser
+```bash
+git clone https://github.com/YOUR_USERNAME/Spamlyser.git
+cd Spamlyser
 ```
 
-**4.** Create a new branch:
-```
-   git checkout -b YourBranchName
-```
-
-**5.** Make changes in source code.
-
-**6.** Stage your changes and commit
-
-```
-   git add .
-   git commit -m "<your_commit_message>"
+**3.** Create a new branch:
+```bash
+git checkout -b YourBranchName
 ```
 
-**7.** Push your local commits to the remote repo.
+**4.** Make changes in source code.
 
-```
-   git push origin YourBranchName
-```
-
-**8.** Create a [PR](https://help.github.com/en/github/collaborating-with-issues-and-pull-requests/creating-a-pull-request)
-
-**Note** If anyone contributes to this repository, then the changes will not be reflected in your local repository. For that:
-
-**9.** Setup a reference(remote) to the original repository to get all the changes from the remote.
-```
-   git remote add upstream https://github.com/theeccentriccoder01/Spamlyser.git
+**5.** Run tests to verify your changes:
+```bash
+PYTHONPATH=. pytest
 ```
 
-**10.** Check the remotes for this repository.
-```
-   git remote -v
-```
-
-**11.** Fetching from the remote repository will bring in its branches and their respective commits.
-```
-   git fetch upstream
+**6.** Run the linter:
+```bash
+ruff check .
+ruff format --check .
 ```
 
-**12.** Make sure that you're on your main branch.
-```
-   git checkout main
-```
-
-**13.** Now that we have fetched the upstream repository, we want to merge its changes into our local branch. This will bring that branch into sync with the upstream, without losing our local changes.
-```
-   git merge upstream/main
+**7.** Stage your changes and commit:
+```bash
+git add .
+git commit -m "<your_commit_message>"
 ```
 
-Here are a few things you can do that will increase the likelihood of your pull request being accepted:
+**8.** Push your local commits to the remote repo:
+```bash
+git push origin YourBranchName
+```
 
-- Follow the [style guide](https://gist.github.com/lisawolderiksen/a7b99d94c92c6671181611be1641c733). Any linting errors should be shown when running `npm test`.
-- Write and update tests.
-- Keep your changes as focused as possible. If there are multiple changes you would like to make that are not dependent upon each other, consider submitting them as separate pull requests.
-- Write a [good commit message](http://tbaggery.com/2008/04/19/a-note-about-git-commit-messages.html).
+**9.** Create a [Pull Request](https://help.github.com/en/github/collaborating-with-issues-and-pull-requests/creating-a-pull-request)
 
-## Resources 
+### Keeping Your Fork in Sync
+
+```bash
+git remote add upstream https://github.com/theeccentriccoder01/Spamlyser.git
+git fetch upstream
+git checkout main
+git merge upstream/main
+```
+
+## Guidelines
+
+- Follow the existing code style. Ruff formatting is enforced in CI.
+- Write and update tests for any new functionality.
+- Keep changes focused. Submit separate PRs for unrelated changes.
+- Write clear [commit messages](http://tbaggery.com/2008/04/19/a-note-about-git-commit-messages.html).
+- Ensure CI passes (lint + tests) before requesting review.
+
+## Resources
 
 - [How to Contribute to Open Source](https://opensource.guide/how-to-contribute/)
 - [Using Pull Requests](https://help.github.com/articles/about-pull-requests/)
