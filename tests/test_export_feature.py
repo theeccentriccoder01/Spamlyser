@@ -8,6 +8,7 @@ module so the import succeeds on CI (where no browser/server is present).
 import sys
 import types
 import warnings
+
 import pandas as pd
 
 # ---------------------------------------------------------------------------
@@ -21,8 +22,7 @@ sys.modules.setdefault("streamlit", _st)
 # Suppress fpdf DeprecationWarnings (dest="S" legacy param)
 warnings.filterwarnings("ignore")
 
-from models.export_feature import dataframe_to_pdf, _pdf_safe  # noqa: E402
-
+from models.export_feature import _pdf_safe, dataframe_to_pdf
 
 # ---------------------------------------------------------------------------
 # _pdf_safe helper

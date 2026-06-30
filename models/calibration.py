@@ -3,11 +3,13 @@ Model confidence calibration module for Expected Calibration Error (ECE),
 Platt Scaling, and Temperature Scaling.
 """
 
+from typing import Any, Dict, Tuple
+
 import numpy as np
-from typing import Tuple, Dict, Any
 
 try:
     from scipy.optimize import minimize
+
     SCIPY_AVAILABLE = True
 except ImportError:
     SCIPY_AVAILABLE = False
@@ -96,10 +98,12 @@ class ConfidenceCalibrator:
         self.is_calibrated = True
         return self.temperature
 
-    def fit_platt(self, y_true: np.ndarray, y_prob: np.ndarray) -> Tuple[float, float]:
+    def fit_platt(self, y_true: np.ndarray, y_prob: np.ndarray) -> tuple[float, float]:
         """Find Platt scaling parameters A and B using logistic regression."""
         if not SCIPY_AVAILABLE:
-            print("Warning: scipy is not installed. Returning default Platt parameters.")
+            print(
+                "Warning: scipy is not installed. Returning default Platt parameters."
+            )
             self.platt_a, self.platt_b = 1.0, 0.0
             return self.platt_a, self.platt_b
 
@@ -125,7 +129,7 @@ class ConfidenceCalibrator:
 
     def generate_calibration_curve(
         self, y_true: np.ndarray, y_prob: np.ndarray, n_bins: int = 10
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """Generate data for reliability diagram / calibration curve."""
         y_true = np.array(y_true)
         y_prob = np.array(y_prob)

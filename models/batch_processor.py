@@ -2,17 +2,20 @@
 Module for handling batch processing of SMS messages using ensemble models.
 """
 
-import pandas as pd
-from typing import List, Dict, Any, Tuple, Optional, Generator
+from collections.abc import Generator
 from concurrent.futures import ThreadPoolExecutor
-from .ensemble_classifier_method import EnsembleSpamClassifier, ModelPerformanceTracker
 from datetime import datetime
+from typing import Any, Dict, List, Optional, Tuple
+
+import pandas as pd
+
+from .ensemble_classifier_method import EnsembleSpamClassifier, ModelPerformanceTracker
 
 
 class BatchProcessor:
     """Handles batch processing of SMS messages using ensemble models."""
 
-    def __init__(self, ensemble_classifier: Optional[EnsembleSpamClassifier] = None):
+    def __init__(self, ensemble_classifier: EnsembleSpamClassifier | None = None):
         """
         Initialize the batch processor.
 
@@ -24,7 +27,7 @@ class BatchProcessor:
             ensemble_classifier = EnsembleSpamClassifier(performance_tracker)
 
         self.ensemble_classifier = ensemble_classifier
-        self.batch_stats: Dict[str, Any] = {
+        self.batch_stats: dict[str, Any] = {
             "total_messages": 0,
             "processed_messages": 0,
             "spam_detected": 0,
@@ -34,7 +37,7 @@ class BatchProcessor:
             "end_time": None,
         }
 
-    def process_message(self, message: str) -> Dict[str, Any]:
+    def process_message(self, message: str) -> dict[str, Any]:
         """
         Process a single message using all models.
 
@@ -79,7 +82,7 @@ class BatchProcessor:
             "timestamp": datetime.now().isoformat(),
         }
 
-    def _analyze_risk_indicators(self, message: str) -> Dict[str, bool]:
+    def _analyze_risk_indicators(self, message: str) -> dict[str, bool]:
         """
         Analyze message for common spam/threat indicators.
 
@@ -123,10 +126,10 @@ class BatchProcessor:
 
     def process_batch(
         self,
-        messages: List[str],
+        messages: list[str],
         batch_size: int = 100,
-        progress_callback: Optional[callable] = None,
-    ) -> Tuple[List[Dict[str, Any]], Dict[str, Any]]:
+        progress_callback: callable | None = None,
+    ) -> tuple[list[dict[str, Any]], dict[str, Any]]:
         """
         Process a batch of messages with progress tracking.
 
@@ -199,9 +202,9 @@ class BatchProcessor:
 
     def process_batch_generator(
         self,
-        messages: List[str],
-        cancel_check: Optional[callable] = None,
-    ) -> Generator[Dict[str, Any], None, None]:
+        messages: list[str],
+        cancel_check: callable | None = None,
+    ) -> Generator[dict[str, Any], None, None]:
         """
         Generator that processes messages sequentially and yields real-time
         progress updates.  Supports cancellation via a callable that returns
@@ -234,7 +237,7 @@ class BatchProcessor:
         self.batch_stats["avg_confidence"] = 0.0
         self.batch_stats["start_time"] = datetime.now()
 
-        self.last_results: List[Dict[str, Any]] = []
+        self.last_results: list[dict[str, Any]] = []
 
         if not messages:
             self.batch_stats["end_time"] = self.batch_stats["start_time"]
@@ -297,7 +300,7 @@ class BatchProcessor:
         )
 
     def generate_report(
-        self, results: List[Dict[str, Any]], format: str = "csv"
+        self, results: list[dict[str, Any]], format: str = "csv"
     ) -> pd.DataFrame:
         """
         Generate a detailed report from batch processing results.

@@ -8,6 +8,7 @@ Fix: wrap each key with (?<!\\d) and (?!\\d) so substitutions only apply
 to digits that are not adjacent to another digit (i.e., standalone
 letter-like tokens in obfuscated words).
 """
+
 from models.smart_preprocess import correct_leetspeak, preprocess_message
 
 
@@ -36,9 +37,7 @@ class TestCorrectLeetspeak:
     def test_phone_number_not_corrupted(self):
         """A phone-like number must not have its digits replaced."""
         result = correct_leetspeak("9876543210")
-        assert result == "9876543210", (
-            f"Phone number was corrupted to '{result}'"
-        )
+        assert result == "9876543210", f"Phone number was corrupted to '{result}'"
 
     def test_price_not_corrupted(self):
         """'$100' must stay '$100'."""

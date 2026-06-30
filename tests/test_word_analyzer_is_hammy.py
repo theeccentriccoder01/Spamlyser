@@ -5,6 +5,7 @@ silent data corruption — the intended is_hammy value (line 342) was always
 overwritten by a stricter expression (line 343), making neutral words appear
 incorrectly in UI highlighting and explanations.
 """
+
 import sys
 from unittest.mock import MagicMock
 
@@ -13,7 +14,7 @@ sys.modules.setdefault("torch", MagicMock())
 sys.modules.setdefault("transformers", MagicMock())
 
 
-from models.word_analyzer import WordAnalyzer  # noqa: E402
+from models.word_analyzer import WordAnalyzer
 
 
 class TestIsHammyNoDuplicateKey:
@@ -62,7 +63,9 @@ class TestIsHammyNoDuplicateKey:
     def test_is_hammy_consistent_with_is_spammy(self):
         """is_hammy must equal `not is_spammy` for words where word_type is
         not explicitly neutral/ham — verifies the correct branch is kept."""
-        words = self._analyze("Congratulations! You won a FREE lottery prize worth $1,000,000!")
+        words = self._analyze(
+            "Congratulations! You won a FREE lottery prize worth $1,000,000!"
+        )
         for w in words:
             # is_hammy = not is_spammy OR word_type in (neutral, ham)
             expected_at_minimum = not w["is_spammy"]

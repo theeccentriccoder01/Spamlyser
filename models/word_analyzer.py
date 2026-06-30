@@ -3,10 +3,11 @@ Advanced word analysis system for Spamlyser Pro
 Provides sophisticated word-level analysis with context awareness
 """
 
-import re
 import html
-from typing import Dict, List, Any, Tuple
-from .text_sanitizer import safe_regex_search, safe_regex_findall, safe_regex_sub
+import re
+from typing import Any, Dict, List, Tuple
+
+from .text_sanitizer import safe_regex_findall, safe_regex_search, safe_regex_sub
 
 
 class WordAnalyzer:
@@ -240,7 +241,7 @@ class WordAnalyzer:
             "time_words": ["now", "today", "immediately", "urgent", "asap"],
         }
 
-    def analyze_text(self, text: str) -> Dict[str, Any]:
+    def analyze_text(self, text: str) -> dict[str, Any]:
         """Analyze text with advanced context-aware logic"""
         # Preprocess text
         original_text = text
@@ -416,7 +417,7 @@ class WordAnalyzer:
 
         return multiplier
 
-    def _check_phrases(self, context: str, position: int, words: List[str]) -> float:
+    def _check_phrases(self, context: str, position: int, words: list[str]) -> float:
         """Check for multi-word spam phrases and only apply weight to tokens
         that are actually part of the matched phrase at the current position.
         Previously this function used a simple substring check on a 3-word
@@ -506,7 +507,7 @@ class WordAnalyzer:
         ham_ratio: float,
         total_score: float,
         complexity_factor: float,
-    ) -> Tuple[str, float]:
+    ) -> tuple[str, float]:
         """Determine final prediction with confidence"""
         # Adjust ratios based on complexity
         if complexity_factor > 1.2:
@@ -537,7 +538,7 @@ class WordAnalyzer:
 
         return predicted_class, confidence
 
-    def create_highlighted_html(self, analysis: Dict[str, Any]) -> str:
+    def create_highlighted_html(self, analysis: dict[str, Any]) -> str:
         """Create beautiful HTML with highlighted words based on analysis"""
         words = [html.escape(w) for w in analysis["text"].split()]
         highlighted_words = []
@@ -656,7 +657,7 @@ class WordAnalyzer:
             </div>
         </div>"""
 
-    def get_explanation_summary(self, analysis: Dict[str, Any]) -> Dict[str, Any]:
+    def get_explanation_summary(self, analysis: dict[str, Any]) -> dict[str, Any]:
         """Get an enhanced summary of the analysis for display"""
         # Get all words for HAM messages, or just influential words for SPAM messages
         if analysis.get("predicted_class") == "HAM":
@@ -764,7 +765,7 @@ class WordAnalyzer:
             "risk_level": self._calculate_risk_level(analysis),
         }
 
-    def _get_context_insights(self, analysis: Dict[str, Any]) -> List[str]:
+    def _get_context_insights(self, analysis: dict[str, Any]) -> list[str]:
         """Get insights about context and patterns"""
         insights = []
 
@@ -802,7 +803,7 @@ class WordAnalyzer:
 
         return insights
 
-    def _calculate_risk_level(self, analysis: Dict[str, Any]) -> str:
+    def _calculate_risk_level(self, analysis: dict[str, Any]) -> str:
         """Calculate overall risk level"""
         spam_ratio = analysis["spam_ratio"]
         confidence = analysis["confidence"]
@@ -819,7 +820,7 @@ class WordAnalyzer:
         else:
             return "SAFE"
 
-    def _get_enhanced_analysis_text(self, analysis: Dict[str, Any]) -> str:
+    def _get_enhanced_analysis_text(self, analysis: dict[str, Any]) -> str:
         """Generate enhanced human-readable analysis text"""
         spam_ratio = analysis["spam_ratio"]
         ham_ratio = analysis["ham_ratio"]

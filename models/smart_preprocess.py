@@ -1,5 +1,6 @@
 import re
-from .text_sanitizer import safe_regex_sub, safe_regex_findall
+
+from .text_sanitizer import safe_regex_findall, safe_regex_sub
 
 ABBREVIATIONS = {
     "u": "you",

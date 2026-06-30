@@ -18,8 +18,8 @@ Performance Optimizations:
 """
 
 import re
-from typing import Dict, List, Any, Tuple, Set
 from functools import lru_cache
+from typing import Any, Dict, List, Set, Tuple
 
 # Threat category indicators
 THREAT_CATEGORIES = {
@@ -201,7 +201,7 @@ _COMMON_SCAM_PHRASES = frozenset(
 )
 
 # Cache keyword sets for O(1) lookups instead of O(n) list searches
-_KEYWORD_SETS: Dict[str, Set[str]] = {}
+_KEYWORD_SETS: dict[str, set[str]] = {}
 
 
 def _safe_search(pattern: re.Pattern, text: str):
@@ -262,7 +262,7 @@ def _count_keyword_matches(message_lower: str, category: str) -> int:
 
 def classify_threat_type(
     message: str, spam_probability: float
-) -> Tuple[str, float, Dict[str, Any]]:
+) -> tuple[str, float, dict[str, Any]]:
     """
     Classify a spam message into a specific threat category.
 
@@ -365,7 +365,7 @@ def classify_threat_type(
     return threat_type, confidence, metadata
 
 
-def get_threat_specific_advice(threat_type: str) -> List[str]:
+def get_threat_specific_advice(threat_type: str) -> list[str]:
     """
     Get advice specific to a threat category.
 

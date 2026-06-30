@@ -15,7 +15,7 @@ def load_custom_rules():
         # Default empty structure if file doesn't exist
         return {"allowlist": [], "blocklist": []}
     try:
-        with open(RULES_FILE, "r", encoding="utf-8") as f:
+        with open(RULES_FILE, encoding="utf-8") as f:
             return json.load(f)
     except Exception:
         return {"allowlist": [], "blocklist": []}

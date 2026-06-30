@@ -8,29 +8,31 @@ but EnsembleSpamClassifier defined no such method, causing:
 Fix: add get_model_prediction(model_name, message) to EnsembleSpamClassifier
 returning a PredictionResult fallback when no real inference pipeline is wired up.
 """
-import sys
+
 import os
+import sys
 import types
 
 # Stub heavy dependencies before any models import
 sys.modules.setdefault("numpy", types.ModuleType("numpy"))
-import unittest.mock as _mock  # noqa: E402
+import unittest.mock as _mock
+
 sys.modules["numpy"].var = _mock.MagicMock(return_value=0.0)
 sys.modules["numpy"].mean = _mock.MagicMock(return_value=0.5)
 
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
-from models.ensemble_classifier_method import (  # noqa: E402
+from models.batch_processor import BatchProcessor
+from models.ensemble_classifier_method import (
     EnsembleSpamClassifier,
     ModelPerformanceTracker,
     PredictionResult,
 )
-from models.batch_processor import BatchProcessor  # noqa: E402
-
 
 # ---------------------------------------------------------------------------
 # Helpers
 # ---------------------------------------------------------------------------
+
 
 def _make_classifier() -> EnsembleSpamClassifier:
     tracker = ModelPerformanceTracker()
@@ -43,6 +45,7 @@ KNOWN_MODELS = ["DistilBERT", "BERT", "RoBERTa", "ALBERT"]
 # ---------------------------------------------------------------------------
 # Tests for the new get_model_prediction() method
 # ---------------------------------------------------------------------------
+
 
 class TestGetModelPredictionExists:
     """The method must exist and be callable — core regression for issue #44."""
@@ -106,6 +109,7 @@ class TestGetModelPredictionExists:
 # Integration: BatchProcessor.process_message() must not crash
 # ---------------------------------------------------------------------------
 
+
 class _FakeEnsembleWithRealMethod(EnsembleSpamClassifier):
     """Subclass that wires get_model_prediction to a deterministic result
     so process_message() can run end-to-end without loading real models."""
@@ -148,8 +152,13 @@ class TestBatchProcessorIntegration:
 
     def test_process_message_returns_expected_keys(self):
         result = self.bp.process_message("win a prize")
-        for key in ("message", "model_predictions", "ensemble_predictions",
-                    "risk_indicators", "timestamp"):
+        for key in (
+            "message",
+            "model_predictions",
+            "ensemble_predictions",
+            "risk_indicators",
+            "timestamp",
+        ):
             assert key in result, f"Missing key '{key}' in process_message result"
 
     def test_process_message_has_all_model_predictions(self):

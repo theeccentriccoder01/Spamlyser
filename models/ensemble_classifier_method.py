@@ -1,10 +1,11 @@
-import numpy as np
-from typing import Dict, List, Any
-import logging
 import json
-from datetime import datetime
-from dataclasses import dataclass
+import logging
 from collections import defaultdict
+from dataclasses import dataclass
+from datetime import datetime
+from typing import Any, Dict, List
+
+import numpy as np
 
 
 @dataclass
@@ -16,7 +17,7 @@ class PredictionResult:
     confidence: float
     spam_probability: float
     details: str
-    metadata: Dict[str, Any]
+    metadata: dict[str, Any]
     threat_type: str = None  # Can be "Phishing", "Scam/Fraud", "Unwanted Marketing", "Other", or None for HAM
 
     @property
@@ -35,7 +36,7 @@ class EnsembleSpamClassifier:
     # Enhanced ensemble classifier that combines predictions from multiple spam detection models
 
     def __init__(
-        self, model_weights: Dict[str, float] = None, performance_tracker=None
+        self, model_weights: dict[str, float] = None, performance_tracker=None
     ):
         self.default_weights = {
             "DistilBERT": 0.20,  # Fast but less accurate
@@ -64,7 +65,7 @@ class EnsembleSpamClassifier:
             n_models = len(self.model_weights)
             self.model_weights = {k: 1 / n_models for k in self.model_weights.keys()}
 
-    def _validate_predictions(self, predictions: Dict[str, Dict[str, Any]]) -> bool:
+    def _validate_predictions(self, predictions: dict[str, dict[str, Any]]) -> bool:
         """Validate input predictions format"""
         if not predictions or not isinstance(predictions, dict):
             self.logger.error("Predictions must be a non-empty dictionary")
@@ -94,7 +95,7 @@ class EnsembleSpamClassifier:
 
         return True
 
-    def majority_voting(self, predictions: Dict[str, Dict[str, Any]]) -> Dict[str, Any]:
+    def majority_voting(self, predictions: dict[str, dict[str, Any]]) -> dict[str, Any]:
 
         # Approach 1: Majority Voting
         try:
@@ -171,12 +172,12 @@ class EnsembleSpamClassifier:
             }
 
         except Exception as e:
-            self.logger.error(f"Error in majority voting: {str(e)}")
+            self.logger.error(f"Error in majority voting: {e!s}")
             return self._fallback_prediction(predictions)
 
     def weighted_average(
-        self, predictions: Dict[str, Dict[str, Any]], threshold: float = 0.5
-    ) -> Dict[str, Any]:
+        self, predictions: dict[str, dict[str, Any]], threshold: float = 0.5
+    ) -> dict[str, Any]:
 
         # Approach 2: Weighted Average
         try:
@@ -246,12 +247,12 @@ class EnsembleSpamClassifier:
             }
 
         except Exception as e:
-            self.logger.error(f"Error in weighted average: {str(e)}")
+            self.logger.error(f"Error in weighted average: {e!s}")
             return self._fallback_prediction(predictions)
 
     def confidence_weighted_voting(
-        self, predictions: Dict[str, Dict[str, Any]]
-    ) -> Dict[str, Any]:
+        self, predictions: dict[str, dict[str, Any]]
+    ) -> dict[str, Any]:
 
         # Approach 3: Confidence-Weighted Voting
 
@@ -332,12 +333,12 @@ class EnsembleSpamClassifier:
             }
 
         except Exception as e:
-            self.logger.error(f"Error in confidence weighted voting: {str(e)}")
+            self.logger.error(f"Error in confidence weighted voting: {e!s}")
             return self._fallback_prediction(predictions)
 
     def adaptive_threshold_ensemble(
-        self, predictions: Dict[str, Dict[str, Any]], base_threshold: float = 0.5
-    ) -> Dict[str, Any]:
+        self, predictions: dict[str, dict[str, Any]], base_threshold: float = 0.5
+    ) -> dict[str, Any]:
 
         # Approach 4: Adaptive Threshold Ensemble
         try:
@@ -409,10 +410,10 @@ class EnsembleSpamClassifier:
             }
 
         except Exception as e:
-            self.logger.error(f"Error in adaptive threshold ensemble: {str(e)}")
+            self.logger.error(f"Error in adaptive threshold ensemble: {e!s}")
             return self._fallback_prediction(predictions)
 
-    def meta_ensemble(self, predictions: Dict[str, Dict[str, Any]]) -> Dict[str, Any]:
+    def meta_ensemble(self, predictions: dict[str, dict[str, Any]]) -> dict[str, Any]:
 
         #   Approach 5: Meta-Ensemble
         #   Combines all ensemble methods and chooses the most confident result
@@ -433,7 +434,7 @@ class EnsembleSpamClassifier:
                     result = method_func(predictions)
                     method_results[method_name] = result
                 except Exception as e:
-                    self.logger.warning(f"Method {method_name} failed: {str(e)}")
+                    self.logger.warning(f"Method {method_name} failed: {e!s}")
                     continue
 
             if not method_results:
@@ -457,12 +458,12 @@ class EnsembleSpamClassifier:
             return best_result
 
         except Exception as e:
-            self.logger.error(f"Error in meta ensemble: {str(e)}")
+            self.logger.error(f"Error in meta ensemble: {e!s}")
             return self._fallback_prediction(predictions)
 
     def get_ensemble_prediction(
-        self, predictions: Dict[str, Dict[str, Any]], method: str = "weighted_average"
-    ) -> Dict[str, Any]:
+        self, predictions: dict[str, dict[str, Any]], method: str = "weighted_average"
+    ) -> dict[str, Any]:
         method_map = {
             "majority_voting": self.majority_voting,
             "weighted_average": self.weighted_average,
@@ -488,8 +489,8 @@ class EnsembleSpamClassifier:
         return result
 
     def get_all_predictions(
-        self, predictions: Dict[str, Dict[str, Any]]
-    ) -> Dict[str, Dict[str, Any]]:
+        self, predictions: dict[str, dict[str, Any]]
+    ) -> dict[str, dict[str, Any]]:
 
         methods = [
             "majority_voting",
@@ -505,7 +506,7 @@ class EnsembleSpamClassifier:
                 results[method] = self.get_ensemble_prediction(predictions, method)
             except Exception as e:
                 self.logger.error(
-                    f"Failed to get prediction for method {method}: {str(e)}"
+                    f"Failed to get prediction for method {method}: {e!s}"
                 )
                 results[method] = self._fallback_prediction(predictions)
 
@@ -546,18 +547,18 @@ class EnsembleSpamClassifier:
             metadata={"model_name": model_name, "fallback": True},
         )
 
-    def update_model_weights(self, new_weights: Dict[str, float]):
+    def update_model_weights(self, new_weights: dict[str, float]):
         """Update model weights"""
         self.model_weights = new_weights.copy()
         self._normalize_weights()
 
-    def get_model_weights(self) -> Dict[str, float]:
+    def get_model_weights(self) -> dict[str, float]:
         """Get current model weights"""
         return self.model_weights.copy()
 
     def _fallback_prediction(
-        self, predictions: Dict[str, Dict[str, Any]]
-    ) -> Dict[str, Any]:
+        self, predictions: dict[str, dict[str, Any]]
+    ) -> dict[str, Any]:
 
         # Fallback prediction when ensemble methods fail
 
@@ -596,7 +597,7 @@ class EnsembleSpamClassifier:
                 "label": "HAM",
                 "confidence": 0.5,
                 "spam_probability": 0.0,
-                "details": f"Emergency fallback due to error: {str(e)}",
+                "details": f"Emergency fallback due to error: {e!s}",
                 "metadata": {"fallback_reason": "complete_failure"},
             }
 
@@ -687,7 +688,7 @@ class ModelPerformanceTracker:
             pass
         # ... implement full precision/recall calculation as needed
 
-    def get_dynamic_weights(self) -> Dict[str, float]:
+    def get_dynamic_weights(self) -> dict[str, float]:
         # ictionary of model weights normalized to sum to 1
         weights = {}
 
@@ -714,7 +715,7 @@ class ModelPerformanceTracker:
 
         return weights
 
-    def get_model_stats(self, model_name: str) -> Dict[str, Any]:
+    def get_model_stats(self, model_name: str) -> dict[str, Any]:
         # Get detailed statistics for a specific model
         if model_name not in self.performance_history:
             return {}
@@ -732,7 +733,7 @@ class ModelPerformanceTracker:
             "metrics": dict(metrics),
         }
 
-    def _calculate_trend(self, history: List[bool]) -> str:
+    def _calculate_trend(self, history: list[bool]) -> str:
         # Calculate performance trend (improving, declining, stable)
         if len(history) < 20:
             return "insufficient_data"
@@ -751,7 +752,7 @@ class ModelPerformanceTracker:
         else:
             return "stable"
 
-    def get_all_stats(self) -> Dict[str, Dict[str, Any]]:
+    def get_all_stats(self) -> dict[str, dict[str, Any]]:
         # Get statistics for all models
         return {
             model: self.get_model_stats(model) for model in self.default_weights.keys()
@@ -775,7 +776,7 @@ class ModelPerformanceTracker:
     def load_from_file(self, filepath: str):
         # Load performance data from JSON file
         try:
-            with open(filepath, "r") as f:
+            with open(filepath) as f:
                 data = json.load(f)
 
             self.performance_history = defaultdict(
@@ -802,7 +803,7 @@ class ModelPerformanceTracker:
             self.min_samples = config.get("min_samples", self.min_samples)
 
         except Exception as e:
-            logging.error(f"Error loading performance data: {str(e)}")
+            logging.error(f"Error loading performance data: {e!s}")
 
 
 # Example usage and testing functions

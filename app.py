@@ -1,10 +1,11 @@
 import html
-import streamlit as st
+from datetime import datetime
+
+import numpy as np
 import pandas as pd
 import plotly.express as px
 import plotly.graph_objects as go
-import numpy as np
-from datetime import datetime
+import streamlit as st
 
 # --- Streamlit Page Configuration ---
 st.set_page_config(
@@ -36,22 +37,22 @@ except ImportError:
 # Import required model components with error handling
 try:
     from models.export_feature import export_results_button
-    from models.threat_analyzer import (
-        classify_threat_type,
-        get_threat_specific_advice,
-        THREAT_CATEGORIES,
-    )
-    from models.word_analyzer import WordAnalyzer
     from models.label_normalizer import normalize_label
     from models.text_sanitizer import (
-        sanitize_text,
-        validate_sms_message,
-        strip_html_unsafe,
-        safe_regex_search,
         safe_regex_findall,
+        safe_regex_search,
+        sanitize_text,
+        strip_html_unsafe,
+        validate_sms_message,
     )
+    from models.threat_analyzer import (
+        THREAT_CATEGORIES,
+        classify_threat_type,
+        get_threat_specific_advice,
+    )
+    from models.word_analyzer import WordAnalyzer
 except ImportError as e:
-    st.error(f"Error importing model components: {str(e)}")
+    st.error(f"Error importing model components: {e!s}")
     st.info(
         "Please ensure all required model files are present in the models directory."
     )
@@ -168,15 +169,17 @@ except ImportError:
 
 
 # Core Python imports
-import time
 import re
-from typing import List
+import time
 from io import StringIO
+from typing import List
+
 import torch
 
 torch.classes.__path__ = []
-from transformers import AutoTokenizer, AutoModelForSequenceClassification, pipeline
 from collections import defaultdict  # Added for easier analytics data aggregation
+
+from transformers import AutoModelForSequenceClassification, AutoTokenizer, pipeline
 
 # Import navigation component
 try:
@@ -1824,7 +1827,7 @@ def show_analyzer_page():
                             st.info("No high-risk messages detected in this batch.")
 
             except Exception as e:
-                st.error(f"❌ Error processing file: {str(e)}")
+                st.error(f"❌ Error processing file: {e!s}")
                 st.info(
                     "Please ensure your CSV file is properly formatted and try again."
                 )
@@ -6880,7 +6883,7 @@ def show_settings_page():
                 st.success("Settings imported successfully!")
                 st.rerun()
             except Exception as e:
-                st.error(f"Error importing settings: {str(e)}")
+                st.error(f"Error importing settings: {e!s}")
 
     with export_col3:
         if st.button("🔄 Reset to Defaults", use_container_width=True):
@@ -7014,7 +7017,7 @@ def show_settings_page():
                     else:
                         st.warning("This pattern is already in the blocklist.")
                 except re.error as e:
-                    st.error(f"Invalid Regular Expression pattern: {str(e)}")
+                    st.error(f"Invalid Regular Expression pattern: {e!s}")
 
         st.markdown("##### Current Blocklist Patterns:")
         if rules["blocklist"]:
@@ -7603,7 +7606,7 @@ def load_tokenizer(model_id):
     try:
         return AutoTokenizer.from_pretrained(model_id)
     except Exception as e:
-        st.error(f"❌ Error loading tokenizer for {model_id}: {str(e)}")
+        st.error(f"❌ Error loading tokenizer for {model_id}: {e!s}")
         return None
 
 
@@ -7623,7 +7626,7 @@ def load_model(model_id):
 
         return model
     except Exception as e:
-        st.error(f"❌ Error loading model {model_id}: {str(e)}")
+        st.error(f"❌ Error loading model {model_id}: {e!s}")
         return None
 
 
@@ -7642,7 +7645,7 @@ def _load_model_cached(model_id):
         )
         return pipe
     except Exception as e:
-        st.error(f"❌ Error creating pipeline for {model_id}: {str(e)}")
+        st.error(f"❌ Error creating pipeline for {model_id}: {e!s}")
         return None
 
 
@@ -7676,7 +7679,7 @@ def load_model_if_needed(model_name, _progress_callback=None):
                 return None
             time.sleep(1)
         except Exception as e:
-            update_status(f"❌ Error loading {model_name}: {str(e)}")
+            update_status(f"❌ Error loading {model_name}: {e!s}")
             return None
         finally:
             time.sleep(1)
@@ -8917,7 +8920,7 @@ def get_ensemble_predictions(message, models):
                     "score": result["score"],
                 }
             except Exception as e:
-                st.warning(f"Error with {model_name}: {str(e)}")
+                st.warning(f"Error with {model_name}: {e!s}")
                 continue
     return predictions
 
@@ -8928,7 +8931,7 @@ def create_predict_proba(classifier):
     `classifier` is a Hugging Face pipeline object.
     """
 
-    def predict_proba_batch(texts: List[str]) -> np.ndarray:
+    def predict_proba_batch(texts: list[str]) -> np.ndarray:
         # 1. Get predictions for the whole batch at once
         # The pipeline is highly optimized for this!
         predictions = classifier(texts, top_k=2)  # Get probabilities for both classes
@@ -10024,14 +10027,14 @@ if uploaded_csv is not None:
                         status_text.text("✅ Analysis complete!")
 
                     except Exception as e:
-                        st.error(f"Error during batch analysis: {str(e)}")
+                        st.error(f"Error during batch analysis: {e!s}")
                         if progress_bar is not None:
                             progress_bar.empty()
                         if status_text is not None:
                             status_text.text("❌ Analysis failed!")
 
     except Exception as e:
-        st.error(f"Error reading CSV file: {str(e)}")
+        st.error(f"Error reading CSV file: {e!s}")
 
 
 def classify_csv(
@@ -10150,7 +10153,7 @@ def classify_csv(
         return pd.DataFrame(results)
 
     except Exception as e:
-        st.error(f"Error processing CSV: {str(e)}")
+        st.error(f"Error processing CSV: {e!s}")
         return None
 
 
@@ -10363,7 +10366,7 @@ if analysis_mode == "Ensemble Analysis":
                 st.markdown(
                     f"""
             <div style='background: rgba(30, 30, 30, 0.9); color: #f44336; padding: 12px; border-radius: 8px; border-left: 4px solid #f44336;'>
-                ❌ Error exporting data: {str(e)}
+                ❌ Error exporting data: {e!s}
             </div>
             """,
                     unsafe_allow_html=True,

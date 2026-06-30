@@ -1,8 +1,9 @@
-import re
 import html
-import signal
 import logging
-from typing import Optional, Callable
+import re
+import signal
+from collections.abc import Callable
+from typing import Optional
 
 logger = logging.getLogger(__name__)
 
@@ -128,7 +129,7 @@ def safe_regex_sub(
             signal.signal(signal.SIGALRM, old_handler)
 
 
-def sanitize_text(text: Optional[str], max_length: int = MAX_SMS_LENGTH) -> str:
+def sanitize_text(text: str | None, max_length: int = MAX_SMS_LENGTH) -> str:
     """Truncate to ``max_length`` and HTML-escape the result."""
     if not text:
         return ""

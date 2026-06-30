@@ -1,9 +1,11 @@
 import os
+
 import pytest
+
 from models.custom_rules_manager import (
+    check_custom_rules,
     load_custom_rules,
     save_custom_rules,
-    check_custom_rules,
 )
 
 RULES_FILE = "custom_rules.json"
@@ -15,7 +17,7 @@ def setup_and_teardown_rules_file():
     original_exists = os.path.exists(RULES_FILE)
     original_content = None
     if original_exists:
-        with open(RULES_FILE, "r", encoding="utf-8") as f:
+        with open(RULES_FILE, encoding="utf-8") as f:
             original_content = f.read()
 
     # Yield control to test

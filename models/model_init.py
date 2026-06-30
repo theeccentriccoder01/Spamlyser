@@ -20,7 +20,7 @@ MODEL_ERROR_MESSAGE = ""
 MODEL_WARNINGS = []
 
 
-def verify_model_availability() -> Tuple[bool, str, list]:
+def verify_model_availability() -> tuple[bool, str, list]:
     """
     Verify that required ML frameworks and models are available.
 
@@ -42,18 +42,18 @@ def verify_model_availability() -> Tuple[bool, str, list]:
         error_msg = (
             "❌ PyTorch is not installed. Please install it with:\n"
             "   pip install torch torchvision torchaudio\n"
-            f"   Error details: {str(e)}"
+            f"   Error details: {e!s}"
         )
         return False, error_msg, warnings
 
     # Check transformers library
     try:
-        from transformers import AutoTokenizer, AutoModelForSequenceClassification
+        from transformers import AutoModelForSequenceClassification, AutoTokenizer
     except ImportError as e:
         error_msg = (
             "❌ Transformers library is not installed. Please install it with:\n"
             "   pip install transformers\n"
-            f"   Error details: {str(e)}"
+            f"   Error details: {e!s}"
         )
         return False, error_msg, warnings
 
@@ -76,7 +76,8 @@ def verify_model_availability() -> Tuple[bool, str, list]:
         # Check if model is cached
         cache_dir = Path.home() / ".cache" / "huggingface" / "transformers"
         model_cached = cache_dir.exists() and any(
-            test_model_name in str(p.parent) and p.is_dir() for p in cache_dir.rglob(f"*{test_model_name}*")
+            test_model_name in str(p.parent) and p.is_dir()
+            for p in cache_dir.rglob(f"*{test_model_name}*")
         )
 
         if not model_cached:
@@ -95,7 +96,7 @@ def verify_model_availability() -> Tuple[bool, str, list]:
                 "   - No internet connection (required for first-time download)\n"
                 "   - Corrupted cache files\n"
                 "   - Insufficient disk space\n"
-                f"   Error details: {str(e)}\n\n"
+                f"   Error details: {e!s}\n\n"
                 "   Try clearing the cache:\n"
                 f"   rm -rf {cache_dir}"
             )
@@ -112,7 +113,7 @@ def verify_model_availability() -> Tuple[bool, str, list]:
                 "   - Corrupted cache files\n"
                 "   - Insufficient disk space\n"
                 "   - Insufficient RAM (model requires ~500MB)\n"
-                f"   Error details: {str(e)}\n\n"
+                f"   Error details: {e!s}\n\n"
                 "   Try clearing the cache:\n"
                 f"   rm -rf {cache_dir}"
             )
@@ -124,7 +125,7 @@ def verify_model_availability() -> Tuple[bool, str, list]:
     except Exception as e:
         error_msg = (
             "❌ Unexpected error during model verification.\n"
-            f"   Error details: {str(e)}\n"
+            f"   Error details: {e!s}\n"
             f"   Error type: {type(e).__name__}\n\n"
             "   Please check:\n"
             "   1. Internet connection (required for first-time model download)\n"
@@ -139,7 +140,7 @@ def verify_model_availability() -> Tuple[bool, str, list]:
         return False, error_msg, warnings
 
 
-def get_model_status_info() -> Dict[str, any]:
+def get_model_status_info() -> dict[str, any]:
     """
     Get detailed information about model status.
 
@@ -206,7 +207,7 @@ try:
 except Exception as e:
     MODEL_STATUS = False
     MODEL_ERROR_MESSAGE = (
-        f"❌ Critical error during model initialization: {str(e)}\n"
+        f"❌ Critical error during model initialization: {e!s}\n"
         "   Please check your Python environment and dependencies."
     )
     MODEL_WARNINGS = []

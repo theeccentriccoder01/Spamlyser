@@ -28,7 +28,7 @@ _SPAM_LABELS = {"SPAM", "LABEL_1"}
 _HAM_LABELS = {"HAM", "LABEL_0"}
 
 
-def normalize_label(raw_label, spam_probability: Optional[float] = None) -> str:
+def normalize_label(raw_label, spam_probability: float | None = None) -> str:
     """Map a model's raw label to canonical ``"SPAM"`` or ``"HAM"``.
 
     Args:

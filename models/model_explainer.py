@@ -5,15 +5,17 @@ This module provides functionality to explain the model predictions using LIME
 (Local Interpretable Model-agnostic Explanations).
 """
 
+from collections.abc import Callable
+from typing import Any, Dict, List
+
 import lime
 import lime.lime_text
-from typing import Dict, List, Any, Callable
 
 
 class ModelExplainer:
     """Class for explaining model predictions using LIME"""
 
-    def __init__(self, predict_fn: Callable, class_names: List[str] = None):
+    def __init__(self, predict_fn: Callable, class_names: list[str] = None):
         """
         Initialize the explainer.
 
@@ -27,12 +29,12 @@ class ModelExplainer:
         # Initialize LIME text explainer
         self.explainer = lime.lime_text.LimeTextExplainer(
             class_names=self.class_names,
-            split_expression="\W+",  # Split by non-word characters
+            split_expression=r"\W+",  # Split by non-word characters
         )
 
     def explain_prediction(
         self, text: str, num_features: int = 10, num_samples: int = 5000
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """
         Explain a prediction for a given text.
 
@@ -97,7 +99,7 @@ class ModelExplainer:
                 ],
             }
 
-    def visualize_explanation(self, explanation_data: Dict[str, Any]) -> Dict[str, Any]:
+    def visualize_explanation(self, explanation_data: dict[str, Any]) -> dict[str, Any]:
         """
         Create visualization data for the explanation.
 
@@ -155,7 +157,7 @@ class ModelExplainer:
 
         return visualization
 
-    def get_threat_explanation(self, text: str, threat_type: str) -> Dict[str, Any]:
+    def get_threat_explanation(self, text: str, threat_type: str) -> dict[str, Any]:
         """
         Generate an explanation specific to the threat type.
 

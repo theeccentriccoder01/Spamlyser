@@ -8,9 +8,9 @@ import os
 import sqlite3
 import threading
 from datetime import datetime
-from typing import Dict, List, Any
-import streamlit as st
+from typing import Any, Dict, List
 
+import streamlit as st
 
 _local = threading.local()
 
@@ -54,7 +54,7 @@ class FeedbackHandler:
         if existing > 0:
             return
         try:
-            with open(json_path, "r") as f:
+            with open(json_path) as f:
                 entries = json.load(f)
             if not isinstance(entries, list):
                 return
@@ -68,7 +68,7 @@ class FeedbackHandler:
         except Exception as e:
             st.warning(f"Could not migrate feedback from {json_path}: {e}")
 
-    def save_feedback(self, feedback_data: Dict[str, Any]) -> bool:
+    def save_feedback(self, feedback_data: dict[str, Any]) -> bool:
         try:
             if "timestamp" not in feedback_data:
                 feedback_data["timestamp"] = datetime.now().strftime(
@@ -82,10 +82,10 @@ class FeedbackHandler:
             conn.commit()
             return True
         except Exception as e:
-            st.error(f"Error saving feedback: {str(e)}")
+            st.error(f"Error saving feedback: {e!s}")
             return False
 
-    def get_all_feedback(self) -> List[Dict[str, Any]]:
+    def get_all_feedback(self) -> list[dict[str, Any]]:
         try:
             conn = _get_connection(self.db_path)
             rows = conn.execute("SELECT id, data FROM feedback ORDER BY id").fetchall()
@@ -93,21 +93,21 @@ class FeedbackHandler:
         except Exception:
             return []
 
-    def get_feedback_by_type(self, feedback_type: str) -> List[Dict[str, Any]]:
+    def get_feedback_by_type(self, feedback_type: str) -> list[dict[str, Any]]:
         all_feedback = self.get_all_feedback()
         return [f for f in all_feedback if f.get("feedback_type") == feedback_type]
 
-    def get_word_analysis_feedback(self) -> List[Dict[str, Any]]:
+    def get_word_analysis_feedback(self) -> list[dict[str, Any]]:
         all_feedback = self.get_all_feedback()
         return [f for f in all_feedback if f.get("context") == "Word Analysis"]
 
-    def get_feedback_stats(self) -> Dict[str, Any]:
+    def get_feedback_stats(self) -> dict[str, Any]:
         feedbacks = self.get_all_feedback()
 
         if not feedbacks:
             return {"total": 0, "average_rating": 0, "by_type": {}, "has_email": 0}
 
-        stats: Dict[str, Any] = {
+        stats: dict[str, Any] = {
             "total": len(feedbacks),
             "by_type": {},
             "has_email": sum(1 for f in feedbacks if f.get("email")),

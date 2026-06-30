@@ -41,7 +41,7 @@ def _ensure_stub(name: str) -> None:
 _ensure_stub("streamlit")
 _ensure_stub("fpdf")
 
-from models.batch_processor import BatchProcessor  # noqa: E402
+from models.batch_processor import BatchProcessor
 
 
 class _FakePrediction:

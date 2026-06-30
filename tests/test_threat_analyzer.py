@@ -2,16 +2,16 @@
 Test file for threat analyzer functionality
 """
 
-import sys
 import os
+import sys
 
 # Add the parent directory to sys.path
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
 from threat_analyzer import (
+    THREAT_CATEGORIES,
     classify_threat_type,
     get_threat_specific_advice,
-    THREAT_CATEGORIES,
 )
 
 

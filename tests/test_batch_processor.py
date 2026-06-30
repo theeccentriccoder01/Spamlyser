@@ -5,10 +5,10 @@ These tests use a lightweight fake ensemble classifier so they run headless on
 CI without loading any transformer models.
 """
 
-import sys
-import os
-import types
 import itertools
+import os
+import sys
+import types
 from datetime import datetime, timedelta
 from unittest import mock
 
@@ -17,11 +17,11 @@ from unittest import mock
 # lightweight stubs only when a dependency is unavailable, so this test runs in
 # any environment while still using the real packages on CI.
 try:
-    import streamlit  # noqa: F401
+    import streamlit
 except Exception:
     sys.modules["streamlit"] = types.ModuleType("streamlit")
 try:
-    import fpdf  # noqa: F401
+    import fpdf
 except Exception:
     _fpdf = types.ModuleType("fpdf")
     _fpdf.FPDF = object
