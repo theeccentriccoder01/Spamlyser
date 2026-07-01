@@ -1,0 +1,117 @@
+# Pre-commit hooks configuration for Spamlyser Pro
+# Install: pip install pre-commit
+# Setup: pre-commit install
+# Run: pre-commit run --all-files
+
+repos:
+  # General checks
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.4.0
+    hooks:
+      - id: trailing-whitespace
+        name: Trim trailing whitespace
+      - id: end-of-file-fixer
+        name: Fix end of file
+      - id: check-yaml
+        name: Check YAML
+      - id: check-json
+        name: Check JSON
+      - id: check-toml
+        name: Check TOML
+      - id: check-added-large-files
+        name: Check for large files
+        args: ['--maxkb=1000']
+      - id: detect-private-key
+        name: Detect private keys
+      - id: mixed-line-ending
+        name: Fix mixed line endings
+      - id: check-merge-conflict
+        name: Check for merge conflicts
+
+  # Python code formatting with Black
+  - repo: https://github.com/psf/black
+    rev: 23.3.0
+    hooks:
+      - id: black
+        name: Format with Black
+        language_version: python3.8
+        args: ['--line-length=100']
+
+  # Import sorting with isort
+  - repo: https://github.com/PyCQA/isort
+    rev: 5.12.0
+    hooks:
+      - id: isort
+        name: Sort imports with isort
+        args: ['--profile=black', '--line-length=100']
+
+  # Linting with Ruff
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.0.260
+    hooks:
+      - id: ruff
+        name: Lint with Ruff
+        args: ['--fix', '--line-length=100']
+
+  # Type checking with mypy
+  - repo: https://github.com/pre-commit/mirrors-mypy
+    rev: v1.0.1
+    hooks:
+      - id: mypy
+        name: Type check with mypy
+        additional_dependencies:
+          - types-PyYAML
+          - types-requests
+        args: ['--ignore-missing-imports']
+        exclude: ^tests/
+
+  # Spell checking with codespell
+  - repo: https://github.com/codespell-project/codespell
+    rev: v2.2.2
+    hooks:
+      - id: codespell
+        name: Check spelling
+        args:
+          - --ignore-words-list=crate,nd,sav,ser
+          - --skip=*.py,*.ipynb,models/**
+
+  # Security checks with bandit
+  - repo: https://github.com/PyCQA/bandit
+    rev: 1.7.4
+    hooks:
+      - id: bandit
+        name: Security check with bandit
+        args: ['-ll', '-i', '-x', 'tests']
+        exclude: ^tests/
+
+  # YAML formatting
+  - repo: https://github.com/macisamuele/language-formatters-pre-commit-hooks
+    rev: v2.9.0
+    hooks:
+      - id: pretty-format-yaml
+        name: Format YAML
+        args: ['--autofix', '--indent', '2']
+
+default_language_version:
+  python: python3.8
+
+# Configuration
+fail_fast: false
+exclude: |
+  (?x)^(
+      venv|
+      __pycache__|
+      .git|
+      .pytest_cache|
+      .mypy_cache|
+      build|
+      dist|
+      \.egg-info
+  )
+ci:
+  autofix_commit_msg: 'chore: auto-format with pre-commit hooks'
+  autofix_prs: true
+  autoupdate_commit_msg: 'chore: update pre-commit hooks'
+  autoupdate_schedule: weekly
+  skip: [mypy]  # mypy is slow in CI
+  stages: [commit]

@@ -1,3 +1,29 @@
 venv
 __pycache__
 *.ps1
+
+# Environment variables
+.env
+.env.local
+.env.*.local
+
+# Streamlit secrets
+.streamlit/secrets.toml
+
+# Cache directories
+.cache/
+*.pyc
+.pytest_cache/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Backups
+*.bak
+*.backup

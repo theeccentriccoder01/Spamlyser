@@ -1,10 +1,41 @@
 [lint]
+# ✅ Enhanced configuration with more rule sets
+line-length = 100
+target-version = "py38"
+
+# Rule selection - enable many useful checks
+select = [
+    "E",      # pycodestyle errors
+    "W",      # pycodestyle warnings
+    "F",      # pyflakes
+    "I",      # isort (import sorting)
+    "C",      # flake8-comprehensions
+    "B",      # flake8-bugbear
+    "UP",     # pyupgrade
+    "ARG",    # flake8-unused-arguments
+    "SIM",    # flake8-simplify
+    "LOG",    # flake8-logging
+]
+
 # Ignore legacy codebase linting errors so CI passes
 ignore = [
-    "F401",  # imported but unused
-    "F811",  # redefinition of unused
-    "F821",  # undefined name
-    "E741",  # ambiguous variable name
-    "F601",  # dictionary key literal repeated
-    "E402",  # module level import not at top of file
+    "F401",   # imported but unused
+    "F811",   # redefinition of unused
+    "F821",   # undefined name
+    "E741",   # ambiguous variable name
+    "F601",   # dictionary key literal repeated
+    "E402",   # module level import not at top of file
+    "E501",   # line too long (handled by black)
 ]
+
+# Per-file ignores
+[lint.per-file-ignores]
+"__init__.py" = ["F401"]  # Allow unused imports in __init__.py
+"tests/*" = ["F811"]       # Allow test function redefinition in tests
+
+[format]
+# Black-compatible formatting
+line-length = 100
+quote-style = "double"
+indent-width = 4
+

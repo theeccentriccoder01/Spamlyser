@@ -14,6 +14,8 @@ Features:
 from pathlib import Path
 from typing import Dict, Tuple
 
+from config import Config  # ✅ Add config import
+
 # Global flag to track model availability
 MODEL_STATUS = False
 MODEL_ERROR_MESSAGE = ""
@@ -70,11 +72,9 @@ def verify_model_availability() -> Tuple[bool, str, list]:
     try:
         print("🔄 Verifying model availability... This may take a moment on first run.")
 
-        # Use a smaller model for testing to reduce download time
-        test_model_name = "distilbert-base-uncased"
-
-        # Check if model is cached
-        cache_dir = Path.home() / ".cache" / "huggingface" / "transformers"
+        # ✅ Get model name and cache dir from config
+        test_model_name = Config.get_verification_model_name()
+        cache_dir = Config.ensure_model_cache_dir() / "transformers"
         model_cached = cache_dir.exists() and any(
             test_model_name in str(p.parent) and p.is_dir() for p in cache_dir.rglob(f"*{test_model_name}*")
         )

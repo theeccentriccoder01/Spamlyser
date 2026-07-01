@@ -11,6 +11,8 @@ from datetime import datetime
 from typing import Dict, List, Any
 import streamlit as st
 
+from config import Config  # ✅ Add config import
+
 
 _local = threading.local()
 
@@ -28,8 +30,13 @@ def _get_connection(db_path: str) -> sqlite3.Connection:
 class FeedbackHandler:
     """Handles user feedback operations using SQLite for concurrent write safety."""
 
-    def __init__(self, feedback_file: str = "feedback_data.json"):
-        self.db_path = os.path.splitext(feedback_file)[0] + ".db"
+    def __init__(self, feedback_file: str = None):
+        # ✅ Use config for paths
+        if feedback_file is None:
+            feedback_file = str(Config.get_feedback_json_path())
+        
+        self.db_path = str(Config.get_feedback_db_path())
+        Config.ensure_feedback_dir()  # Create directory if needed
         self._init_db()
         self._migrate_from_json(feedback_file)
 
