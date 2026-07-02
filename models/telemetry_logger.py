@@ -1,23 +1,24 @@
-import time
 import json
+import time
 from pathlib import Path
-from typing import Dict, Any
+from typing import Any, Dict
+
 
 class TelemetryLogger:
     def __init__(self, log_path: str = "spamlyser_telemetry.json"):
         self.log_path = Path(log_path)
-        
+
     def log_inference(self, duration_ms: float, confidence: float, classification: str):
         log_entry = {
             "timestamp": time.time(),
             "duration_ms": duration_ms,
             "confidence": confidence,
-            "classification": classification
+            "classification": classification,
         }
         try:
             data = []
             if self.log_path.exists():
-                with open(self.log_path, "r") as f:
+                with open(self.log_path) as f:
                     data = json.load(f)
             data.append(log_entry)
             with open(self.log_path, "w") as f:
