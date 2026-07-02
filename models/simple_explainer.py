@@ -272,13 +272,13 @@ class SimpleExplainer:
 
         for category, keywords in self.keywords.items():
             for keyword in keywords:
-                if keyword in text_lower and keyword not in seen:
+                occurrences = _count_keyword_occurrences(keyword, text_lower)
+                if occurrences and keyword not in seen:
                     seen.add(keyword)
-                    count = len(re.findall(re.escape(keyword), text_lower))
                     matches.append(
                         {
                             "word": keyword,
-                            "weight": round(0.5 * count, 3),
+                            "weight": round(0.5 * occurrences, 3),
                             "is_positive": True,
                             "category": category,
                         }
@@ -299,13 +299,13 @@ class SimpleExplainer:
 
         for category, keywords in self.ham_keywords.items():
             for keyword in keywords:
-                if keyword in text_lower and keyword not in seen:
+                occurrences = _count_keyword_occurrences(keyword, text_lower)
+                if occurrences and keyword not in seen:
                     seen.add(keyword)
-                    count = len(re.findall(re.escape(keyword), text_lower))
                     matches.append(
                         {
                             "word": keyword,
-                            "weight": round(-0.5 * count, 3),  # negative = ham signal
+                            "weight": round(-0.5 * occurrences, 3),
                             "is_positive": False,
                             "category": category,
                         }
@@ -314,3 +314,10 @@ class SimpleExplainer:
         # Sort by descending absolute weight (strongest ham signals first)
         matches.sort(key=lambda x: abs(x["weight"]), reverse=True)
         return matches
+
+
+def _count_keyword_occurrences(keyword: str, text_lower: str) -> int:
+    """Count full keyword or phrase occurrences in already-lowercased text."""
+    escaped = re.escape(keyword.lower())
+    pattern = rf"(?<!\w){escaped}(?!\w)"
+    return len(re.findall(pattern, text_lower))
