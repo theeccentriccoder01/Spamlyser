@@ -74,6 +74,11 @@ another tool, or archive the complete analysis output.
 | `history_to_json(history)` | `models/export_feature.py` | numpy-safe JSON serialiser |
 | `export_results_button(history)` | `models/export_feature.py` | Streamlit download widget |
 
+Batch exports can also include risk indicator columns produced by
+`BatchProcessor._analyze_risk_indicators`. See
+[`BATCH_RISK_INDICATORS.md`](BATCH_RISK_INDICATORS.md) for the current signal
+definitions and regression coverage.
+
 ## Running export tests
 
 ```bash
