@@ -1,5 +1,6 @@
 import unicodedata
 
+
 def clean_unicode_text(text: str) -> str:
     """Normalize Unicode characters and remove emojis/diacritics."""
     normalized = unicodedata.normalize("NFKD", text)

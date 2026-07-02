@@ -1,5 +1,6 @@
-from models.unicode_handler import clean_unicode_text
 import re
+
+from models.unicode_handler import clean_unicode_text
 
 from .text_sanitizer import safe_regex_findall, safe_regex_sub
 
