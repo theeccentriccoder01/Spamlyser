@@ -1,3 +1,4 @@
+from models.rate_limiter import RateLimiter
 """
 Module for handling batch processing of SMS messages using ensemble models.
 """
