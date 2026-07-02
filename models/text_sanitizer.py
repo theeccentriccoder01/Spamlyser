@@ -139,8 +139,8 @@ def sanitize_text(text: str | None, max_length: int = MAX_SMS_LENGTH) -> str:
 
 def strip_html_unsafe(text: str) -> str:
     """Remove known HTML/script tags before display-only rendering."""
-    text = re.sub(r"(?i)<script[^>]*>.*?</script>", "", text)
-    text = re.sub(r"(?i)<[^>]*>", "", text)
+    text = safe_regex_sub(r"<script[^>]*>.*?</script>", "", text, flags=re.IGNORECASE)
+    text = safe_regex_sub(r"<[^>]*>", "", text, flags=re.IGNORECASE)
     return text
 
 
