@@ -28,6 +28,16 @@ _local = threading.local()
 _logger = logging.getLogger(__name__)
 
 
+def _coerce_rating(value: Any) -> float | None:
+    """Return a numeric rating or ``None`` when the value is unusable."""
+    if value is None or isinstance(value, bool):
+        return None
+    try:
+        return float(value)
+    except (TypeError, ValueError):
+        return None
+
+
 def _open_connection(db_path: str) -> sqlite3.Connection:
     """Create a brand-new SQLite connection with WAL mode and busy timeout."""
     conn = sqlite3.connect(db_path, check_same_thread=False)
@@ -169,7 +179,11 @@ class FeedbackHandler:
             "has_email": sum(1 for f in feedbacks if f.get("email")),
         }
 
-        ratings = [f.get("rating", 0) for f in feedbacks if f.get("rating") is not None]
+        ratings = [
+            rating
+            for rating in (_coerce_rating(f.get("rating")) for f in feedbacks)
+            if rating is not None
+        ]
         stats["average_rating"] = sum(ratings) / len(ratings) if ratings else 0
 
         for feedback in feedbacks:
