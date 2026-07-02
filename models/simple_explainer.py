@@ -1,3 +1,4 @@
+from models.ham_explainer_viz import format_ham_explanation
 """
 Lightweight, dependency-free alternative to :class:`ModelExplainer`.
 

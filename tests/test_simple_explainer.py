@@ -130,3 +130,8 @@ def test_get_threat_explanation_unknown_threat():
     result = explainer.get_threat_explanation("hello", "UnknownType")
     assert result["matching_keywords"] == []
     assert result["threat_features"] == []
+
+def test_format_ham_explanation():
+    from models.ham_explainer_viz import format_ham_explanation
+    res = format_ham_explanation(["hello"], [0.9])
+    assert "Ham Token Analysis" in res
