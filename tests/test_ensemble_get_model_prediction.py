@@ -166,7 +166,9 @@ class TestBatchProcessorIntegration:
         assert len(results) == 3
         assert stats["total_messages"] == 3
 
+
 def test_calibrator_store():
     from models.calibrator_store import CalibratorStore
+
     store = CalibratorStore()
     assert store.get_calibrated_probability(1.0) == 0.5
