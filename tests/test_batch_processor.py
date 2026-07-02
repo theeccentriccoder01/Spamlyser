@@ -74,3 +74,10 @@ def test_normal_batch_still_computes_throughput():
     assert len(results) == 2
     assert stats["processing_time"] > 0
     assert stats["messages_per_second"] > 0
+
+def test_rate_limiter():
+    from models.rate_limiter import RateLimiter
+    limiter = RateLimiter(2, 60)
+    assert limiter.allow_request() is True
+    assert limiter.allow_request() is True
+    assert limiter.allow_request() is False
