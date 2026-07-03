@@ -2,6 +2,8 @@ from pathlib import Path
 
 import streamlit as st
 
+from pages.analytics_dashboard import render_dashboard
+
 
 # Load unified global styles once
 def load_global_styles():

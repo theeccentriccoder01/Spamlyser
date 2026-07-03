@@ -210,6 +210,7 @@ PAGES = {
     "about": "ℹ️ About",
     "features": "⚡ Features",
     "analytics": "📊 Analytics",
+    "dashboard": "📈 Dashboard",
     "models": "🤖 Models",
     "feedback": "💬 Feedback",
     "help": "❓ Help",
@@ -7399,6 +7400,14 @@ def main():
         show_features_page()
     elif st.session_state.current_page == "analytics":
         show_analytics_page()
+    elif st.session_state.current_page == "dashboard":
+        try:
+            from page_functions import render_dashboard
+
+            render_dashboard()
+        except ImportError:
+            st.warning("Dashboard module not found. Using default analytics page.")
+            show_analytics_page()
     elif st.session_state.current_page == "models":
         show_models_page()
     elif st.session_state.current_page == "feedback":

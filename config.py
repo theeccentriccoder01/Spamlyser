@@ -96,4 +96,12 @@ def get_optional(key: str, default: str | None = None) -> str | None:
     return val if val else default
 
 
+ANALYTICS_DB_PATH: str = os.getenv(
+    "SPAMLYSER_ANALYTICS_DB", str(DATA_DIR / "analytics.db")
+)
+
+ANALYTICS_RETENTION_DAYS: int = int(
+    os.getenv("SPAMLYSER_ANALYTICS_RETENTION", "90")
+)
+
 BATCH_RATE_LIMIT = 50
