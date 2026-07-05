@@ -1,3 +1,5 @@
+from models.recovery_agent import attempt_self_healing
+
 """
 Safe file storage with atomic writes, automatic backups, and rotation.
 
@@ -186,7 +188,6 @@ class StorageManager:
                 return data
 
             _logger.warning("Validation failed for %s; trying next backup.", candidate)
-
         return default
 
     def list_backups(self, filepath: str) -> list[Path]:

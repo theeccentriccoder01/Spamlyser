@@ -1,5 +1,9 @@
 import re
 
+from config import LANGUAGE_DETECTION_ENABLED
+from models.language_detector import detect_language
+from models.unicode_handler import clean_unicode_text
+
 from .text_sanitizer import safe_regex_findall, safe_regex_sub
 
 ABBREVIATIONS = {
@@ -58,10 +62,11 @@ def count_suspicious_elements(text: str) -> dict:
 
 
 def preprocess_message(text: str) -> dict:
+    detected_lang = detect_language(text) if LANGUAGE_DETECTION_ENABLED else "en"
     cleaned = expand_abbreviations(text)
     cleaned = correct_leetspeak(cleaned)
     suspicious = count_suspicious_elements(cleaned)
-    return {"cleaned": cleaned, "suspicious": suspicious}
+    return {"cleaned": cleaned, "suspicious": suspicious, "language": detected_lang}
 
 
 # Example usage

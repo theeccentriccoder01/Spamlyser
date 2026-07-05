@@ -58,3 +58,5 @@ jobs:
             --severity-level high \
             --confidence-level medium \
             --format txt
+
+# Security Audit workflow extended with run_sast.py
