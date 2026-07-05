@@ -2,6 +2,21 @@ from pathlib import Path
 
 import streamlit as st
 
+from pages.analytics_dashboard import render_dashboard
+
+
+def show_model_comparison_legend():
+    """Render a small legend explaining comparison result colors."""
+    st.markdown(
+        """
+    <div style="display:flex;gap:15px;margin:10px 0;font-size:0.9rem;">
+        <span style="background:#ff444440;padding:2px 10px;border-radius:4px;">🔴 SPAM</span>
+        <span style="background:#00d4aa40;padding:2px 10px;border-radius:4px;">🟢 HAM</span>
+    </div>
+    """,
+        unsafe_allow_html=True,
+    )
+
 
 # Load unified global styles once
 def load_global_styles():
@@ -16,6 +31,14 @@ def load_global_styles():
             st.session_state[key] = True
         except Exception as e:
             st.warning(f"Could not load global styles from {css_path}: {e}")
+
+    # Also inject theme CSS variables
+    try:
+        from assets.theme_manager import theme_css_variables
+
+        st.markdown(theme_css_variables(), unsafe_allow_html=True)
+    except ImportError:
+        pass
 
 
 # navigate_to is intentionally NOT stored as a module-level variable.

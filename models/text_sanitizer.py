@@ -2,6 +2,7 @@ import html
 import logging
 import re
 import signal
+import threading
 from collections.abc import Callable
 from typing import Optional
 
@@ -37,7 +38,12 @@ def safe_regex(
     global _TIMER_TRIGGERED
     _TIMER_TRIGGERED = False
 
-    if hasattr(signal, "SIGALRM"):
+    use_timeout = (
+        hasattr(signal, "SIGALRM")
+        and threading.current_thread() is threading.main_thread()
+    )
+
+    if use_timeout:
         old_handler = signal.signal(signal.SIGALRM, _timeout_handler)
         signal.setitimer(signal.ITIMER_REAL, timeout)
     try:
@@ -54,7 +60,7 @@ def safe_regex(
             )
             return default
     finally:
-        if hasattr(signal, "SIGALRM"):
+        if use_timeout:
             signal.setitimer(signal.ITIMER_REAL, 0)
             signal.signal(signal.SIGALRM, old_handler)
 
@@ -107,7 +113,12 @@ def safe_regex_sub(
     global _TIMER_TRIGGERED
     _TIMER_TRIGGERED = False
 
-    if hasattr(signal, "SIGALRM"):
+    use_timeout = (
+        hasattr(signal, "SIGALRM")
+        and threading.current_thread() is threading.main_thread()
+    )
+
+    if use_timeout:
         old_handler = signal.signal(signal.SIGALRM, _timeout_handler)
         signal.setitimer(signal.ITIMER_REAL, timeout)
     try:
@@ -124,7 +135,7 @@ def safe_regex_sub(
             )
             return default if default is not None else text
     finally:
-        if hasattr(signal, "SIGALRM"):
+        if use_timeout:
             signal.setitimer(signal.ITIMER_REAL, 0)
             signal.signal(signal.SIGALRM, old_handler)
 

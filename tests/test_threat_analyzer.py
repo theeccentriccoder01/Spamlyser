@@ -68,3 +68,10 @@ def test_threat_advice():
     # Test None category
     none_advice = get_threat_specific_advice(None)
     assert none_advice == []
+
+
+def test_load_custom_categories():
+    from models.threat_analyzer import load_custom_categories
+
+    cats = load_custom_categories()
+    assert isinstance(cats, dict)
