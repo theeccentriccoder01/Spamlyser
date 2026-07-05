@@ -204,3 +204,13 @@ def test_load_json_safe_restores_primary_file_from_backup(tmp_path):
     with open(target, encoding="utf-8") as f:
         restored = json.load(f)
     assert restored == {"restored": True}
+
+
+def test_attempt_self_healing(tmp_path):
+    from models.recovery_agent import attempt_self_healing
+
+    primary = tmp_path / "primary.json"
+    backup = tmp_path / "backup.json"
+    backup.write_text("ok")
+    assert attempt_self_healing(primary, backup) is True
+    assert primary.read_text() == "ok"

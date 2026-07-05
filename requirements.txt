@@ -1,6 +1,6 @@
 # Core Dependencies
-streamlit>=1.58.0
-pandas>=3.0.3,<4.0.0
+streamlit>=1.39.0
+pandas>=2.0.0,<3.0.0
 plotly>=6.8.0,<7.0.0
 transformers>=5.12.1,<6.0.0
 torch>=2.12.1,<3.0.0
@@ -13,7 +13,7 @@ lime>=0.2.0.1
 # Hugging Face Ecosystem
 datasets>=5.0.0,<6.0.0
 sentencepiece!=0.1.100,>=0.2.1
-protobuf>=7.35.1,<8.0.0
+protobuf>=3.20.0,<6.0.0
 
 # Development & Utilities
 tqdm>=4.68.3,<5.0.0
@@ -24,5 +24,8 @@ python-dotenv>=1.2.2,<2.0.0
 pytest>=9.1.1,<10.0.0
 pytest-cov>=7.1.0,<8.0.0
 
-#UI
-fpdf
+# UI
+fpdf2>=2.8.2,<3.0.0
+
+# Report Encryption
+cryptography>=48.0.1

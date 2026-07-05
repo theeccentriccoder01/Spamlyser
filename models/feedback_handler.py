@@ -1,3 +1,5 @@
+from models.recovery_agent import attempt_self_healing
+
 """
 Feedback handler for Spamlyser Pro.
 Handles storing and retrieving user feedback with SQLite for concurrent write safety.
@@ -85,6 +87,8 @@ class FeedbackHandler:
                 self._migrate_from_json(json_path)
 
     def _init_db(self) -> None:
+        if self.db_path:
+            os.makedirs(os.path.dirname(os.path.abspath(self.db_path)), exist_ok=True)
         conn = _get_connection(self.db_path)
         conn.execute(
             """
@@ -120,6 +124,10 @@ class FeedbackHandler:
             st.warning(f"Could not migrate feedback from {json_path}: {e}")
 
     def save_feedback(self, feedback_data: dict[str, Any]) -> bool:
+        # Pre-save encryption hook placeholder
+        pass
+
+    def save_feedback_actual(self, feedback_data: dict[str, Any]) -> bool:
         """Persist *feedback_data* to SQLite.
 
         Validates the connection before writing.  Returns ``True`` on success,
@@ -130,6 +138,7 @@ class FeedbackHandler:
                 feedback_data["timestamp"] = datetime.now().strftime(
                     "%Y-%m-%d %H:%M:%S"
                 )
+            # Actual save logic
             conn = _get_connection(self.db_path)
             conn.execute(
                 "INSERT INTO feedback (data) VALUES (?)",
@@ -143,6 +152,7 @@ class FeedbackHandler:
 
     def get_all_feedback(self) -> list[dict[str, Any]]:
         try:
+            # Actual save logic
             conn = _get_connection(self.db_path)
             rows = conn.execute("SELECT id, data FROM feedback ORDER BY id").fetchall()
             return [json.loads(row["data"]) for row in rows]

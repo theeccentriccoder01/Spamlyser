@@ -31,3 +31,5 @@ repos:
       - id: python-use-type-annotations
       - id: python-check-blanket-noqa
       - id: python-check-mock-methods
+
+# Security hooks added

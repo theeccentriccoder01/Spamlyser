@@ -1,3 +1,5 @@
+from models.rules_validator import validate_rule_structure
+
 """
 Custom rules manager for Spamlyser Pro.
 
@@ -63,10 +65,13 @@ def _validate_rules(rules: Any) -> bool:
 
         {
             "allowlist": ["domain.com", ...],
-            "blocklist": ["regex_pattern", ...]
+            "blocklist": ["regex_pattern", ...],
+            "compounds": [{...}, ...]         # optional
         }
 
-    Both keys are required and must be lists of strings.
+    Both ``allowlist`` and ``blocklist`` are required and must be lists of
+    strings.  ``compounds`` (if present) is validated via
+    :func:`~models.rule_engine.validate_compound_rules`.
     """
     if not isinstance(rules, dict):
         return False
@@ -74,6 +79,11 @@ def _validate_rules(rules: Any) -> bool:
         if key not in rules or not isinstance(rules[key], list):
             return False
         if not all(isinstance(item, str) for item in rules[key]):
+            return False
+    if "compounds" in rules:
+        from .rule_engine import validate_compound_rules as _vcr
+
+        if not _vcr(rules["compounds"]):
             return False
     return True
 
@@ -107,7 +117,8 @@ def save_custom_rules(rules: dict[str, list]) -> bool:
     Parameters
     ----------
     rules:
-        A dict with ``"allowlist"`` and ``"blocklist"`` list-of-string keys.
+        A dict with ``"allowlist"``, ``"blocklist"``, and optionally
+        ``"compounds"`` list-of-dict keys.
 
     Returns
     -------
@@ -138,14 +149,14 @@ def save_custom_rules(rules: dict[str, list]) -> bool:
 
 
 def check_custom_rules(text: str) -> str | None:
-    """Check whether *text* matches any allowlist or blocklist rule.
+    """Check whether *text* matches any allowlist, blocklist, or compound rule.
 
     Returns
     -------
     ``"HAM"``
         Text matches an allowlist entry (evaluated first).
     ``"SPAM"``
-        Text matches a blocklist pattern.
+        Text matches a blocklist pattern or compound rule.
     ``None``
         No rule matched.
     """
@@ -157,7 +168,16 @@ def check_custom_rules(text: str) -> str | None:
         if domain.strip() and domain.lower() in text_lower:
             return "HAM"
 
-    # 2. Blocklist — invalid regexes are silently skipped
+    # 2. Compound rules — evaluated before the simple blocklist
+    compounds = rules.get("compounds", [])
+    if compounds:
+        from .rule_engine import check_compound_rules as _check_compounds
+
+        compound_result = _check_compounds(text, compounds)
+        if compound_result is not None:
+            return compound_result
+
+    # 3. Blocklist — invalid regexes are silently skipped
     for pattern_str in rules.get("blocklist", []):
         if not pattern_str.strip():
             continue

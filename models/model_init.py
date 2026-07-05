@@ -1,3 +1,5 @@
+import time
+
 """
 Model initialization and verification module
 
@@ -218,11 +220,11 @@ except Exception as e:
 # Print status to console for debugging
 if not MODEL_STATUS:
     print("\n" + "=" * 60)
-    print("⚠️  MODEL INITIALIZATION FAILED")
+    print("[ERROR] MODEL INITIALIZATION FAILED")
     print("=" * 60)
     print(MODEL_ERROR_MESSAGE)
     print("=" * 60 + "\n")
 else:
-    print("✅ Models initialized successfully")
+    print("[SUCCESS] Models initialized successfully")
     for warning in MODEL_WARNINGS:
         print(warning)
