@@ -6890,7 +6890,9 @@ def show_settings_page():
     if st.button("➕ Add Webhook", use_container_width=True):
         notifier = st.session_state.get("webhook_notifier")
         if notifier and webhook_url:
-            if notifier.add_webhook(webhook_url, secret=webhook_secret or None, label=webhook_label):
+            if notifier.add_webhook(
+                webhook_url, secret=webhook_secret or None, label=webhook_label
+            ):
                 st.success("Webhook added successfully!")
                 st.rerun()
             else:
@@ -6907,7 +6909,9 @@ def show_settings_page():
         for i, wh in enumerate(existing):
             cols = st.columns([3, 1, 1])
             cols[0].markdown(f"**{wh['label']}** — `{wh['url']}`")
-            cols[1].markdown(f"Events: {', '.join(wh.get('events', ['spam_detected']))}")
+            cols[1].markdown(
+                f"Events: {', '.join(wh.get('events', ['spam_detected']))}"
+            )
             if cols[2].button("🗑️ Remove", key=f"del_wh_{i}"):
                 notifier.remove_webhook(wh["url"])
                 st.rerun()
@@ -9522,7 +9526,9 @@ if analyse_btn and user_sms.strip():
                             ensemble_result["threat_type"] = threat_type
                             ensemble_result["threat_confidence"] = threat_confidence
 
-                        if ensemble_result["label"] == "SPAM" and st.session_state.get("webhook_notifier"):
+                        if ensemble_result["label"] == "SPAM" and st.session_state.get(
+                            "webhook_notifier"
+                        ):
                             st.session_state.webhook_notifier.notify_spam_detected(
                                 message=user_sms,
                                 confidence=ensemble_result["confidence"],

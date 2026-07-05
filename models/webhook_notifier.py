@@ -9,7 +9,7 @@ import json
 import logging
 import os
 import threading
-from datetime import datetime, timezone
+from datetime import UTC, datetime, timezone
 from pathlib import Path
 from typing import Any
 
@@ -25,11 +25,7 @@ class WebhookNotifier:
         if config_path is None:
             config_path = os.getenv(
                 "SPAMLYSER_WEBHOOK_CONFIG",
-                str(
-                    Path(__file__).resolve().parent.parent
-                    / "data"
-                    / "webhooks.json"
-                ),
+                str(Path(__file__).resolve().parent.parent / "data" / "webhooks.json"),
             )
         self._config_path = Path(config_path)
         self._webhooks: list[dict[str, Any]] = []
@@ -66,7 +62,7 @@ class WebhookNotifier:
             "events": events or ["spam_detected"],
             "label": label or url,
             "enabled": True,
-            "created_at": datetime.now(timezone.utc).isoformat(),
+            "created_at": datetime.now(UTC).isoformat(),
         }
         self._webhooks.append(webhook)
         self._save_config()
@@ -93,7 +89,7 @@ class WebhookNotifier:
         """Send spam alert to all enabled webhooks (async)."""
         payload = {
             "event": "spam_detected",
-            "timestamp": datetime.now(timezone.utc).isoformat(),
+            "timestamp": datetime.now(UTC).isoformat(),
             "message_snippet": message[:200],
             "confidence": confidence,
             "threat_type": threat_type,
@@ -101,7 +97,9 @@ class WebhookNotifier:
             "source": "Spamlyser Pro",
         }
         for wh in self._webhooks:
-            if wh.get("enabled", True) and "spam_detected" in wh.get("events", ["spam_detected"]):
+            if wh.get("enabled", True) and "spam_detected" in wh.get(
+                "events", ["spam_detected"]
+            ):
                 threading.Thread(
                     target=self._send_single,
                     args=(wh, payload),
