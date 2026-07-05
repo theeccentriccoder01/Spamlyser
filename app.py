@@ -9300,10 +9300,10 @@ if analyse_btn and user_sms.strip():
                 if categories:
                     badge_html = "".join(
                         f'<span style="display:inline-block;padding:2px 10px;margin:2px;'
-                        f'border-radius:12px;background:{c["color"]}20;'
-                        f'color:{c["color"]};border:1px solid {c["color"]}40;'
+                        f"border-radius:12px;background:{c['color']}20;"
+                        f"color:{c['color']};border:1px solid {c['color']}40;"
                         f'font-size:0.85rem;">{c["icon"]} {c["label"]}'
-                        f'</span>'
+                        f"</span>"
                         for c in categories
                     )
                     st.markdown(
@@ -9485,7 +9485,9 @@ if analyse_btn and user_sms.strip():
 
                         if "categorizer" not in st.session_state:
                             try:
-                                from models.message_categorizer import MessageCategorizer
+                                from models.message_categorizer import (
+                                    MessageCategorizer,
+                                )
 
                                 st.session_state.categorizer = MessageCategorizer()
                             except ImportError:
@@ -9542,10 +9544,10 @@ if analyse_btn and user_sms.strip():
                         if ensemble_categories:
                             badge_html = "".join(
                                 f'<span style="display:inline-block;padding:2px 10px;margin:2px;'
-                                f'border-radius:12px;background:{c["color"]}20;'
-                                f'color:{c["color"]};border:1px solid {c["color"]}40;'
+                                f"border-radius:12px;background:{c['color']}20;"
+                                f"color:{c['color']};border:1px solid {c['color']}40;"
                                 f'font-size:0.85rem;">{c["icon"]} {c["label"]}'
-                                f'</span>'
+                                f"</span>"
                                 for c in ensemble_categories
                             )
                             st.markdown(

@@ -12,7 +12,6 @@ from pathlib import Path
 from threading import Lock
 from typing import Any
 
-
 DEFAULT_CATEGORIES = {
     "personal": {
         "label": "Personal",
@@ -74,9 +73,7 @@ class MessageCategorizer:
             config_path = os.getenv(
                 "SPAMLYSER_CATEGORIES_CONFIG",
                 str(
-                    Path(__file__).resolve().parent.parent
-                    / "data"
-                    / "categories.json"
+                    Path(__file__).resolve().parent.parent / "data" / "categories.json"
                 ),
             )
         self._config_path = Path(config_path)
@@ -111,9 +108,7 @@ class MessageCategorizer:
             if keywords:
                 pattern = r"\b(?:" + "|".join(re.escape(kw) for kw in keywords) + r")\b"
                 try:
-                    self._compiled_patterns[cat_id] = re.compile(
-                        pattern, re.IGNORECASE
-                    )
+                    self._compiled_patterns[cat_id] = re.compile(pattern, re.IGNORECASE)
                 except re.error:
                     pass
 
@@ -139,7 +134,12 @@ class MessageCategorizer:
             return dict(self._categories)
 
     def add_category(
-        self, cat_id: str, label: str, keywords: list[str], icon: str = "📁", color: str = "#888888"
+        self,
+        cat_id: str,
+        label: str,
+        keywords: list[str],
+        icon: str = "📁",
+        color: str = "#888888",
     ) -> bool:
         with self._lock:
             if cat_id in self._categories:
