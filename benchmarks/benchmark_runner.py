@@ -131,5 +131,37 @@ def run_all(output_csv: str | None = None) -> pd.DataFrame:
     return results
 
 
+def run_full_benchmark(
+    model_names: list[str] | None = None,
+    samples: list[str] | None = None,
+    warmup: int = 2,
+    runs: int = 10,
+    save_history: bool = True,
+) -> dict[str, Any]:
+    """Run a comprehensive benchmark and persist results for regression tracking.
+
+    Returns a dict keyed by model name with latency percentiles and
+    optional regression warnings.
+    """
+    from models.benchmark_automation import BenchmarkHistory, run_automated_benchmark
+
+    history = BenchmarkHistory() if save_history else None
+    results = run_automated_benchmark(
+        model_names=model_names,
+        samples=samples,
+        warmup=warmup,
+        runs=runs,
+        history=history,
+    )
+    if history and results:
+        for model_name in results:
+            reg = history.get_regression(model_name)
+            if reg:
+                _logger.warning(
+                    "Regression detected for %s: %s", model_name, reg
+                )
+    return results
+
+
 if __name__ == "__main__":
     run_all()

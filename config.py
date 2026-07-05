@@ -134,3 +134,13 @@ ANALYTICS_DB_PATH: str = os.getenv(
 ANALYTICS_RETENTION_DAYS: int = int(os.getenv("SPAMLYSER_ANALYTICS_RETENTION", "90"))
 
 BATCH_RATE_LIMIT = 50
+
+# ── Automated benchmarks ──────────────────────────────────────────────────
+BENCHMARK_AUTO_RUNS: int = int(os.getenv("SPAMLYSER_BENCH_RUNS", "10"))
+BENCHMARK_AUTO_WARMUP: int = int(os.getenv("SPAMLYSER_BENCH_WARMUP", "2"))
+BENCHMARK_REGRESSION_THRESHOLD_PCT: float = float(
+    os.getenv("SPAMLYSER_BENCH_REGRESSION_PCT", "10.0")
+)
+BENCHMARK_HISTORY_PATH: str = os.getenv(
+    "SPAMLYSER_BENCH_HISTORY", str(DATA_DIR / "benchmark_history.json")
+)

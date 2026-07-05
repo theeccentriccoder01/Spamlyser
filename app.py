@@ -3290,6 +3290,27 @@ def show_models_page():
         unsafe_allow_html=True,
     )
 
+    st.markdown("### 🏋️ Model Benchmarks")
+    try:
+        from models.benchmark_automation import BenchmarkHistory, run_automated_benchmark
+
+        if st.button("▶️ Run Benchmark Now", type="secondary", use_container_width=True):
+            with st.spinner("Running model benchmarks... (this may take a minute)"):
+                history = BenchmarkHistory()
+                results = run_automated_benchmark(history=history)
+            if results:
+                st.success(f"Benchmarked {len(results)} models successfully!")
+                for model, data in results.items():
+                    st.metric(
+                        label=f"{model}",
+                        value=f"{data['latency_mean_ms']:.1f} ms",
+                        delta=f"p95: {data['latency_p95_ms']:.1f} ms",
+                    )
+            else:
+                st.warning("No models could be benchmarked. Ensure models are loaded.")
+    except ImportError:
+        pass
+
     # Action buttons
     action_col1, action_col2, action_col3 = st.columns(3)
 

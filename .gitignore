@@ -2,7 +2,6 @@ venv
 __pycache__
 *.ps1
 
-<<<<<<< HEAD
 # Environment / secrets (never commit real credentials)
 .env
 .streamlit/secrets.toml
@@ -10,9 +9,6 @@ __pycache__
 # Data directory (created at runtime)
 data/
 
-# OS artefacts
-.DS_Store
-Thumbs.db
 # IDE / editor
 .vscode/
 .idea/
