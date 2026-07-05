@@ -53,10 +53,27 @@ CUSTOM_RULES_PATH: str = os.getenv(
     "SPAMLYSER_CUSTOM_RULES", str(DATA_DIR / "custom_rules.json")
 )
 
+SENDER_REPUTATION_DB_PATH: str = os.getenv(
+    "SPAMLYSER_SENDER_REPUTATION_DB", str(DATA_DIR / "sender_reputation.json")
+)
+
+CATEGORIES_CONFIG_PATH: str = os.getenv(
+    "SPAMLYSER_CATEGORIES_CONFIG", str(DATA_DIR / "categories.json")
+)
+
 PERFORMANCE_DATA_PATH: str = os.getenv(
     "SPAMLYSER_PERFORMANCE_DATA", str(DATA_DIR / "performance_data.json")
 )
 
+WEBHOOK_CONFIG_PATH: str = os.getenv(
+    "SPAMLYSER_WEBHOOK_CONFIG", str(DATA_DIR / "webhooks.json")
+)
+
+WEBHOOK_RETRY_COUNT: int = int(os.getenv("SPAMLYSER_WEBHOOK_RETRY", "3"))
+
+ENCRYPT_REPORT_BY_DEFAULT: bool = (
+    os.getenv("SPAMLYSER_ENCRYPT_REPORT", "false").lower() == "true"
+)
 # ── Application ────────────────────────────────────────────────────────────
 APP_TITLE: str = os.getenv("SPAMLYSER_APP_TITLE", "Spamlyser Pro - Ensemble Edition")
 APP_ICON: str = os.getenv("SPAMLYSER_APP_ICON", "🛡️")
@@ -77,6 +94,20 @@ MAX_CUSTOM_RULES_PER_LIST: int = int(
     os.getenv("SPAMLYSER_MAX_CUSTOM_RULES_PER_LIST", "500")
 )
 
+MODEL_COMPARISON_SAMPLE_SIZE: int = int(os.getenv("SPAMLYSER_COMPARE_SAMPLES", "5"))
+MAX_COMPOUND_RULES: int = int(os.getenv("SPAMLYSER_MAX_COMPOUND_RULES", "50"))
+BENCHMARK_SAMPLE_SIZE: int = int(os.getenv("SPAMLYSER_BENCHMARK_SAMPLES", "10"))
+
+BENCHMARK_WARMUP_RUNS: int = int(os.getenv("SPAMLYSER_BENCHMARK_WARMUP", "1"))
+
+LANGUAGE_DETECTION_ENABLED: bool = (
+    os.getenv("SPAMLYSER_LANG_DETECT", "true").lower() == "true"
+)
+
+LANGUAGE_DETECTION_CONFIDENCE_THRESHOLD: float = float(
+    os.getenv("SPAMLYSER_LANG_CONFIDENCE", "0.3")
+)
+
 
 # ── Helpers ────────────────────────────────────────────────────────────────
 def ensure_data_dir() -> Path:
@@ -94,3 +125,12 @@ def get_optional(key: str, default: str | None = None) -> str | None:
     """Return the env value for *key* or *default* when unset or empty."""
     val = os.getenv(key, default)
     return val if val else default
+
+
+ANALYTICS_DB_PATH: str = os.getenv(
+    "SPAMLYSER_ANALYTICS_DB", str(DATA_DIR / "analytics.db")
+)
+
+ANALYTICS_RETENTION_DAYS: int = int(os.getenv("SPAMLYSER_ANALYTICS_RETENTION", "90"))
+
+BATCH_RATE_LIMIT = 50

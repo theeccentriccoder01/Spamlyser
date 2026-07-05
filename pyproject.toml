@@ -11,3 +11,8 @@ filterwarnings = [
     "ignore::DeprecationWarning",
     "ignore::PendingDeprecationWarning",
 ]
+
+[tool.benchmark]
+samples = 10
+warmup = 1
+runs = 5
