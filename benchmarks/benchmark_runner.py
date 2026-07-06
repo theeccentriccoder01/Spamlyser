@@ -62,6 +62,7 @@ def latency_benchmark(
     if samples is None:
         samples = SAMPLE_MESSAGES
 
+    import sys
     rows: list[dict[str, Any]] = []
 
     for name in model_names:
@@ -69,6 +70,14 @@ def latency_benchmark(
         if clf is None:
             _logger.info("Skipping %s (not available)", name)
             continue
+
+        # Estimate model memory footprint dynamically
+        mem_bytes = sys.getsizeof(clf)
+        try:
+            if hasattr(clf, "model"):
+                mem_bytes += sys.getsizeof(clf.model)
+        except Exception:
+            pass
 
         for sample_idx, raw in enumerate(samples):
             cleaned = preprocess_message(raw)["cleaned"]
@@ -85,6 +94,7 @@ def latency_benchmark(
                         "run": run - warmup,
                         "sample_idx": sample_idx,
                         "latency_ms": round(elapsed, 2),
+                        "memory_bytes": mem_bytes,
                         "label": pred["label"],
                         "confidence": round(pred["score"], 4),
                     }
