@@ -30,6 +30,17 @@ _local = threading.local()
 _logger = logging.getLogger(__name__)
 
 
+def _format_rating_stars(value: Any) -> str:
+    """Return a safe star rating string for feedback exports."""
+    if value is None or isinstance(value, bool):
+        return ""
+    try:
+        rating = int(float(value))
+    except (TypeError, ValueError):
+        return ""
+    return "⭐" * max(rating, 0)
+
+
 def _coerce_rating(value: Any) -> float | None:
     """Return a numeric rating or ``None`` when the value is unusable."""
     if value is None or isinstance(value, bool):
@@ -214,7 +225,7 @@ class FeedbackHandler:
 ## User Feedback
 
 **Type:** {feedback.get("feedback_type", "Not specified")}
-**Rating:** {"⭐" * feedback.get("rating", 0)}
+**Rating:** {_format_rating_stars(feedback.get("rating"))}
 **Date:** {feedback.get("timestamp", "Not recorded")}
 
 ### Message:
