@@ -1,5 +1,6 @@
 """Tests for models/export_feature.py."""
 
+import json
 import sys
 import warnings
 
@@ -12,10 +13,14 @@ if "fpdf" in sys.modules and not hasattr(sys.modules["fpdf"], "__version__"):
     del sys.modules["fpdf"]
 try:
     __import__("fpdf")
+    _FPDF_INSTALLED = True
 except ImportError:
-    pytest.skip("fpdf not installed — PDF tests skipped", allow_module_level=True)
+    _FPDF_INSTALLED = False
 
-from models.export_feature import _pdf_safe, dataframe_to_pdf
+from models.export_feature import _pdf_safe, history_to_json
+
+if _FPDF_INSTALLED:
+    from models.export_feature import dataframe_to_pdf
 
 warnings.filterwarnings("ignore", category=DeprecationWarning)
 
@@ -49,6 +54,7 @@ class TestPdfSafe:
         assert _pdf_safe(None) == "None"
 
 
+@pytest.mark.skipif(not _FPDF_INSTALLED, reason="fpdf not installed — PDF tests skipped")
 class TestDataframeToPdf:
     def _valid_pdf(self, data: bytes) -> bool:
         return data[:5] == b"%PDF-"
@@ -97,3 +103,47 @@ class TestDataframeToPdf:
         df = pd.DataFrame([{"message": "test", "label": "HAM"}])
         out = dataframe_to_pdf(df)
         assert out.tell() == 0
+
+
+# ── New tests for history_to_json ────────────────────────────────────────────
+
+
+class TestHistoryToJson:
+    def test_returns_valid_json_string(self):
+        history = [{"message": "hello", "label": "HAM", "confidence": 0.9}]
+        result = history_to_json(history)
+        parsed = json.loads(result)
+        assert isinstance(parsed, list)
+        assert parsed[0]["label"] == "HAM"
+
+    def test_unicode_preserved(self):
+        history = [{"message": "WIN \u20b95000!", "label": "SPAM"}]
+        result = history_to_json(history)
+        # ensure_ascii=False so the rupee sign should be present
+        assert "\u20b9" in result
+
+    def test_numpy_integers_serialised(self):
+        try:
+            import numpy as np
+
+            history = [{"score": np.int64(42), "label": "HAM"}]
+            result = history_to_json(history)
+            parsed = json.loads(result)
+            assert parsed[0]["score"] == 42
+        except ImportError:
+            pytest.skip("numpy not installed")
+
+    def test_empty_history_returns_empty_array(self):
+        result = history_to_json([])
+        assert json.loads(result) == []
+
+    def test_nested_structures_preserved(self):
+        history = [
+            {
+                "message": "test",
+                "model_predictions": {"BERT": {"label": "SPAM", "score": 0.95}},
+            }
+        ]
+        result = history_to_json(history)
+        parsed = json.loads(result)
+        assert parsed[0]["model_predictions"]["BERT"]["label"] == "SPAM"
