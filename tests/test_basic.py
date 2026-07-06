@@ -1,5 +1,5 @@
-def test_sample():
-    assert 1 + 1 == 2
+def test_telemetry_logger_init():
+    from models.telemetry_logger import TelemetryLogger
 
-
-# Add more tests for your ML logic and backend functions here
+    logger = TelemetryLogger()
+    assert logger is not None

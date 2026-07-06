@@ -155,8 +155,6 @@ class ModelExplainer:
 
         return visualization
 
-        return visualization
-
     def get_threat_explanation(self, text: str, threat_type: str) -> dict[str, Any]:
         """
         Generate an explanation specific to the threat type.

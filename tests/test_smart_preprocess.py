@@ -94,3 +94,9 @@ class TestCorrectLeetspeak:
         assert "Free" in cleaned or "free" in cleaned, (
             f"Leet 'Fr33' not decoded in: '{cleaned}'"
         )
+
+
+def test_unicode_handler():
+    from models.unicode_handler import clean_unicode_text
+
+    assert clean_unicode_text("Café") == "Cafe"

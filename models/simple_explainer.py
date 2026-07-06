@@ -1,3 +1,5 @@
+from models.ham_explainer_viz import format_ham_explanation
+
 """
 Lightweight, dependency-free alternative to :class:`ModelExplainer`.
 
@@ -76,6 +78,71 @@ SPAM_KEYWORDS: dict[str, list[str]] = {
     ],
 }
 
+# HAM (legitimate message) indicator patterns.  These are common in everyday
+# conversation or professional communication and are notably absent from spam.
+HAM_KEYWORDS: dict[str, list[str]] = {
+    "Greeting / Casual": [
+        "hi",
+        "hello",
+        "hey",
+        "good morning",
+        "good afternoon",
+        "good evening",
+        "hope you",
+        "how are you",
+        "thanks",
+        "thank you",
+        "cheers",
+    ],
+    "Personal / Relational": [
+        "see you",
+        "talk later",
+        "catch up",
+        "miss you",
+        "love you",
+        "take care",
+        "thinking of you",
+        "happy birthday",
+        "congratulations on",
+        "well done",
+    ],
+    "Scheduling / Meeting": [
+        "meeting",
+        "appointment",
+        "schedule",
+        "calendar",
+        "at noon",
+        "tomorrow",
+        "next week",
+        "reminder",
+        "due date",
+        "deadline for",
+        "rsvp",
+    ],
+    "Professional / Work": [
+        "attached",
+        "please find",
+        "as discussed",
+        "follow up",
+        "let me know",
+        "kind regards",
+        "best regards",
+        "sincerely",
+        "invoice",
+        "report",
+        "ticket",
+    ],
+    "Negation of Spam Tactics": [
+        "no cost",
+        "no spam",
+        "unsubscribe",
+        "opt out",
+        "privacy policy",
+        "terms of service",
+        "do not reply",
+    ],
+}
+
 
 class SimpleExplainer:
     """Keyword-based explainer that identifies spam signals in text.
@@ -83,6 +150,11 @@ class SimpleExplainer:
     Does not require LIME or any external ML explainability library.  Useful
     as a fallback when ``ModelExplainer`` (which depends on ``lime``) cannot
     be imported.
+
+    HAM indicator detection is now implemented via :attr:`ham_keywords`.
+    ``_find_ham_indicators`` returns words/phrases from ``HAM_KEYWORDS`` that
+    are present in the text with a negative weight (indicating they *reduce*
+    the spam probability).
     """
 
     def __init__(
@@ -90,15 +162,17 @@ class SimpleExplainer:
         predict_fn: Callable | None = None,
         class_names: list[str] | None = None,
         keywords: dict[str, list[str]] | None = None,
+        ham_keywords: dict[str, list[str]] | None = None,
     ):
         self.predict_fn = predict_fn
         self.class_names = class_names or ["HAM", "SPAM"]
         self.keywords = keywords or SPAM_KEYWORDS
+        self.ham_keywords = ham_keywords or HAM_KEYWORDS
 
     def explain_prediction(
         self, text: str, num_features: int = 10, num_samples: int = 5000
     ) -> dict[str, Any]:
-        """Explain a prediction by matching spam keywords.
+        """Explain a prediction by matching spam and ham keywords.
 
         The ``num_features`` and ``num_samples`` parameters are accepted for
         interface compatibility with :class:`ModelExplainer` but are not used
@@ -216,8 +290,29 @@ class SimpleExplainer:
         return matches
 
     def _find_ham_indicators(self, text_lower: str) -> list[dict[str, Any]]:
-        """Return dummy ham indicators (always returns empty list).
+        """Return words/phrases that signal legitimate (HAM) content.
 
-        Subclasses could override this to provide genuine ham-signal detection.
+        Weights are **negative** to indicate that these features *reduce* the
+        probability of a message being spam.  The magnitude reflects how many
+        times the keyword appears in the text (same formula as spam weights).
         """
-        return []
+        matches: list[dict[str, Any]] = []
+        seen: set = set()
+
+        for category, keywords in self.ham_keywords.items():
+            for keyword in keywords:
+                if keyword in text_lower and keyword not in seen:
+                    seen.add(keyword)
+                    count = len(re.findall(re.escape(keyword), text_lower))
+                    matches.append(
+                        {
+                            "word": keyword,
+                            "weight": round(-0.5 * count, 3),  # negative = ham signal
+                            "is_positive": False,
+                            "category": category,
+                        }
+                    )
+
+        # Sort by descending absolute weight (strongest ham signals first)
+        matches.sort(key=lambda x: abs(x["weight"]), reverse=True)
+        return matches

@@ -1,0 +1,65 @@
+name: Security vulnerability report
+description: Report a security issue or vulnerability in Spamlyser
+labels: security
+body:
+  - type: markdown
+    attributes:
+      value: |
+        > **⚠️ Sensitive vulnerabilities**
+        > If this vulnerability could be exploited in production (e.g. XSS, injection,
+        > authentication bypass), please **do not** open a public issue.
+        > Instead email the maintainers directly so it can be fixed before disclosure.
+
+  - type: textarea
+    attributes:
+      label: Describe the vulnerability
+      description: |
+        A clear description of the security issue — what it is, where it occurs,
+        and what an attacker could achieve by exploiting it.
+      placeholder: >
+        e.g. User-supplied text is rendered without HTML-escaping via
+        st.markdown(unsafe_allow_html=True), allowing stored XSS when the
+        analysis result is rendered.
+    validations:
+      required: true
+
+  - type: textarea
+    attributes:
+      label: Steps to reproduce
+      placeholder: >
+        1. Open the analyzer page
+        2. Paste the following payload as the SMS message: ...
+        3. Click "Analyse"
+        4. Observe the script executes
+
+  - type: textarea
+    attributes:
+      label: Impact
+      description: What can an attacker achieve? Who is affected?
+      placeholder: >
+        An unauthenticated user can inject arbitrary JavaScript that runs in
+        the browser session of any admin who views the feedback dashboard.
+
+  - type: dropdown
+    attributes:
+      label: Severity (your estimate)
+      options:
+        - Critical (data breach / remote code execution)
+        - High (privilege escalation / stored XSS)
+        - Medium (information disclosure / CSRF)
+        - Low (minor hardening issue)
+    validations:
+      required: true
+
+  - type: textarea
+    attributes:
+      label: Suggested fix
+      placeholder: >
+        Call html.escape() on all user-supplied strings before embedding them
+        in HTML fragments passed to st.markdown().
+
+  - type: textarea
+    attributes:
+      label: Additional context
+      placeholder: >
+        Affected version, environment details, or proof-of-concept code.

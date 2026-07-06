@@ -54,7 +54,9 @@ class TestPdfSafe:
         assert _pdf_safe(None) == "None"
 
 
-@pytest.mark.skipif(not _FPDF_INSTALLED, reason="fpdf not installed — PDF tests skipped")
+@pytest.mark.skipif(
+    not _FPDF_INSTALLED, reason="fpdf not installed — PDF tests skipped"
+)
 class TestDataframeToPdf:
     def _valid_pdf(self, data: bytes) -> bool:
         return data[:5] == b"%PDF-"
@@ -147,3 +149,9 @@ class TestHistoryToJson:
         result = history_to_json(history)
         parsed = json.loads(result)
         assert parsed[0]["model_predictions"]["BERT"]["label"] == "SPAM"
+
+
+def test_export_encryptor():
+    from models.export_encryptor import encrypt_export_data
+
+    assert encrypt_export_data("test", "key") != "test"

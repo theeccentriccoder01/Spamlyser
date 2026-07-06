@@ -1,3 +1,5 @@
+from models.recovery_agent import attempt_self_healing
+
 """
 Safe file storage with atomic writes, automatic backups, and rotation.
 
@@ -5,9 +7,17 @@ Every write goes to a temporary file first, then is renamed atomically over
 the target.  Before overwriting an existing file, a timestamped backup is
 created in a ``.backups/`` sibling directory.  Old backups are automatically
 pruned so only the *N* most recent are kept.
+
+Integrity checking
+------------------
+:meth:`load_json_safe` extends the basic :meth:`load_json` API with an
+optional *validator* callable.  If the parsed data fails validation the method
+falls back to the most recent backup automatically, giving the application a
+second chance to recover from data corruption without manual intervention.
 """
 
 import json
+import logging
 import os
 import shutil
 import tempfile
@@ -15,6 +25,8 @@ from collections.abc import Callable
 from datetime import datetime, timedelta
 from pathlib import Path
 from typing import Any, Dict, List, Optional
+
+_logger = logging.getLogger(__name__)
 
 
 class StorageManager:
@@ -124,6 +136,59 @@ class StorageManager:
                 except (json.JSONDecodeError, OSError):
                     pass
             return default
+
+    def load_json_safe(
+        self,
+        filepath: str,
+        default: Any = None,
+        validate: Callable[[Any], bool] | None = None,
+    ) -> Any:
+        """Load JSON and validate content, falling back to backups on failure.
+
+        Unlike :meth:`load_json`, which only falls back on *parse* errors,
+        this method also falls back when *validate* returns ``False`` — useful
+        for catching semantic corruption (e.g. missing required keys, wrong
+        types) that would otherwise pass JSON parsing silently.
+
+        Parameters
+        ----------
+        filepath : str
+            Path to the JSON file to load.
+        default : Any
+            Value returned when all recovery options are exhausted.
+        validate : callable, optional
+            ``callable(data) -> bool``.  If provided and returns ``False``
+            for the primary file, backups are tried in descending age order.
+
+        Returns
+        -------
+        Any
+            Loaded (and validated) data, or *default* if nothing works.
+        """
+        path = Path(filepath)
+        candidates: list[Path] = []
+        if path.exists():
+            candidates.append(path)
+        candidates.extend(self.list_backups(filepath))
+
+        for candidate in candidates:
+            try:
+                with open(str(candidate), encoding="utf-8") as f:
+                    data = json.load(f)
+            except (json.JSONDecodeError, OSError) as exc:
+                _logger.warning("Could not parse %s: %s", candidate, exc)
+                continue
+
+            if validate is None or validate(data):
+                if candidate != path:
+                    _logger.warning(
+                        "Primary file corrupt; restored from backup %s.", candidate
+                    )
+                    self.save_json(str(path), data, backup=False)
+                return data
+
+            _logger.warning("Validation failed for %s; trying next backup.", candidate)
+        return default
 
     def list_backups(self, filepath: str) -> list[Path]:
         """Return all backup paths for *filepath*, sorted newest-first."""

@@ -105,3 +105,65 @@ a[href]:active,
   from { opacity: 0; transform: translateY(8px); }
   to { opacity: 1; transform: translateY(0); }
 }
+
+/* ── Accessibility enhancements ───────────────────────────────────────── */
+
+/* Focus-visible ring for keyboard users */
+:focus-visible {
+  outline: 3px solid #00d4aa !important;
+  outline-offset: 2px !important;
+  box-shadow: 0 0 0 4px rgba(0, 212, 170, 0.3) !important;
+}
+
+/* High contrast mode */
+@media (prefers-contrast: high) {
+  :root {
+    --text-primary: #ffffff !important;
+    --text-secondary: #cccccc !important;
+    --border-color: #ffffff !important;
+  }
+  .stButton > button {
+    border: 2px solid currentColor !important;
+  }
+  .prediction-card,
+  .ensemble-card,
+  .feature-card,
+  .model-info {
+    border: 2px solid var(--card-border, #555) !important;
+  }
+}
+
+/* Reduced motion — respect user preference */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+  .main .block-container {
+    animation: none !important;
+  }
+}
+
+/* Larger touch targets for mobile */
+@media (pointer: coarse) {
+  .stButton > button,
+  .stDownloadButton > button {
+    min-height: 48px;
+    padding: 12px 24px !important;
+  }
+}
+
+/* Screen-reader-only utility class */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}

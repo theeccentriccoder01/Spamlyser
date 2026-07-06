@@ -87,4 +87,3 @@ PDF tests are skipped automatically when fpdf2 is not installed.
 If exports are failing, ensure that:
 1. `fpdf2` is installed and updated to the latest version for PDF generation.
 2. The history data does not contain raw database connection handles or non-serialisable generator objects.
-

@@ -1,3 +1,5 @@
+from models.export_encryptor import encrypt_export_data
+
 """
 Export helpers for Spamlyser Pro — CSV, PDF, and JSON formats.
 
@@ -135,7 +137,7 @@ def history_to_json(history: list[dict[str, Any]]) -> str:
     def _coerce(obj: Any) -> Any:
         # numpy int/float, pandas Timestamp, etc.
         try:
-            import numpy as np  # noqa: PLC0415
+            import numpy as np
 
             if isinstance(obj, (np.integer, np.floating)):
                 return obj.item()
@@ -176,22 +178,60 @@ def export_results_button(
         key=f"export_format_{filename_prefix}",
     )
 
+    enable_encrypt = st.checkbox(
+        "🔒 Encrypt with password",
+        value=False,
+        help="Protect the exported file with AES-256-GCM encryption",
+        key=f"encrypt_export_{filename_prefix}",
+    )
+
+    enc_password = None
+    if enable_encrypt:
+        enc_password = st.text_input(
+            "Encryption password",
+            type="password",
+            placeholder="Enter a strong password",
+            key=f"encrypt_pwd_{filename_prefix}",
+        )
+
     if export_format == "CSV":
         csv_data = df.to_csv(index=False)
-        st.download_button(
-            label="📥 Download Results CSV",
-            data=csv_data,
-            file_name=f"{filename_prefix}_{ts}.csv",
-            mime="text/csv",
-        )
+        if enable_encrypt and enc_password:
+            from .encrypted_report import encrypt_bytes
+
+            encrypted = encrypt_bytes(csv_data.encode("utf-8"), enc_password)
+            st.download_button(
+                label="🔒 Download Encrypted CSV",
+                data=encrypted,
+                file_name=f"{filename_prefix}_{ts}.csv.enc",
+                mime="application/octet-stream",
+            )
+        else:
+            st.download_button(
+                label="📥 Download Results CSV",
+                data=csv_data,
+                file_name=f"{filename_prefix}_{ts}.csv",
+                mime="text/csv",
+            )
     elif export_format == "JSON":
         json_data = history_to_json(history)
-        st.download_button(
-            label="📥 Download Results JSON",
-            data=json_data,
-            file_name=f"{filename_prefix}_{ts}.json",
-            mime="application/json",
-        )
+        if enable_encrypt and enc_password:
+            from .encrypted_report import encrypt_bytes
+
+            encrypted = encrypt_bytes(json_data.encode("utf-8"), enc_password)
+            st.download_button(
+                label="🔒 Download Encrypted JSON",
+                data=encrypted,
+                file_name=f"{filename_prefix}_{ts}.json.enc",
+                mime="application/octet-stream",
+            )
+        else:
+            st.download_button(
+                label="📥 Download Results JSON",
+                data=json_data,
+                file_name=f"{filename_prefix}_{ts}.json",
+                mime="application/json",
+            )
     else:
         if not _FPDF_AVAILABLE:
             st.error(
@@ -200,9 +240,20 @@ def export_results_button(
             )
             return
         pdf_data = _build_pdf(df)
-        st.download_button(
-            label="📥 Download Results PDF",
-            data=pdf_data,
-            file_name=f"{filename_prefix}_{ts}.pdf",
-            mime="application/pdf",
-        )
+        if enable_encrypt and enc_password:
+            from .encrypted_report import encrypt_bytes
+
+            encrypted = encrypt_bytes(pdf_data.read(), enc_password)
+            st.download_button(
+                label="🔒 Download Encrypted PDF",
+                data=encrypted,
+                file_name=f"{filename_prefix}_{ts}.pdf.enc",
+                mime="application/octet-stream",
+            )
+        else:
+            st.download_button(
+                label="📥 Download Results PDF",
+                data=pdf_data,
+                file_name=f"{filename_prefix}_{ts}.pdf",
+                mime="application/pdf",
+            )

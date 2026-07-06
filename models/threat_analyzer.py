@@ -1,3 +1,15 @@
+import json
+from pathlib import Path
+
+
+def load_custom_categories():
+    p = Path("data/threat_categories.json")
+    if p.exists():
+        with open(p) as f:
+            return json.load(f)
+    return {}
+
+
 """
 Threat Analyzer for Spamlyser Pro - Multi-class Threat Analysis Module
 

@@ -1,11 +1,16 @@
 """Tests for the lightweight SimpleExplainer module."""
 
-from models.simple_explainer import SPAM_KEYWORDS, SimpleExplainer
+from models.simple_explainer import HAM_KEYWORDS, SPAM_KEYWORDS, SimpleExplainer
 
 
 def test_default_spam_keywords_are_populated():
     assert isinstance(SPAM_KEYWORDS, dict)
     assert len(SPAM_KEYWORDS) >= 4
+
+
+def test_default_ham_keywords_are_populated():
+    assert isinstance(HAM_KEYWORDS, dict)
+    assert len(HAM_KEYWORDS) >= 4
 
 
 def test_explain_prediction_returns_expected_structure():
@@ -28,11 +33,21 @@ def test_explain_prediction_finds_spam_keywords():
     assert "urgent" in words or "account" in words or "verify" in words
 
 
-def test_explain_prediction_ham_returns_empty():
+def test_explain_prediction_ham_finds_indicators():
     explainer = SimpleExplainer()
-    result = explainer.explain_prediction("Hey, how are you doing today?")
-    spam_features = result["features"][1]["important_words"]
-    assert len(spam_features) == 0
+    result = explainer.explain_prediction(
+        "Hey, hello! Good morning, let me know when we can meet."
+    )
+    ham_features = result["features"][0]["important_words"]
+    words = [f["word"] for f in ham_features]
+    assert len(ham_features) > 0
+    assert (
+        "hello" in words
+        or "let me know" in words
+        or "meeting" in words
+        or "hi" in words
+        or "hey" in words
+    )
 
 
 def test_visualize_explanation_returns_feature_importance():
@@ -115,3 +130,10 @@ def test_get_threat_explanation_unknown_threat():
     result = explainer.get_threat_explanation("hello", "UnknownType")
     assert result["matching_keywords"] == []
     assert result["threat_features"] == []
+
+
+def test_format_ham_explanation():
+    from models.ham_explainer_viz import format_ham_explanation
+
+    res = format_ham_explanation(["hello"], [0.9])
+    assert "Ham Token Analysis" in res

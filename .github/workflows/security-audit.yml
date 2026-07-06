@@ -1,0 +1,62 @@
+name: Security Audit
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+  schedule:
+    # Run weekly on Monday at 08:00 UTC so CVE advisories are caught early
+    - cron: "0 8 * * 1"
+
+jobs:
+  dependency-audit:
+    name: Dependency vulnerability scan (pip-audit)
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+          cache: "pip"
+          cache-dependency-path: "requirements*.txt"
+
+      - name: Install pip-audit
+        run: python -m pip install --upgrade pip pip-audit
+
+      - name: Audit runtime dependencies
+        run: pip-audit -r requirements.txt --strict
+
+      - name: Audit dev dependencies
+        # Failures here are informational only — don't block the build
+        run: pip-audit -r requirements-dev.txt || true
+
+  static-security-analysis:
+    name: Static security analysis (bandit)
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+
+      - name: Install bandit
+        run: python -m pip install --upgrade pip bandit[toml]
+
+      - name: Run bandit (high-severity issues only)
+        # Exit code 1 = issues found. We fail on high severity (level 3+)
+        # and medium confidence (level 2+) to keep signal-to-noise reasonable.
+        run: |
+          bandit -r . \
+            --exclude ./.git,./tests,./docs \
+            --severity-level high \
+            --confidence-level medium \
+            --format txt
+
+# Security Audit workflow extended with run_sast.py

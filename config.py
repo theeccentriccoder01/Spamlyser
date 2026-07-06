@@ -4,6 +4,9 @@ Central configuration for Spamlyser Pro.
 Loads settings from environment variables (via python-dotenv) with sensible
 defaults so the app works out-of-the-box.  In production, override any value
 through a ``.env`` file or system environment variables.
+
+All path constants resolve to absolute ``Path`` objects so they work
+regardless of the current working directory when the application starts.
 """
 
 import os
@@ -22,7 +25,7 @@ except ImportError:
 PROJECT_ROOT = Path(__file__).resolve().parent
 
 # Where per-run data (feedback, performance snapshots) is stored.
-DATA_DIR = Path(os.getenv("SPAMLYSER_DATA_DIR", PROJECT_ROOT / "data"))
+DATA_DIR = Path(os.getenv("SPAMLYSER_DATA_DIR", str(PROJECT_ROOT / "data")))
 
 # ── Model settings ─────────────────────────────────────────────────────────
 MODEL_CACHE_DIR = Path(
@@ -50,10 +53,27 @@ CUSTOM_RULES_PATH: str = os.getenv(
     "SPAMLYSER_CUSTOM_RULES", str(DATA_DIR / "custom_rules.json")
 )
 
+SENDER_REPUTATION_DB_PATH: str = os.getenv(
+    "SPAMLYSER_SENDER_REPUTATION_DB", str(DATA_DIR / "sender_reputation.json")
+)
+
+CATEGORIES_CONFIG_PATH: str = os.getenv(
+    "SPAMLYSER_CATEGORIES_CONFIG", str(DATA_DIR / "categories.json")
+)
+
 PERFORMANCE_DATA_PATH: str = os.getenv(
     "SPAMLYSER_PERFORMANCE_DATA", str(DATA_DIR / "performance_data.json")
 )
 
+WEBHOOK_CONFIG_PATH: str = os.getenv(
+    "SPAMLYSER_WEBHOOK_CONFIG", str(DATA_DIR / "webhooks.json")
+)
+
+WEBHOOK_RETRY_COUNT: int = int(os.getenv("SPAMLYSER_WEBHOOK_RETRY", "3"))
+
+ENCRYPT_REPORT_BY_DEFAULT: bool = (
+    os.getenv("SPAMLYSER_ENCRYPT_REPORT", "false").lower() == "true"
+)
 # ── Application ────────────────────────────────────────────────────────────
 APP_TITLE: str = os.getenv("SPAMLYSER_APP_TITLE", "Spamlyser Pro - Ensemble Edition")
 APP_ICON: str = os.getenv("SPAMLYSER_APP_ICON", "🛡️")
@@ -67,10 +87,36 @@ ENABLE_TELEMETRY: bool = os.getenv("SPAMLYSER_ENABLE_TELEMETRY", "false").lower(
 
 MAX_SMS_LENGTH: int = int(os.getenv("SPAMLYSER_MAX_SMS_LENGTH", "1000"))
 
+# Maximum number of entries allowed in each custom-rules list (allowlist or
+# blocklist).  Exceeding this limit is a soft warning — the app still works —
+# but it is enforced in the UI to keep the rules file manageable.
+MAX_CUSTOM_RULES_PER_LIST: int = int(
+    os.getenv("SPAMLYSER_MAX_CUSTOM_RULES_PER_LIST", "500")
+)
+
+MODEL_COMPARISON_SAMPLE_SIZE: int = int(os.getenv("SPAMLYSER_COMPARE_SAMPLES", "5"))
+MAX_COMPOUND_RULES: int = int(os.getenv("SPAMLYSER_MAX_COMPOUND_RULES", "50"))
+BENCHMARK_SAMPLE_SIZE: int = int(os.getenv("SPAMLYSER_BENCHMARK_SAMPLES", "10"))
+
+BENCHMARK_WARMUP_RUNS: int = int(os.getenv("SPAMLYSER_BENCHMARK_WARMUP", "1"))
+
+LANGUAGE_DETECTION_ENABLED: bool = (
+    os.getenv("SPAMLYSER_LANG_DETECT", "true").lower() == "true"
+)
+
+LANGUAGE_DETECTION_CONFIDENCE_THRESHOLD: float = float(
+    os.getenv("SPAMLYSER_LANG_CONFIDENCE", "0.3")
+)
+
 
 # ── Helpers ────────────────────────────────────────────────────────────────
 def ensure_data_dir() -> Path:
-    """Create the data directory if it does not exist and return its path."""
+    """Create the data directory (and any parents) if it does not exist.
+
+    Returns the resolved ``Path`` object so callers can use it directly::
+
+        path = ensure_data_dir() / "my_file.json"
+    """
     DATA_DIR.mkdir(parents=True, exist_ok=True)
     return DATA_DIR
 
@@ -79,3 +125,12 @@ def get_optional(key: str, default: str | None = None) -> str | None:
     """Return the env value for *key* or *default* when unset or empty."""
     val = os.getenv(key, default)
     return val if val else default
+
+
+ANALYTICS_DB_PATH: str = os.getenv(
+    "SPAMLYSER_ANALYTICS_DB", str(DATA_DIR / "analytics.db")
+)
+
+ANALYTICS_RETENTION_DAYS: int = int(os.getenv("SPAMLYSER_ANALYTICS_RETENTION", "90"))
+
+BATCH_RATE_LIMIT = 50

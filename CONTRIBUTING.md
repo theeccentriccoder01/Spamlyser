@@ -100,3 +100,32 @@ git merge upstream/main
 - [How to Contribute to Open Source](https://opensource.guide/how-to-contribute/)
 - [Using Pull Requests](https://help.github.com/articles/about-pull-requests/)
 - [GitHub Help](https://help.github.com)
+
+## Reporting Security Vulnerabilities
+
+We take security seriously and appreciate responsible disclosure.
+
+**For non-sensitive issues** (e.g. a missing header, an informational finding
+from a static analyser), open a public issue using the
+[Security vulnerability report](.github/ISSUE_TEMPLATE/security_report.yml)
+template.
+
+**For sensitive vulnerabilities** that could be exploited in production (stored
+XSS, injection, authentication bypass, data exposure), please **do not** open
+a public issue. Email the maintainers directly instead so the issue can be
+patched before it is publicly disclosed.
+
+The project's CI pipeline runs automated security checks on every PR:
+
+- **`pip-audit`** — scans all runtime dependencies for known CVEs.
+- **`bandit`** — performs static analysis to catch common Python security
+  anti-patterns (e.g. `eval()`, hard-coded passwords, unsafe `subprocess`
+  calls).
+
+You can run the same checks locally:
+
+```bash
+pip install pip-audit bandit
+pip-audit -r requirements.txt
+bandit -r . --exclude ./tests,./docs -l -i
+```
