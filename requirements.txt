@@ -28,4 +28,4 @@ pytest-cov>=7.1.0,<8.0.0
 fpdf2>=2.8.2,<3.0.0
 
 # Report Encryption
-cryptography>=44.0.0,<45.0.0
+cryptography>=48.0.1

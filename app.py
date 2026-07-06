@@ -200,7 +200,7 @@ try:
     from models.navigation import top_navigation_bar
 except ImportError:
 
-    def top_navigation_bar(navigate_to):
+    def top_navigation_bar():
         pass  # Silent fallback
 
 
@@ -1295,7 +1295,7 @@ def show_analyzer_page():
         help="Choose between analyzing a single message or processing multiple messages from a CSV file",
     )
 
-    if analysis_mode == "Single Message Analysis":
+    if analysis_mode == "Single Message":
         st.markdown("### 📝 Single Message Analysis")
         # Existing single message analysis code will go here
     else:
@@ -3289,27 +3289,6 @@ def show_models_page():
     """,
         unsafe_allow_html=True,
     )
-
-    st.markdown("### 🏋️ Model Benchmarks")
-    try:
-        from models.benchmark_automation import BenchmarkHistory, run_automated_benchmark
-
-        if st.button("▶️ Run Benchmark Now", type="secondary", use_container_width=True):
-            with st.spinner("Running model benchmarks... (this may take a minute)"):
-                history = BenchmarkHistory()
-                results = run_automated_benchmark(history=history)
-            if results:
-                st.success(f"Benchmarked {len(results)} models successfully!")
-                for model, data in results.items():
-                    st.metric(
-                        label=f"{model}",
-                        value=f"{data['latency_mean_ms']:.1f} ms",
-                        delta=f"p95: {data['latency_p95_ms']:.1f} ms",
-                    )
-            else:
-                st.warning("No models could be benchmarked. Ensure models are loaded.")
-    except ImportError:
-        pass
 
     # Action buttons
     action_col1, action_col2, action_col3 = st.columns(3)
@@ -7378,7 +7357,7 @@ def main():
     """Main function to route between different pages"""
 
     # Display the top navigation bar
-    top_navigation_bar(navigate_to)
+    top_navigation_bar()
 
     # Define the feedback page function directly
     def show_feedback_page():
@@ -7583,45 +7562,6 @@ def main():
             if st.button("❓ Get Help", use_container_width=True):
                 navigate_to("help")
 
-    # Page routing logic
-    if st.session_state.current_page == "home":
-        show_home_page()
-    elif st.session_state.current_page == "analyzer":
-        show_analyzer_page()
-    elif st.session_state.current_page == "about":
-        show_about_page()
-    elif st.session_state.current_page == "features":
-        show_features_page()
-    elif st.session_state.current_page == "analytics":
-        show_analytics_page()
-    elif st.session_state.current_page == "dashboard":
-        try:
-            from page_functions import render_dashboard
-
-            render_dashboard()
-        except ImportError:
-            st.warning("Dashboard module not found. Using default analytics page.")
-            show_analytics_page()
-    elif st.session_state.current_page == "models":
-        show_models_page()
-    elif st.session_state.current_page == "model_compare":
-        show_model_compare_page()
-    elif st.session_state.current_page == "feedback":
-        show_feedback_page()
-    elif st.session_state.current_page == "help":
-        show_help_page()
-    elif st.session_state.current_page == "contact":
-        show_contact_page()
-    elif st.session_state.current_page == "docs":
-        show_docs_page()
-    elif st.session_state.current_page == "api":
-        show_api_page()
-    elif st.session_state.current_page == "settings":
-        show_settings_page()
-    else:
-        # Default to home if unknown page
-        st.session_state.current_page = "home"
-        show_home_page()
 
 def show_model_compare_page():
     st.markdown("<div style='margin-top: 20px;'></div>", unsafe_allow_html=True)
@@ -7725,6 +7665,46 @@ def show_model_compare_page():
         st.info(
             "💡 Enter a message above and click **Compare Models** to see side-by-side predictions."
         )
+
+    # Page routing logic
+    if st.session_state.current_page == "home":
+        show_home_page()
+    elif st.session_state.current_page == "analyzer":
+        show_analyzer_page()
+    elif st.session_state.current_page == "about":
+        show_about_page()
+    elif st.session_state.current_page == "features":
+        show_features_page()
+    elif st.session_state.current_page == "analytics":
+        show_analytics_page()
+    elif st.session_state.current_page == "dashboard":
+        try:
+            from page_functions import render_dashboard
+
+            render_dashboard()
+        except ImportError:
+            st.warning("Dashboard module not found. Using default analytics page.")
+            show_analytics_page()
+    elif st.session_state.current_page == "models":
+        show_models_page()
+    elif st.session_state.current_page == "model_compare":
+        show_model_compare_page()
+    elif st.session_state.current_page == "feedback":
+        show_feedback_page()
+    elif st.session_state.current_page == "help":
+        show_help_page()
+    elif st.session_state.current_page == "contact":
+        show_contact_page()
+    elif st.session_state.current_page == "docs":
+        show_docs_page()
+    elif st.session_state.current_page == "api":
+        show_api_page()
+    elif st.session_state.current_page == "settings":
+        show_settings_page()
+    else:
+        # Default to home if unknown page
+        st.session_state.current_page = "home"
+        show_home_page()
 
 
 # --- Analyzer Page Content ---
@@ -9553,7 +9533,9 @@ if analyse_btn and user_sms.strip():
                             confidence=confidence,
                             threat_type=threat_type,
                         )
-                        render_sender_reputation_card(sender_id, rep_data)
+                        st.info(
+                            f"👤 **Sender Reputation Score for {sender_id}:** {rep_data['reputation_score']:.2f} (from {rep_data['total_messages']} previous messages)"
+                        )
 
                 # Categorize message
                 categories = []
@@ -9793,13 +9775,17 @@ if analyse_btn and user_sms.strip():
                             sender_match = re.search(r"[\+\d\s\-\(\)]{7,15}", user_sms)
                             if sender_match:
                                 sender_id = sender_match.group().strip()
-                                rep_data = st.session_state.sender_reputation.record_analysis(
-                                    sender=sender_id,
-                                    is_spam=(ensemble_result["label"] == "SPAM"),
-                                    confidence=ensemble_result["confidence"],
-                                    threat_type=threat_type,
+                                rep_data = (
+                                    st.session_state.sender_reputation.record_analysis(
+                                        sender=sender_id,
+                                        is_spam=(ensemble_result["label"] == "SPAM"),
+                                        confidence=ensemble_result["confidence"],
+                                        threat_type=threat_type,
+                                    )
                                 )
-                                render_sender_reputation_card(sender_id, rep_data)
+                                st.info(
+                                    f"👤 **Sender Reputation Score for {sender_id}:** {rep_data['reputation_score']:.2f} (from {rep_data['total_messages']} previous messages)"
+                                )
 
                         if "categorizer" not in st.session_state:
                             try:
@@ -11061,62 +11047,6 @@ st.markdown(
     unsafe_allow_html=True,
 )
 
-
-# --- Helper: Sender Reputation Display ---
-def render_sender_reputation_card(sender_id, rep_data):
-    """Render a styled sender reputation card with colour-coded risk level."""
-    score = rep_data["reputation_score"]
-    total = rep_data["total_messages"]
-    spam = rep_data["spam_count"]
-    ham = rep_data["ham_count"]
-    threat_types = rep_data.get("threat_types", {})
-
-    if score < 0.3:
-        risk = "🔴 High Risk"
-        bar_color = "#ff4444"
-    elif score < 0.5:
-        risk = "🟠 Medium Risk"
-        bar_color = "#ffaa00"
-    elif score < 0.7:
-        risk = "🟡 Low Risk"
-        bar_color = "#ffdd00"
-    else:
-        risk = "🟢 Safe"
-        bar_color = "#00d4aa"
-
-    bar_pct = max(0, min(100, score * 100))
-    st.markdown(
-        f"""
-    <div style="background:#1a1a2e;border:1px solid {bar_color}60;border-radius:12px;padding:16px;margin:16px 0;">
-        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
-            <h4 style="color:{bar_color};margin:0;">👤 Sender: {sender_id}</h4>
-            <span style="color:{bar_color};font-weight:700;font-size:1.1rem;">{risk}</span>
-        </div>
-        <div style="margin:8px 0;">
-            <span style="color:#aaa;">Reputation Score:</span>
-            <span style="color:{bar_color};font-weight:700;font-size:1.2rem;">{score:.3f}</span>
-        </div>
-        <div style="background:#333;border-radius:8px;height:10px;margin:8px 0;overflow:hidden;">
-            <div style="background:{bar_color};width:{bar_pct:.0f}%;height:100%;border-radius:8px;transition:width 0.5s;"></div>
-        </div>
-        <div style="display:flex;gap:20px;margin:8px 0;font-size:0.95rem;">
-            <span style="color:#ff6b6b;">⚠️ Spam: <strong>{spam}</strong></span>
-            <span style="color:#00d4aa;">✅ Ham: <strong>{ham}</strong></span>
-            <span style="color:#888;">📊 Total: <strong>{total}</strong></span>
-            <span style="color:#888;">🕐 First: <strong>{rep_data.get("first_seen", "N/A")[:10]}</strong></span>
-        </div>
-    </div>
-    """,
-        unsafe_allow_html=True,
-    )
-
-    if threat_types:
-        st.markdown("**🗂️ Threat Type Breakdown:**")
-        for ttype, count in sorted(threat_types.items(), key=lambda x: -x[1]):
-            st.markdown(f"- {ttype}: {count} occurrence(s)")
-
-
 # --- Main Execution ---
 # Call the main function to handle routing
-if __name__ == "__main__":
-    main()
+main()
