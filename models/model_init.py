@@ -81,8 +81,7 @@ def verify_model_availability() -> tuple[bool, str, list]:
         test_model_name = VERIFICATION_MODEL_NAME
         cache_dir = MODEL_CACHE_DIR
         model_cached = cache_dir.exists() and any(
-            test_model_name in str(p.parent) and p.is_dir()
-            for p in cache_dir.rglob(f"*{test_model_name}*")
+            f"models--{test_model_name}" in p.name for p in cache_dir.rglob("*")
         )
 
         if not model_cached:
