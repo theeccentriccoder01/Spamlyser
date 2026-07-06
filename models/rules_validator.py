@@ -29,8 +29,30 @@ def validate_rule_structure(rule: dict[str, Any]) -> tuple[bool, str]:
         return False, f"Invalid regex pattern: {e}"
 
     try:
-        float(rule["score"])
+        score = float(rule["score"])
+        if not (-10.0 <= score <= 10.0):
+            return False, "Rule score must be between -10.0 and 10.0"
     except (ValueError, TypeError):
         return False, "Rule score must be a number"
 
     return True, ""
+
+
+def validate_rules_collection(rules: list[dict[str, Any]]) -> tuple[bool, str]:
+    """Validate a collection of rules for logical sanity, checking for duplicates."""
+    if not isinstance(rules, list):
+        return False, "Rules collection must be a list"
+
+    seen_names = set()
+    for idx, rule in enumerate(rules):
+        ok, err = validate_rule_structure(rule)
+        if not ok:
+            return False, f"Rule at index {idx} is invalid: {err}"
+        
+        name = rule["name"].strip().lower()
+        if name in seen_names:
+            return False, f"Duplicate rule name detected: '{rule['name']}'"
+        seen_names.add(name)
+
+    return True, ""
+
