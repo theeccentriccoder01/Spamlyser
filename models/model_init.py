@@ -212,7 +212,7 @@ try:
 except Exception as e:
     MODEL_STATUS = False
     MODEL_ERROR_MESSAGE = (
-        f"❌ Critical error during model initialization: {e!s}\n"
+        f"[ERROR] Critical error during model initialization: {e!s}\n"
         "   Please check your Python environment and dependencies."
     )
     MODEL_WARNINGS = []
