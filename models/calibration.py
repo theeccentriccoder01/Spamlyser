@@ -76,7 +76,8 @@ class ConfidenceCalibrator:
     def fit_temperature(self, y_true: np.ndarray, y_prob: np.ndarray) -> float:
         """Find the optimal temperature T using negative log likelihood minimization."""
         if not SCIPY_AVAILABLE:
-            print("Warning: scipy is not installed. Returning default temperature.")
+            import warnings
+            warnings.warn("scipy not found, skipping temperature fitting")
             self.temperature = 1.0
             return self.temperature
 
@@ -103,10 +104,10 @@ class ConfidenceCalibrator:
     def fit_platt(self, y_true: np.ndarray, y_prob: np.ndarray) -> tuple[float, float]:
         """Find Platt scaling parameters A and B using logistic regression."""
         if not SCIPY_AVAILABLE:
-            print(
-                "Warning: scipy is not installed. Returning default Platt parameters."
-            )
-            self.platt_a, self.platt_b = 1.0, 0.0
+            import warnings
+            warnings.warn("scipy not found, skipping Platt scaling")
+            self.platt_a = 1.0
+            self.platt_b = 0.0
             return self.platt_a, self.platt_b
 
         y_true = np.array(y_true)
