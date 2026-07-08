@@ -7357,7 +7357,7 @@ def main():
     """Main function to route between different pages"""
 
     # Display the top navigation bar
-    top_navigation_bar()
+    top_navigation_bar(navigate_to)
 
     # Define the feedback page function directly
     def show_feedback_page():
