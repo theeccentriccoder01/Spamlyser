@@ -6780,6 +6780,16 @@ def show_settings_page():
         )
         st.session_state.settings["theme"] = theme
 
+        if "theme_preset" not in st.session_state:
+            st.session_state.theme_preset = "Default"
+        theme_preset = st.selectbox(
+            "Choose theme preset:",
+            options=["Default", "Deep Space", "Emerald Guard", "Amber Glow", "Ocean Breeze"],
+            index=["Default", "Deep Space", "Emerald Guard", "Amber Glow", "Ocean Breeze"].index(st.session_state.theme_preset),
+            help="Select an accent color preset for your theme",
+        )
+        st.session_state.theme_preset = theme_preset
+
         show_confidence = st.checkbox(
             "Always show confidence scores",
             value=st.session_state.settings["show_confidence_scores"],
@@ -7357,7 +7367,7 @@ def main():
     """Main function to route between different pages"""
 
     # Display the top navigation bar
-    top_navigation_bar()
+    top_navigation_bar(navigate_to)
 
     # Define the feedback page function directly
     def show_feedback_page():
