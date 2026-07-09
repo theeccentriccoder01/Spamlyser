@@ -234,6 +234,7 @@ PAGES = {
     "features": "⚡ Features",
     "analytics": "📊 Analytics",
     "dashboard": "📈 Dashboard",
+    "anomaly": "🔍 Anomaly Detection",
     "models": "🤖 Models",
     "model_compare": "🔄 Compare",
     "feedback": "💬 Feedback",
@@ -7685,6 +7686,12 @@ def show_model_compare_page():
         except ImportError:
             st.warning("Dashboard module not found. Using default analytics page.")
             show_analytics_page()
+    elif st.session_state.current_page == "anomaly":
+        try:
+            from pages.anomaly_dashboard import render_anomaly_dashboard
+            render_anomaly_dashboard()
+        except ImportError as e:
+            st.warning(f"Anomaly dashboard module not available: {e}")
     elif st.session_state.current_page == "models":
         show_models_page()
     elif st.session_state.current_page == "model_compare":
