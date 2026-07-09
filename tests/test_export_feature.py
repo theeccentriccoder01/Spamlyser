@@ -56,6 +56,35 @@ class TestCsvExportSafety:
         assert "0.98" in csv_data
         assert "See you at 5pm" in csv_data
 
+    def test_newline_payload_neutralized(self):
+        """Multi-line payloads that hide formulas after a newline."""
+        result = _csv_safe_cell("innocent text\n=CMD('calc')")
+        assert "\n" not in result  # newline should be collapsed
+
+    def test_carriage_return_payload_neutralized(self):
+        result = _csv_safe_cell("normal\r\n=HYPERLINK('http://evil.com')")
+        assert "\r" not in result
+        assert "\n" not in result
+
+    def test_null_byte_stripped(self):
+        result = _csv_safe_cell("hello\x00=CMD('calc')")
+        assert "\x00" not in result
+
+    def test_tab_separated_injection(self):
+        """Tab character used to break into adjacent cells."""
+        result = _csv_safe_cell("\t=SUM(A1:A10)")
+        assert result.startswith("'")
+
+    def test_pipe_command_injection(self):
+        result = _csv_safe_cell("|cmd /c calc")
+        assert result.startswith("'")
+
+    def test_empty_string_unchanged(self):
+        assert _csv_safe_cell("") == ""
+
+    def test_none_value_unchanged(self):
+        assert _csv_safe_cell(None) is None
+
 
 class TestPdfSafe:
     def test_plain_ascii_unchanged(self):

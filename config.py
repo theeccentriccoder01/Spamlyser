@@ -74,6 +74,13 @@ WEBHOOK_RETRY_COUNT: int = int(os.getenv("SPAMLYSER_WEBHOOK_RETRY", "3"))
 ENCRYPT_REPORT_BY_DEFAULT: bool = (
     os.getenv("SPAMLYSER_ENCRYPT_REPORT", "false").lower() == "true"
 )
+
+# When True, all CSV exports run through the formula injection sanitizer
+# to prevent CWE-1236 attacks when users open exports in spreadsheet apps.
+CSV_EXPORT_SANITIZE_FORMULAS: bool = (
+    os.getenv("SPAMLYSER_CSV_SANITIZE_FORMULAS", "true").lower() == "true"
+)
+
 # ── Application ────────────────────────────────────────────────────────────
 APP_TITLE: str = os.getenv("SPAMLYSER_APP_TITLE", "Spamlyser Pro - Ensemble Edition")
 APP_ICON: str = os.getenv("SPAMLYSER_APP_ICON", "🛡️")
