@@ -1449,6 +1449,9 @@ def show_analyzer_page():
                         ):
                             st.session_state.batch_cancel = True
 
+                # Streaming visualizer container
+                stream_viz_container = st.empty()
+
                 # Process ONE message per script run (non-blocking)
                 if (
                     st.session_state.batch_processing
@@ -1519,6 +1522,33 @@ def show_analyzer_page():
                             "Avg Confidence",
                             f"{st.session_state.batch_confidence:.2%}",
                         )
+
+                    # Render streaming card for the just-processed message
+                    try:
+                        from models.stream_visualizer import StreamVisualizer
+                        viz = StreamVisualizer()
+                        result_card = {
+                            "label": result["ensemble_predictions"]["majority_voting"]["label"],
+                            "confidence": result["ensemble_predictions"]["majority_voting"]["confidence"],
+                            "method": "Ensemble",
+                            "threat": next(iter(result.get("risk_indicators", {}).keys()), "N/A"),
+                            "message": msg,
+                            "timestamp": datetime.now().isoformat(),
+                        }
+                        with stream_viz_container:
+                            st.markdown(f"""<div class="stream-card {'spam' if result_card['label'] == 'SPAM' else 'ham'}" style="animation:slideIn 0.3s ease-out;background:{'linear-gradient(135deg,#ff444410,#1a1a1a)' if result_card['label'] == 'SPAM' else 'linear-gradient(135deg,#44bb4410,#1a1a1a)'};border-left:4px solid {'#ff4444' if result_card['label'] == 'SPAM' else '#44bb44'};border-radius:8px;padding:8px 14px;margin:3px 0;display:flex;justify-content:space-between;align-items:center">
+                                <div style="flex:1">
+                                    <span style="color:{'#ff4444' if result_card['label'] == 'SPAM' else '#44bb44'};font-weight:700;font-size:0.85rem">{result_card['label']}</span>
+                                    <span style="color:#8b949e;font-size:0.7rem;margin-left:6px">{result_card['method']}</span>
+                                    <div style="color:#c9d1d9;font-size:0.75rem;margin-top:1px">{msg[:70]}</div>
+                                </div>
+                                <div style="text-align:right;min-width:100px">
+                                    <div style="font-size:0.85rem;font-weight:600;color:{'#ff4444' if result_card['label'] == 'SPAM' else '#44bb44'}">{result_card['confidence']:.1%}</div>
+                                    <div style="font-size:0.65rem;color:#8b949e">{result_card['threat']}</div>
+                                </div>
+                            </div>""", unsafe_allow_html=True)
+                    except ImportError:
+                        pass
 
                     # Continue with next message or finish
                     if st.session_state.batch_queue:
