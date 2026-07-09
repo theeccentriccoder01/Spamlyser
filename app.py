@@ -233,6 +233,7 @@ PAGES = {
     "about": "ℹ️ About",
     "features": "⚡ Features",
     "analytics": "📊 Analytics",
+    "trends": "📈 Trend Analytics",
     "dashboard": "📈 Dashboard",
     "models": "🤖 Models",
     "model_compare": "🔄 Compare",
@@ -7677,6 +7678,12 @@ def show_model_compare_page():
         show_features_page()
     elif st.session_state.current_page == "analytics":
         show_analytics_page()
+    elif st.session_state.current_page == "trends":
+        try:
+            from pages.trend_analytics import render_trend_analytics
+            render_trend_analytics()
+        except ImportError as e:
+            st.warning(f"Trend analytics module not available: {e}")
     elif st.session_state.current_page == "dashboard":
         try:
             from page_functions import render_dashboard
