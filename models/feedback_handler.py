@@ -14,13 +14,22 @@ can occur when:
 * the database file is rotated or deleted externally,
 * a previous write left the connection in an error state, or
 * the underlying OS closes the file descriptor without Python knowing.
+
+Retry policy
+------------
+Write operations are wrapped in a retry decorator that catches transient
+SQLite errors (database locked, busy, disk I/O) and retries up to 3 times
+with exponential backoff. This handles the race condition where multiple
+Streamlit sessions attempt concurrent writes.
 """
 
+import functools
 import json
 import logging
 import os
 import sqlite3
 import threading
+import time
 from datetime import datetime
 from typing import Any, Dict, List
 
@@ -28,6 +37,47 @@ import streamlit as st
 
 _local = threading.local()
 _logger = logging.getLogger(__name__)
+
+# Transient SQLite errors that are safe to retry
+_RETRYABLE_ERRORS = (
+    "database is locked",
+    "database disk image is malformed",
+    "disk I/O error",
+)
+
+
+def _retry_on_db_error(max_retries: int = 3, backoff_base: float = 0.1):
+    """Decorator that retries a function on transient SQLite failures.
+
+    Uses exponential backoff between retries to reduce contention when
+    multiple threads hit the database simultaneously.
+    """
+    def decorator(func):
+        @functools.wraps(func)
+        def wrapper(*args, **kwargs):
+            last_exc = None
+            for attempt in range(max_retries):
+                try:
+                    return func(*args, **kwargs)
+                except sqlite3.OperationalError as exc:
+                    error_msg = str(exc).lower()
+                    if any(err in error_msg for err in _RETRYABLE_ERRORS):
+                        last_exc = exc
+                        wait = backoff_base * (2 ** attempt)
+                        _logger.warning(
+                            "Retrying %s after SQLite error (attempt %d/%d): %s",
+                            func.__name__, attempt + 1, max_retries, exc,
+                        )
+                        time.sleep(wait)
+                    else:
+                        raise
+            _logger.error(
+                "All %d retries exhausted for %s: %s",
+                max_retries, func.__name__, last_exc,
+            )
+            raise last_exc
+        return wrapper
+    return decorator
 
 
 def _format_rating_stars(value: Any) -> str:
@@ -88,7 +138,12 @@ def _get_connection(db_path: str) -> sqlite3.Connection:
 
 
 class FeedbackHandler:
-    """Handles user feedback operations using SQLite for concurrent write safety."""
+    """Handles user feedback operations using SQLite for concurrent write safety.
+
+    The handler uses thread-local connections with health-check pings and
+    wraps all write operations in a retry decorator that handles transient
+    SQLite errors (database locked, busy, disk I/O).
+    """
 
     def __init__(self, feedback_file: str = ""):
         default = feedback_file or ""
@@ -106,6 +161,20 @@ class FeedbackHandler:
             json_path = FEEDBACK_JSON_PATH
             if os.path.exists(json_path):
                 self._migrate_from_json(json_path)
+
+    def __del__(self):
+        """Attempt to close the thread-local connection on garbage collection.
+
+        This prevents stale file descriptors from accumulating during
+        repeated Streamlit script reruns.
+        """
+        conn = getattr(_local, "conn", None)
+        if conn is not None:
+            try:
+                conn.close()
+            except Exception:
+                pass
+            _local.conn = None
 
     def _init_db(self) -> None:
         if self.db_path:

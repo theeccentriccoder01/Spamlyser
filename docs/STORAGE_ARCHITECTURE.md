@@ -23,6 +23,20 @@ The single point of truth for all JSON file I/O.  Key behaviours:
 
 Stores feedback as SQLite rows (WAL mode, 5-second busy timeout).
 
+**Connection pooling** — the `db_connection_pool.ConnectionPool` manages a
+bounded set of connections with automatic health checks and idle pruning.
+Configuration is via `config.py`:
+
+| Setting | Env Variable | Default | Description |
+|---------|-------------|---------|-------------|
+| `FEEDBACK_DB_MAX_CONNECTIONS` | `SPAMLYSER_FEEDBACK_DB_MAX_CONNS` | 5 | Max simultaneous connections |
+| `FEEDBACK_DB_IDLE_TIMEOUT` | `SPAMLYSER_FEEDBACK_DB_IDLE_TIMEOUT` | 300s | Idle connections pruned after this |
+
+**Retry policy** — write operations are wrapped in `_retry_on_db_error()`
+which catches transient SQLite errors (`database is locked`, `disk I/O error`)
+and retries up to 3 times with exponential backoff. This handles the race
+condition where multiple Streamlit sessions write simultaneously.
+
 **Connection health-check policy** — before every write the thread-local
 connection is pinged with `SELECT 1`.  If the ping fails (stale descriptor,
 deleted DB file, prior transaction error) the connection is silently closed and
