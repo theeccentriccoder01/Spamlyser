@@ -38,3 +38,9 @@ If there are user-facing changes then we may require documentation to be updated
 <!--
 If there are any breaking changes to public APIs, please add the `api change` label.
 -->
+
+## Checklist
+
+- [ ] I have tested my changes locally and confirmed they work as expected
+- [ ] I have added or updated tests where applicable
+- [ ] I understand that inactive PRs may be auto-closed after 21 days (see [Stale Issue Policy](../CONTRIBUTING.md#stale-issue-policy))

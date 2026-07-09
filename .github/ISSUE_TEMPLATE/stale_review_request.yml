@@ -1,0 +1,53 @@
+name: "\U0001F504 Stale Review Request"
+description: Request reopening of an automatically closed issue or PR
+title: "[Stale Review] "
+labels: ["status: stale review"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Use this template to request that a stale-closed issue or PR be
+        reviewed and potentially reopened. Please provide the original
+        issue/PR number and explain why it should remain open.
+
+  - type: input
+    id: original_reference
+    attributes:
+      label: Original Issue/PR Number
+      description: "The number of the issue or PR that was auto-closed (e.g., #42)"
+      placeholder: "#"
+    validations:
+      required: true
+
+  - type: dropdown
+    id: type
+    attributes:
+      label: Type
+      description: Was the original item an issue or a pull request?
+      options:
+        - Issue
+        - Pull Request
+    validations:
+      required: true
+
+  - type: textarea
+    id: justification
+    attributes:
+      label: Why should this be reopened?
+      description: >
+        Explain why the original issue/PR is still relevant. Include any new
+        information, reproduction steps, or context that was not available
+        when it was auto-closed.
+      placeholder: |
+        The bug still occurs on version X.Y.Z. I can reproduce it by...
+    validations:
+      required: true
+
+  - type: textarea
+    id: additional_context
+    attributes:
+      label: Additional Context
+      description: Any screenshots, logs, or related issues that support reopening.
+      placeholder: Paste relevant details here...
+    validations:
+      required: false

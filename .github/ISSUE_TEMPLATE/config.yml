@@ -1,1 +1,5 @@
 blank_issues_enabled: true
+contact_links:
+  - name: "\U0001F4CB Stale Issue Policy"
+    url: https://github.com/Spamlyser/Spamlyser/blob/master/CONTRIBUTING.md#stale-issue-policy
+    about: Learn about our automated stale issue/PR management policy before filing a stale review request.

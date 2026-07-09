@@ -129,3 +129,25 @@ pip install pip-audit bandit
 pip-audit -r requirements.txt
 bandit -r . --exclude ./tests,./docs -l -i
 ```
+
+## Stale Issue Policy
+
+To keep the issue tracker manageable, we use an automated stale bot that
+labels and eventually closes issues and PRs that have been inactive for
+an extended period.
+
+| Item | Marked stale after | Auto-closed after |
+|------|-------------------|-------------------|
+| Issues | 30 days of inactivity | 14 days after stale label |
+| Pull Requests | 21 days of inactivity | 14 days after stale label |
+
+### How to prevent auto-closure
+
+- **Leave a comment** on the issue or PR explaining that it is still relevant.
+  Any activity (comments, pushes, label changes) resets the timer.
+- **Add an exempt label** like `priority: critical` or `status: blocked` to
+  permanently exclude an item from the stale process.
+- **Request a stale review** using the dedicated issue template if your
+  issue was closed prematurely.
+
+Items with milestones assigned are also exempt from the stale process.

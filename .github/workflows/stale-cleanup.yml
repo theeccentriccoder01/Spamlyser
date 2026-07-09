@@ -1,0 +1,64 @@
+name: Stale Issues and PRs Cleanup
+
+on:
+  schedule:
+    # Run daily at 02:00 UTC to check for stale issues and PRs
+    - cron: '0 2 * * *'
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: 'Run in dry-run mode (no changes made)'
+        required: false
+        default: 'false'
+        type: boolean
+
+permissions:
+  issues: write
+  pull-requests: write
+
+jobs:
+  stale:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Mark and close stale issues and PRs
+        uses: actions/stale@v9
+        with:
+          # Issue configuration
+          days-before-issue-stale: 30
+          days-before-issue-close: 14
+          stale-issue-label: 'status: stale'
+          stale-issue-message: >
+            This issue has been automatically marked as stale because it has
+            not had any activity in the last 30 days. It will be closed in
+            14 days if no further activity occurs. If you believe this issue
+            is still relevant, please leave a comment or update the description
+            to prevent automatic closure.
+          close-issue-message: >
+            This issue has been automatically closed due to inactivity. If the
+            problem persists or you have new information to add, feel free to
+            reopen it or create a new issue using the stale review request
+            template.
+
+          # PR configuration
+          days-before-pr-stale: 21
+          days-before-pr-close: 14
+          stale-pr-label: 'status: stale'
+          stale-pr-message: >
+            This pull request has been automatically marked as stale because
+            it has not had any activity in the last 21 days. It will be closed
+            in 14 days if no further activity occurs. Please rebase and push
+            updates if this PR is still in progress.
+          close-pr-message: >
+            This pull request has been automatically closed due to inactivity.
+            If you would like to continue working on it, please reopen and
+            rebase against the latest master branch.
+
+          # Labels that exempt issues/PRs from the stale process
+          exempt-issue-labels: 'priority: critical,status: blocked,good first issue'
+          exempt-pr-labels: 'priority: critical,status: blocked,status: review needed'
+
+          # Do not process locked issues/PRs
+          exempt-all-milestones: true
+
+          # Limit operations per run to avoid hitting rate limits
+          operations-per-run: 50
