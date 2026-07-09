@@ -7357,7 +7357,7 @@ def main():
     """Main function to route between different pages"""
 
     # Display the top navigation bar
-    top_navigation_bar()
+    top_navigation_bar(navigate_to)
 
     # Define the feedback page function directly
     def show_feedback_page():
@@ -10606,9 +10606,33 @@ if analysis_mode == "Single Model" and st.session_state.classification_history:
         "#### 🕒 <span style='color: #00d4aa;'>Recent Single Model Classifications</span>",
         unsafe_allow_html=True,
     )
-    recent = st.session_state.classification_history[-5:]  # Show last 5
 
-    for item in reversed(recent):
+    col_s1, col_s2, col_s3, col_s4 = st.columns([3, 2, 2, 1])
+    with col_s1:
+        search_q = st.text_input("🔍 Search", "", key="single_search")
+    with col_s2:
+        filter_type = st.selectbox("🏷️ Filter", ["All", "SPAM", "HAM"], key="single_filter")
+    with col_s3:
+        sort_order = st.selectbox("↕️ Sort", ["Newest", "Oldest"], key="single_sort")
+    with col_s4:
+        st.write("") # spacer
+        st.write("") # spacer
+        if st.button("🗑️ Clear", key="single_clear", help="Clear History"):
+            st.session_state.classification_history.clear()
+            st.rerun()
+
+    filtered = st.session_state.classification_history
+    if search_q:
+        filtered = [h for h in filtered if search_q.lower() in str(h.get("message", "")).lower()]
+    if filter_type != "All":
+        filtered = [h for h in filtered if str(h.get("prediction", "")).upper() == filter_type.upper()]
+
+    if sort_order == "Newest":
+        display_history = list(reversed(filtered))
+    else:
+        display_history = filtered
+
+    for item in display_history[:50]:  # Show up to 50 items
         status_color = "#ff6b6b" if item["prediction"] == "SPAM" else "#4ecdc4"
         st.markdown(
             f"""
@@ -10643,9 +10667,33 @@ if analysis_mode == "Single Model" and st.session_state.classification_history:
 
 elif analysis_mode == "Ensemble Analysis" and st.session_state.ensemble_history:
     st.markdown("#### 🕒 Recent Ensemble Results")
-    recent = st.session_state.ensemble_history[-5:]  # Show last 5
 
-    for item in reversed(recent):
+    col_e1, col_e2, col_e3, col_e4 = st.columns([3, 2, 2, 1])
+    with col_e1:
+        search_q = st.text_input("🔍 Search", "", key="ens_search")
+    with col_e2:
+        filter_type = st.selectbox("🏷️ Filter", ["All", "SPAM", "HAM"], key="ens_filter")
+    with col_e3:
+        sort_order = st.selectbox("↕️ Sort", ["Newest", "Oldest"], key="ens_sort")
+    with col_e4:
+        st.write("") # spacer
+        st.write("") # spacer
+        if st.button("🗑️ Clear", key="ens_clear", help="Clear History"):
+            st.session_state.ensemble_history.clear()
+            st.rerun()
+
+    filtered = st.session_state.ensemble_history
+    if search_q:
+        filtered = [h for h in filtered if search_q.lower() in str(h.get("message", "")).lower()]
+    if filter_type != "All":
+        filtered = [h for h in filtered if str(h.get("prediction", "")).upper() == filter_type.upper()]
+
+    if sort_order == "Newest":
+        display_history = list(reversed(filtered))
+    else:
+        display_history = filtered
+
+    for item in display_history[:50]:  # Show up to 50 items
         status_color = "#ff6b6b" if item["prediction"] == "SPAM" else "#4ecdc4"
         st.markdown(
             f"""
