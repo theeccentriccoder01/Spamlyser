@@ -14,6 +14,7 @@ PAGES = {
     "contact": "📞 Contact",
     "docs": "📚 Docs",
     "api": "🔌 API",
+    "what_if": "🧪 What-If",
     "settings": "⚙️ Settings",
 }
 

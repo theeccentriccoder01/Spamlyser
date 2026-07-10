@@ -241,6 +241,7 @@ PAGES = {
     "contact": "📞 Contact",
     "docs": "📚 Docs",
     "api": "🔌 API",
+    "what_if": "🧪 What-If",
     "settings": "⚙️ Settings",
 }
 
@@ -7689,6 +7690,14 @@ def show_model_compare_page():
         show_models_page()
     elif st.session_state.current_page == "model_compare":
         show_model_compare_page()
+    elif st.session_state.current_page == "what_if":
+        try:
+            from models.what_if_analyzer import render_what_if_playground
+            from models.ensemble_classifier_method import EnsembleSpamClassifier, ModelPerformanceTracker
+            classifier = EnsembleSpamClassifier(ModelPerformanceTracker())
+            render_what_if_playground(classifier)
+        except ImportError as e:
+            st.warning(f"What-If module not available: {e}")
     elif st.session_state.current_page == "feedback":
         show_feedback_page()
     elif st.session_state.current_page == "help":
@@ -11018,6 +11027,11 @@ with col3:
             '<script>handleNavClick("nav_compare");</script>', unsafe_allow_html=True
         )
         navigate_to("model_compare")
+    if st.button("What-If", key="nav_whatif", use_container_width=True):
+        st.markdown(
+            '<script>handleNavClick("nav_whatif");</script>', unsafe_allow_html=True
+        )
+        navigate_to("what_if")
 
 with col4:
     if st.button("Feedback", key="nav_feedback", use_container_width=True):
