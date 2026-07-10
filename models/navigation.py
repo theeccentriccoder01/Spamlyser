@@ -8,6 +8,7 @@ PAGES = {
     "about": "ℹ️ About",
     "features": "⚡ Features",
     "analytics": "📊 Analytics",
+    "trends": "📈 Trend Analytics",
     "anomaly": "🔍 Anomaly Detection",
     "models": "🤖 Models",
     "feedback": "💬 Feedback",
