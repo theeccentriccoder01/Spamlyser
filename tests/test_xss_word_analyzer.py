@@ -1,5 +1,7 @@
 import pytest
+
 from models.word_analyzer import WordAnalyzer
+
 
 def test_word_analyzer_xss_prevention():
     analyzer = WordAnalyzer()

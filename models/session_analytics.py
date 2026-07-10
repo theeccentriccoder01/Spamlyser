@@ -1,8 +1,8 @@
 """Cross-session trend analytics — segments analysis history into sessions."""
 
-from typing import Any
 from collections import defaultdict
 from datetime import datetime, timedelta
+from typing import Any
 
 import numpy as np
 import pandas as pd

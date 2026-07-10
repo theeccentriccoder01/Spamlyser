@@ -1,6 +1,7 @@
 import os
-import sys
 import re
+import sys
+
 
 def run_sast_checks():
     print("==================================================")
@@ -14,7 +15,7 @@ def run_sast_checks():
     }
     
     issues_found = 0
-    for root, dirs, files in os.walk("."):
+    for root, _dirs, files in os.walk("."):
         if any(p in root for p in [".git", "tests", "docs", "venv", ".venv"]):
             continue
         for file in files:
@@ -22,13 +23,13 @@ def run_sast_checks():
                 continue
             filepath = os.path.join(root, file)
             try:
-                with open(filepath, "r", encoding="utf-8") as f:
+                with open(filepath, encoding="utf-8") as f:
                     content = f.read()
                 for pattern, desc in insecure_patterns.items():
                     if re.search(pattern, content):
                         print(f"⚠️ [WARNING] {filepath}: {desc}")
                         issues_found += 1
-            except Exception as e:
+            except Exception:
                 pass
 
     print("==================================================")

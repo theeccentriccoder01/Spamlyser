@@ -3,8 +3,8 @@
 import time
 from typing import Any
 
-import streamlit as st
 import pandas as pd
+import streamlit as st
 
 
 class WhatIfAnalyzer:
@@ -177,7 +177,7 @@ def render_what_if_playground(classifier) -> None:
     words = text.split()
     if words:
         impact_html = ""
-        for i, word in enumerate(words):
+        for _i, word in enumerate(words):
             intensity = abs(hash(word)) % 100 / 100
             is_spam_word = word.lower() in {"urgent", "click", "verify", "account", "password", "free", "win", "prize", "limited", "offer", "call", "now"}
             if is_spam_word:

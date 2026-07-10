@@ -2,9 +2,9 @@
 
 import numpy as np
 import pandas as pd
+from scipy.stats import zscore
 from sklearn.ensemble import IsolationForest
 from sklearn.feature_extraction.text import TfidfVectorizer
-from scipy.stats import zscore
 
 
 class AnomalyDetector:

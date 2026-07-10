@@ -1,11 +1,12 @@
 """Cross-session trend analytics dashboard — Gantt timeline + KPI comparison."""
 
-import streamlit as st
+from datetime import datetime
+
+import numpy as np
 import pandas as pd
 import plotly.express as px
-import numpy as np
 import plotly.graph_objects as go
-from datetime import datetime
+import streamlit as st
 
 
 def render_trend_analytics() -> None:
@@ -50,8 +51,7 @@ def render_trend_analytics() -> None:
 
     with tab1:
         fig = go.Figure()
-        colors = px.colors.qualitative.Set2
-        for i, s in enumerate(sessions):
+        for _i, s in enumerate(sessions):
             spam_pct = s["spam_rate"]
             bar_color = f"rgb({int(255 * spam_pct)}, {int(255 * (1 - spam_pct))}, 100)"
             fig.add_trace(go.Bar(

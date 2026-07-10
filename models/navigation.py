@@ -25,7 +25,7 @@ def top_navigation_bar(navigate_to):
     """Render a horizontal navigation bar at the top of the page."""
     current = st.session_state.get("current_page", "home")
     cols = st.columns(len(PAGES))
-    for col, (page_key, page_label) in zip(cols, PAGES.items()):
+    for col, (page_key, page_label) in zip(cols, PAGES.items(), strict=False):
         with col:
             is_active = page_key == current
             if is_active:
