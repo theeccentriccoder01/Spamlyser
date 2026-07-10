@@ -16,3 +16,7 @@ filterwarnings = [
 samples = 10
 warmup = 1
 runs = 5
+
+[tool.mypy]
+ignore_missing_imports = true
+explicit_package_bases = true
