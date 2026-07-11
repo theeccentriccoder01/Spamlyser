@@ -39,21 +39,44 @@ try:
 except ImportError:
     _FPDF_AVAILABLE = False
 
-_CSV_FORMULA_PREFIXES = ("=", "+", "-", "@", "\t", "\r")
+_CSV_FORMULA_PREFIXES = ("=", "+", "-", "@", "\t", "\r", "\n", "|")
 
 
 def _csv_safe_cell(value: Any) -> Any:
-    """Return *value* safe for spreadsheet CSV import."""
+    """Return *value* safe for spreadsheet CSV import.
+
+    Handles edge cases that the original implementation missed:
+    - Multi-line payloads where formula triggers appear after newlines
+    - Null byte injection that confuses some CSV parsers
+    - Tab-separated payloads that break cell boundaries
+    - Embedded formulas hidden after whitespace padding
+
+    See Also
+    --------
+    models.csv_sanitizer : Dedicated sanitization module for deeper analysis.
+    """
     if not isinstance(value, str):
         return value
-    stripped = value.lstrip()
+
+    # Collapse embedded newlines and carriage returns that can smuggle
+    # payloads across cell boundaries in some spreadsheet parsers
+    cleaned = value.replace("\r\n", " ").replace("\r", " ").replace("\n", " ")
+
+    # Strip null bytes — these confuse parsers and can hide payloads
+    cleaned = cleaned.replace("\x00", "")
+
+    stripped = cleaned.lstrip()
     if stripped.startswith(_CSV_FORMULA_PREFIXES):
-        return "'" + value
-    return value
+        return "'" + cleaned
+    return cleaned
 
 
 def dataframe_to_csv(df: pd.DataFrame) -> str:
-    """Serialise *df* to CSV after neutralising formula-like text cells."""
+    """Serialise *df* to CSV after neutralising formula-like text cells.
+
+    Every string column is run through ``_csv_safe_cell`` to prevent
+    CSV injection (CWE-1236). Non-string columns are left untouched.
+    """
     safe_df = df.copy()
     for column in safe_df.columns:
         if is_object_dtype(safe_df[column]) or is_string_dtype(safe_df[column]):

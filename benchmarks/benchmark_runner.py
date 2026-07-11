@@ -63,6 +63,7 @@ def latency_benchmark(
         samples = SAMPLE_MESSAGES
 
     import sys
+
     rows: list[dict[str, Any]] = []
 
     for name in model_names:
@@ -167,9 +168,7 @@ def run_full_benchmark(
         for model_name in results:
             reg = history.get_regression(model_name)
             if reg:
-                _logger.warning(
-                    "Regression detected for %s: %s", model_name, reg
-                )
+                _logger.warning("Regression detected for %s: %s", model_name, reg)
     return results
 
 
