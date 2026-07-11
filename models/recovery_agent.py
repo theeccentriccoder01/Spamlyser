@@ -1,5 +1,5 @@
-import sqlite3
 import shutil
+import sqlite3
 from pathlib import Path
 
 
@@ -30,4 +30,3 @@ def attempt_self_healing(primary_path: Path, backup_path: Path) -> bool:
         except OSError:
             pass
     return False
-
