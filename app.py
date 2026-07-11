@@ -244,6 +244,8 @@ PAGES = {
     "docs": "📚 Docs",
     "api": "🔌 API",
     "what_if": "🧪 What-If",
+    "senders": "👤 Senders",
+    "benchmarks": "⏱️ Benchmarks",
     "settings": "⚙️ Settings",
 }
 
@@ -7768,6 +7770,18 @@ def show_model_compare_page():
         show_docs_page()
     elif st.session_state.current_page == "api":
         show_api_page()
+    elif st.session_state.current_page == "senders":
+        try:
+            from pages.sender_analytics import render_sender_analytics
+            render_sender_analytics()
+        except ImportError as e:
+            st.warning(f"Sender analytics module not available: {e}")
+    elif st.session_state.current_page == "benchmarks":
+        try:
+            from pages.benchmark_dashboard import render_benchmark_dashboard
+            render_benchmark_dashboard()
+        except ImportError as e:
+            st.warning(f"Benchmark dashboard module not available: {e}")
     elif st.session_state.current_page == "settings":
         show_settings_page()
     else:
