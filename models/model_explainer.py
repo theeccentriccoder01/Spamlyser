@@ -109,7 +109,10 @@ class ModelExplainer:
         Returns:
             Dict with visualization data
         """
-        visualization = {"highlighted_text": {}, "feature_importance": {}}
+        visualization: dict[str, Any] = {
+            "highlighted_text": {},
+            "feature_importance": {},
+        }
 
         # Check if we have an explanation object or error
         if "error" in explanation_data:

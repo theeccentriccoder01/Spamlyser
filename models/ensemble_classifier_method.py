@@ -278,7 +278,7 @@ class EnsembleSpamClassifier:
                 # Incorporate per-model reliability score and recent accuracy
                 reliability = self.model_weights.get(model_name, 1.0)
                 accuracy = 1.0
-                if hasattr(self, 'performance_tracker') and self.performance_tracker:
+                if hasattr(self, "performance_tracker") and self.performance_tracker:
                     stats = self.performance_tracker.get_model_stats(model_name)
                     accuracy = stats.get("recent_accuracy", 1.0)
 

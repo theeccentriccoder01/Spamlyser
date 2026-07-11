@@ -77,7 +77,8 @@ class ConfidenceCalibrator:
         """Find the optimal temperature T using negative log likelihood minimization."""
         if not SCIPY_AVAILABLE:
             import warnings
-            warnings.warn("scipy not found, skipping temperature fitting")
+
+            warnings.warn("scipy not found, skipping temperature fitting", stacklevel=2)
             self.temperature = 1.0
             return self.temperature
 
@@ -105,7 +106,8 @@ class ConfidenceCalibrator:
         """Find Platt scaling parameters A and B using logistic regression."""
         if not SCIPY_AVAILABLE:
             import warnings
-            warnings.warn("scipy not found, skipping Platt scaling")
+
+            warnings.warn("scipy not found, skipping Platt scaling", stacklevel=2)
             self.platt_a = 1.0
             self.platt_b = 0.0
             return self.platt_a, self.platt_b

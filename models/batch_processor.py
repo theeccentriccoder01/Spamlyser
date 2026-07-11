@@ -48,7 +48,7 @@ class BatchProcessor:
             parsed = 1
         return min(max(parsed, 1), max_workers)
 
-    def process_message(self, message: str) -> dict[str, Any]:
+    def process_message(self, message: str, sender: str | None = None) -> dict[str, Any]:
         """
         Process a single message using all models.
 
@@ -129,8 +129,7 @@ class BatchProcessor:
                 for x in ["password", "account", "login", "ssn", "credit card"]
             ),
             "all_caps": any(
-                word.isupper() and len(word) > 2
-                for word in original_message.split()
+                word.isupper() and len(word) > 2 for word in original_message.split()
             ),
             "suspicious_chars": (
                 len([c for c in message if not c.isalnum() and not c.isspace()])

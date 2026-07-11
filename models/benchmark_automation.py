@@ -3,7 +3,7 @@
 import json
 import logging
 import time
-from dataclasses import dataclass, field, asdict
+from dataclasses import asdict, dataclass, field
 from datetime import datetime
 from pathlib import Path
 from typing import Any
@@ -33,7 +33,11 @@ class BenchmarkHistory:
 
     def __init__(self, path: str | Path | None = None):
         if path is None:
-            path = Path(__file__).resolve().parent.parent / "data" / "benchmark_history.json"
+            path = (
+                Path(__file__).resolve().parent.parent
+                / "data"
+                / "benchmark_history.json"
+            )
         self._path = Path(path)
         self._history: list[dict[str, Any]] = []
         self._load()
@@ -64,7 +68,9 @@ class BenchmarkHistory:
                 return entry
         return None
 
-    def get_regression(self, model_name: str, threshold_pct: float = 10.0) -> dict[str, Any] | None:
+    def get_regression(
+        self, model_name: str, threshold_pct: float = 10.0
+    ) -> dict[str, Any] | None:
         """Compare last two runs for *model_name*.
 
         Returns a dict keyed by metric name with ``previous``, ``current``,
