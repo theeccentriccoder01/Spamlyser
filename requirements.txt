@@ -25,7 +25,7 @@ pytest>=9.1.1,<10.0.0
 pytest-cov>=7.1.0,<8.0.0
 
 # UI
-fpdf2>=2.8.2,<3.0.0
+fpdf2>=2.8.7,<3.0.0
 
 # Report Encryption
 cryptography>=49.0.0
