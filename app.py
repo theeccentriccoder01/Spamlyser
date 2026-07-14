@@ -7748,12 +7748,8 @@ def show_model_compare_page():
         show_model_compare_page()
     elif st.session_state.current_page == "what_if":
         try:
-            from models.ensemble_classifier_method import (
-                EnsembleSpamClassifier,
-                ModelPerformanceTracker,
-            )
             from models.what_if_analyzer import render_what_if_playground
-
+            from models.ensemble_classifier_method import EnsembleSpamClassifier, ModelPerformanceTracker
             classifier = EnsembleSpamClassifier(ModelPerformanceTracker())
             render_what_if_playground(classifier)
         except ImportError as e:
