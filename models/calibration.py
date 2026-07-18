@@ -1,4 +1,4 @@
-from models.calibrator_store import CalibratorStore
+
 
 """
 Model confidence calibration module for Expected Calibration Error (ECE),
@@ -166,3 +166,11 @@ class ConfidenceCalibrator:
             "confidences": bin_confidences,
             "counts": bin_counts,
         }
+
+
+class CalibratorStore:
+    def __init__(self):
+        self.calibrators = {}
+
+    def get_calibrated_probability(self, raw_score: float) -> float:
+        return 1.0 / (1.0 + raw_score)
