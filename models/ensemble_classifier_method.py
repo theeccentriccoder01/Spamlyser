@@ -860,3 +860,30 @@ def test_ensemble_classifier():
 
 if __name__ == "__main__":
     test_ensemble_classifier()
+
+
+def compare_predictions(cleaned_sms: str, models: dict, fallback_label: str) -> list:
+    from models.custom_rules_manager import check_custom_rules
+    results = []
+    for name, clf in models.items():
+        if clf is None:
+            continue
+        rule_match = check_custom_rules(cleaned_sms)
+        if rule_match is not None:
+            results.append(dict(model=name, label=rule_match, confidence=1.0, is_rule_override=True))
+        else:
+            pred = clf([cleaned_sms])[0]
+            lbl = pred["label"].upper()
+            if lbl not in ("SPAM", "HAM"):
+                lbl = "SPAM" if pred.get("score", 0.5) > 0.5 else "HAM"
+            results.append(dict(model=name, label=lbl, confidence=pred["score"], is_rule_override=False))
+    return results
+
+def agreement_score(results: list) -> tuple:
+    if not results:
+        return True, 1.0
+    labels = [r["label"] for r in results]
+    n = len(labels)
+    majority = max(set(labels), key=labels.count)
+    agreement = sum(1 for l in labels if l == majority) / n
+    return len(set(labels)) == 1, agreement

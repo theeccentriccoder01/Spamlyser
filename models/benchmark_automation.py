@@ -1,3 +1,4 @@
+import models.drift_tracker
 """Automated model benchmarking — compare models, track regressions, persist results."""
 
 import json
