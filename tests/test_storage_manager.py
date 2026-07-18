@@ -231,10 +231,10 @@ def test_attempt_self_healing(tmp_path):
 
     primary = tmp_path / "primary.db"
     backup = tmp_path / "backup.db"
-    
+
     conn = sqlite3.connect(backup)
     conn.execute("CREATE TABLE t (id INT)")
     conn.close()
-    
+
     assert attempt_self_healing(primary, backup) is True
     assert primary.exists()
