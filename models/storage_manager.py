@@ -1,4 +1,4 @@
-from models.recovery_agent import attempt_self_healing
+
 
 """
 Safe file storage with atomic writes, automatic backups, and rotation.
@@ -284,3 +284,28 @@ class StorageManager:
 def default_json_validator(data: Any) -> bool:
     """Return ``True`` if *data* is a dict or list (a valid JSON container)."""
     return isinstance(data, (dict, list))
+
+
+def verify_db_integrity(db_path) -> bool:
+    import sqlite3
+    try:
+        conn = sqlite3.connect(str(db_path))
+        cursor = conn.cursor()
+        cursor.execute("PRAGMA integrity_check;")
+        result = cursor.fetchone()
+        conn.close()
+        return result and result[0] == "ok"
+    except Exception:
+        return False
+
+def attempt_self_healing(primary_path, backup_path) -> bool:
+    import shutil
+    if verify_db_integrity(primary_path):
+        return True
+    if backup_path.exists() and verify_db_integrity(backup_path):
+        try:
+            shutil.copy2(str(backup_path), str(primary_path))
+            return True
+        except OSError:
+            pass
+    return False
