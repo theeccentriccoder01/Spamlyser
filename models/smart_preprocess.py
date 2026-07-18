@@ -74,3 +74,17 @@ if __name__ == "__main__":
     msg = "Fr33 M0n3y!!! u r winner! Call 9876543210 now!"
     result = preprocess_message(msg)
     print(result)
+
+
+def normalize_label(raw_label, spam_probability: float | None = None) -> str:
+    label = str(raw_label).strip().upper()
+    if label in {"SPAM", "LABEL_1", "LABEL-1", "1"}:
+        return "SPAM"
+    if label in {"HAM", "LABEL_0", "LABEL-0", "0"}:
+        return "HAM"
+    if spam_probability is not None:
+        try:
+            return "SPAM" if float(spam_probability) >= 0.5 else "HAM"
+        except (TypeError, ValueError):
+            return "HAM"
+    return "HAM"

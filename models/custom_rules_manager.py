@@ -1,3 +1,4 @@
+import models.rules_simulator
 from models.rules_validator import validate_rule_structure
 
 """
