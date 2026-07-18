@@ -1,3 +1,4 @@
+import pages.theme_customizer
 """Theme manager for Spamlyser Pro — persistent dark/light mode with session state."""
 
 import json
