@@ -1,3 +1,4 @@
+import models.webhook_queue
 from models.recovery_agent import attempt_self_healing
 
 """
