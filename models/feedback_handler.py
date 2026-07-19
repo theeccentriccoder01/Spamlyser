@@ -1,4 +1,4 @@
-from models.recovery_agent import attempt_self_healing
+from models.storage_manager import attempt_self_healing
 
 """
 Feedback handler for Spamlyser Pro.
