@@ -187,3 +187,14 @@ def check_custom_rules(text: str) -> str | None:
             return "SPAM"
 
     return None
+
+
+def validate_rule_schema(rule: dict) -> bool:
+    """Validates threat rule dictionary properties."""
+    required_keys = {"id", "pattern", "risk_level"}
+    return all(k in rule for k in required_keys)
+
+
+def validate_rule_structure(rule: dict) -> bool:
+    """Validates threat rule structure - alias for schema validation."""
+    return validate_rule_schema(rule)
