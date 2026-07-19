@@ -2,7 +2,7 @@ import re
 
 from config import LANGUAGE_DETECTION_ENABLED
 from models.language_detector import detect_language
-from models.unicode_handler import clean_unicode_text
+
 
 from .text_sanitizer import safe_regex_findall, safe_regex_sub
 
@@ -74,3 +74,10 @@ if __name__ == "__main__":
     msg = "Fr33 M0n3y!!! u r winner! Call 9876543210 now!"
     result = preprocess_message(msg)
     print(result)
+
+
+def clean_unicode_text(text: str) -> str:
+    """Normalize Unicode characters and remove emojis/diacritics."""
+    import unicodedata
+    normalized = unicodedata.normalize("NFKD", text)
+    return "".join(c for c in normalized if not unicodedata.combining(c))
