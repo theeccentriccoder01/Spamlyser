@@ -1,4 +1,5 @@
 import models.webhook_queue
+import models.workspace_manager
 from models.recovery_agent import attempt_self_healing
 
 """
