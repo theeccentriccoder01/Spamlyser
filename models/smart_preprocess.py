@@ -81,3 +81,16 @@ def clean_unicode_text(text: str) -> str:
     import unicodedata
     normalized = unicodedata.normalize("NFKD", text)
     return "".join(c for c in normalized if not unicodedata.combining(c))
+
+def normalize_label(raw_label, spam_probability: float | None = None) -> str:
+    label = str(raw_label).strip().upper()
+    if label in {"SPAM", "LABEL_1", "LABEL-1", "1"}:
+        return "SPAM"
+    if label in {"HAM", "LABEL_0", "LABEL-0", "0"}:
+        return "HAM"
+    if spam_probability is not None:
+        try:
+            return "SPAM" if float(spam_probability) >= 0.5 else "HAM"
+        except (TypeError, ValueError):
+            return "HAM"
+    return "HAM"
