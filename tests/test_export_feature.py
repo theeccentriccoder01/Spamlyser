@@ -32,13 +32,13 @@ warnings.filterwarnings("ignore", category=DeprecationWarning)
 
 class TestCsvExportSafety:
     def test_formula_like_strings_are_prefixed(self):
-        assert _csv_safe_cell("=IMPORTXML(\"http://bad.example\")").startswith("'=")
+        assert _csv_safe_cell('=IMPORTXML("http://bad.example")').startswith("'=")
         assert _csv_safe_cell("+SUM(1,2)").startswith("'+")
         assert _csv_safe_cell("-10+20").startswith("'-")
         assert _csv_safe_cell("@cmd").startswith("'@")
 
     def test_leading_whitespace_before_formula_is_prefixed(self):
-        assert _csv_safe_cell("   =HYPERLINK(\"http://bad.example\")").startswith("'")
+        assert _csv_safe_cell('   =HYPERLINK("http://bad.example")').startswith("'")
 
     def test_normal_strings_and_numbers_are_unchanged(self):
         assert _csv_safe_cell("Free prize claim") == "Free prize claim"
@@ -213,6 +213,6 @@ class TestHistoryToJson:
 
 
 def test_export_encryptor():
-    from models.export_encryptor import encrypt_export_data
+    from models.export_feature import encrypt_export_data
 
     assert encrypt_export_data("test", "key") != "test"

@@ -45,6 +45,16 @@ FEEDBACK_DB_PATH: str = os.getenv(
     "SPAMLYSER_FEEDBACK_DB", str(DATA_DIR / "feedback.db")
 )
 
+# Connection pool settings for the feedback SQLite database.
+# These control how many concurrent connections are allowed and when
+# idle connections are pruned to prevent file descriptor leaks.
+FEEDBACK_DB_MAX_CONNECTIONS: int = int(
+    os.getenv("SPAMLYSER_FEEDBACK_DB_MAX_CONNS", "5")
+)
+FEEDBACK_DB_IDLE_TIMEOUT: float = float(
+    os.getenv("SPAMLYSER_FEEDBACK_DB_IDLE_TIMEOUT", "300")
+)
+
 FEEDBACK_JSON_PATH: str = os.getenv(
     "SPAMLYSER_FEEDBACK_JSON", str(DATA_DIR / "feedback_data.json")
 )
@@ -153,5 +163,9 @@ BENCHMARK_HISTORY_PATH: str = os.getenv(
 )
 
 # ── Error boundary / resilience ────────────────────────────────────────────
-ERROR_BOUNDARY_ENABLED: bool = os.getenv("SPAMLYSER_ERROR_BOUNDARY", "true").lower() == "true"
-ERROR_BOUNDARY_SHOW_DETAIL: bool = os.getenv("SPAMLYSER_ERROR_DETAIL", "false").lower() == "true"
+ERROR_BOUNDARY_ENABLED: bool = (
+    os.getenv("SPAMLYSER_ERROR_BOUNDARY", "true").lower() == "true"
+)
+ERROR_BOUNDARY_SHOW_DETAIL: bool = (
+    os.getenv("SPAMLYSER_ERROR_DETAIL", "false").lower() == "true"
+)

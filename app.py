@@ -1,3 +1,6 @@
+import models.workspace_manager
+import models.redos_guard
+import models.rules_simulator
 import html
 from datetime import datetime
 
@@ -51,7 +54,7 @@ except ImportError:
 # Import required model components with error handling
 try:
     from models.export_feature import export_results_button
-    from models.label_normalizer import normalize_label
+    from models.smart_preprocess import normalize_label
     from models.text_sanitizer import (
         safe_regex_findall,
         safe_regex_search,
@@ -233,7 +236,9 @@ PAGES = {
     "about": "ℹ️ About",
     "features": "⚡ Features",
     "analytics": "📊 Analytics",
+    "trends": "📈 Trend Analytics",
     "dashboard": "📈 Dashboard",
+    "anomaly": "🔍 Anomaly Detection",
     "models": "🤖 Models",
     "model_compare": "🔄 Compare",
     "feedback": "💬 Feedback",
@@ -241,6 +246,7 @@ PAGES = {
     "contact": "📞 Contact",
     "docs": "📚 Docs",
     "api": "🔌 API",
+    "what_if": "🧪 What-If",
     "settings": "⚙️ Settings",
 }
 
@@ -1449,6 +1455,9 @@ def show_analyzer_page():
                         ):
                             st.session_state.batch_cancel = True
 
+                # Streaming visualizer container
+                stream_viz_container = st.empty()
+
                 # Process ONE message per script run (non-blocking)
                 if (
                     st.session_state.batch_processing
@@ -1519,6 +1528,43 @@ def show_analyzer_page():
                             "Avg Confidence",
                             f"{st.session_state.batch_confidence:.2%}",
                         )
+
+                    # Render streaming card for the just-processed message
+                    try:
+                        from models.stream_visualizer import StreamVisualizer
+
+                        StreamVisualizer()
+                        result_card = {
+                            "label": result["ensemble_predictions"]["majority_voting"][
+                                "label"
+                            ],
+                            "confidence": result["ensemble_predictions"][
+                                "majority_voting"
+                            ]["confidence"],
+                            "method": "Ensemble",
+                            "threat": next(
+                                iter(result.get("risk_indicators", {}).keys()), "N/A"
+                            ),
+                            "message": msg,
+                            "timestamp": datetime.now().isoformat(),
+                        }
+                        with stream_viz_container:
+                            st.markdown(
+                                f"""<div class="stream-card {"spam" if result_card["label"] == "SPAM" else "ham"}" style="animation:slideIn 0.3s ease-out;background:{"linear-gradient(135deg,#ff444410,#1a1a1a)" if result_card["label"] == "SPAM" else "linear-gradient(135deg,#44bb4410,#1a1a1a)"};border-left:4px solid {"#ff4444" if result_card["label"] == "SPAM" else "#44bb44"};border-radius:8px;padding:8px 14px;margin:3px 0;display:flex;justify-content:space-between;align-items:center">
+                                <div style="flex:1">
+                                    <span style="color:{"#ff4444" if result_card["label"] == "SPAM" else "#44bb44"};font-weight:700;font-size:0.85rem">{result_card["label"]}</span>
+                                    <span style="color:#8b949e;font-size:0.7rem;margin-left:6px">{result_card["method"]}</span>
+                                    <div style="color:#c9d1d9;font-size:0.75rem;margin-top:1px">{msg[:70]}</div>
+                                </div>
+                                <div style="text-align:right;min-width:100px">
+                                    <div style="font-size:0.85rem;font-weight:600;color:{"#ff4444" if result_card["label"] == "SPAM" else "#44bb44"}">{result_card["confidence"]:.1%}</div>
+                                    <div style="font-size:0.65rem;color:#8b949e">{result_card["threat"]}</div>
+                                </div>
+                            </div>""",
+                                unsafe_allow_html=True,
+                            )
+                    except ImportError:
+                        pass
 
                     # Continue with next message or finish
                     if st.session_state.batch_queue:
@@ -7677,6 +7723,13 @@ def show_model_compare_page():
         show_features_page()
     elif st.session_state.current_page == "analytics":
         show_analytics_page()
+    elif st.session_state.current_page == "trends":
+        try:
+            from pages.trend_analytics import render_trend_analytics
+
+            render_trend_analytics()
+        except ImportError as e:
+            st.warning(f"Trend analytics module not available: {e}")
     elif st.session_state.current_page == "dashboard":
         try:
             from page_functions import render_dashboard
@@ -7685,10 +7738,29 @@ def show_model_compare_page():
         except ImportError:
             st.warning("Dashboard module not found. Using default analytics page.")
             show_analytics_page()
+    elif st.session_state.current_page == "anomaly":
+        try:
+            from pages.anomaly_dashboard import render_anomaly_dashboard
+
+            render_anomaly_dashboard()
+        except ImportError as e:
+            st.warning(f"Anomaly dashboard module not available: {e}")
     elif st.session_state.current_page == "models":
         show_models_page()
     elif st.session_state.current_page == "model_compare":
         show_model_compare_page()
+    elif st.session_state.current_page == "what_if":
+        try:
+            from models.ensemble_classifier_method import (
+                EnsembleSpamClassifier,
+                ModelPerformanceTracker,
+            )
+            from models.what_if_analyzer import render_what_if_playground
+
+            classifier = EnsembleSpamClassifier(ModelPerformanceTracker())
+            render_what_if_playground(classifier)
+        except ImportError as e:
+            st.warning(f"What-If module not available: {e}")
     elif st.session_state.current_page == "feedback":
         show_feedback_page()
     elif st.session_state.current_page == "help":
@@ -10606,9 +10678,41 @@ if analysis_mode == "Single Model" and st.session_state.classification_history:
         "#### 🕒 <span style='color: #00d4aa;'>Recent Single Model Classifications</span>",
         unsafe_allow_html=True,
     )
-    recent = st.session_state.classification_history[-5:]  # Show last 5
 
-    for item in reversed(recent):
+    col_s1, col_s2, col_s3, col_s4 = st.columns([3, 2, 2, 1])
+    with col_s1:
+        search_q = st.text_input("🔍 Search", "", key="single_search")
+    with col_s2:
+        filter_type = st.selectbox(
+            "🏷️ Filter", ["All", "SPAM", "HAM"], key="single_filter"
+        )
+    with col_s3:
+        sort_order = st.selectbox("↕️ Sort", ["Newest", "Oldest"], key="single_sort")
+    with col_s4:
+        st.write("")  # spacer
+        st.write("")  # spacer
+        if st.button("🗑️ Clear", key="single_clear", help="Clear History"):
+            st.session_state.classification_history.clear()
+            st.rerun()
+
+    filtered = st.session_state.classification_history
+    if search_q:
+        filtered = [
+            h for h in filtered if search_q.lower() in str(h.get("message", "")).lower()
+        ]
+    if filter_type != "All":
+        filtered = [
+            h
+            for h in filtered
+            if str(h.get("prediction", "")).upper() == filter_type.upper()
+        ]
+
+    if sort_order == "Newest":
+        display_history = list(reversed(filtered))
+    else:
+        display_history = filtered
+
+    for item in display_history[:50]:  # Show up to 50 items
         status_color = "#ff6b6b" if item["prediction"] == "SPAM" else "#4ecdc4"
         st.markdown(
             f"""
@@ -10643,9 +10747,39 @@ if analysis_mode == "Single Model" and st.session_state.classification_history:
 
 elif analysis_mode == "Ensemble Analysis" and st.session_state.ensemble_history:
     st.markdown("#### 🕒 Recent Ensemble Results")
-    recent = st.session_state.ensemble_history[-5:]  # Show last 5
 
-    for item in reversed(recent):
+    col_e1, col_e2, col_e3, col_e4 = st.columns([3, 2, 2, 1])
+    with col_e1:
+        search_q = st.text_input("🔍 Search", "", key="ens_search")
+    with col_e2:
+        filter_type = st.selectbox("🏷️ Filter", ["All", "SPAM", "HAM"], key="ens_filter")
+    with col_e3:
+        sort_order = st.selectbox("↕️ Sort", ["Newest", "Oldest"], key="ens_sort")
+    with col_e4:
+        st.write("")  # spacer
+        st.write("")  # spacer
+        if st.button("🗑️ Clear", key="ens_clear", help="Clear History"):
+            st.session_state.ensemble_history.clear()
+            st.rerun()
+
+    filtered = st.session_state.ensemble_history
+    if search_q:
+        filtered = [
+            h for h in filtered if search_q.lower() in str(h.get("message", "")).lower()
+        ]
+    if filter_type != "All":
+        filtered = [
+            h
+            for h in filtered
+            if str(h.get("prediction", "")).upper() == filter_type.upper()
+        ]
+
+    if sort_order == "Newest":
+        display_history = list(reversed(filtered))
+    else:
+        display_history = filtered
+
+    for item in display_history[:50]:  # Show up to 50 items
         status_color = "#ff6b6b" if item["prediction"] == "SPAM" else "#4ecdc4"
         st.markdown(
             f"""
@@ -10970,6 +11104,11 @@ with col3:
             '<script>handleNavClick("nav_compare");</script>', unsafe_allow_html=True
         )
         navigate_to("model_compare")
+    if st.button("What-If", key="nav_whatif", use_container_width=True):
+        st.markdown(
+            '<script>handleNavClick("nav_whatif");</script>', unsafe_allow_html=True
+        )
+        navigate_to("what_if")
 
 with col4:
     if st.button("Feedback", key="nav_feedback", use_container_width=True):

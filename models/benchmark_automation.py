@@ -1,9 +1,10 @@
+import models.drift_tracker
 """Automated model benchmarking — compare models, track regressions, persist results."""
 
 import json
 import logging
 import time
-from dataclasses import dataclass, field, asdict
+from dataclasses import asdict, dataclass, field
 from datetime import datetime
 from pathlib import Path
 from typing import Any
@@ -33,7 +34,11 @@ class BenchmarkHistory:
 
     def __init__(self, path: str | Path | None = None):
         if path is None:
-            path = Path(__file__).resolve().parent.parent / "data" / "benchmark_history.json"
+            path = (
+                Path(__file__).resolve().parent.parent
+                / "data"
+                / "benchmark_history.json"
+            )
         self._path = Path(path)
         self._history: list[dict[str, Any]] = []
         self._load()
@@ -64,7 +69,9 @@ class BenchmarkHistory:
                 return entry
         return None
 
-    def get_regression(self, model_name: str, threshold_pct: float = 10.0) -> dict[str, Any] | None:
+    def get_regression(
+        self, model_name: str, threshold_pct: float = 10.0
+    ) -> dict[str, Any] | None:
         """Compare last two runs for *model_name*.
 
         Returns a dict keyed by metric name with ``previous``, ``current``,
@@ -126,3 +133,28 @@ def run_automated_benchmark(
             history.record(result)
 
     return output
+
+
+class TelemetryLogger:
+    def __init__(self, log_path: str = "spamlyser_telemetry.json"):
+        from pathlib import Path
+        self.log_path = Path(log_path)
+
+    def log_inference(self, duration_ms: float, confidence: float, classification: str):
+        import time, json
+        log_entry = {
+            "timestamp": time.time(),
+            "duration_ms": duration_ms,
+            "confidence": confidence,
+            "classification": classification,
+        }
+        try:
+            data = []
+            if self.log_path.exists():
+                with open(self.log_path) as f:
+                    data = json.load(f)
+            data.append(log_entry)
+            with open(self.log_path, "w") as f:
+                json.dump(data[-100:], f, indent=2)
+        except Exception:
+            pass

