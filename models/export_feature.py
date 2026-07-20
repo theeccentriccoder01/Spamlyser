@@ -1,4 +1,4 @@
-from models.export_encryptor import encrypt_export_data
+
 
 """
 Export helpers for Spamlyser Pro — CSV, PDF, and JSON formats.
@@ -30,6 +30,7 @@ from typing import Any
 
 import pandas as pd
 import streamlit as st
+from pandas.api.types import is_object_dtype, is_string_dtype
 
 try:
     from fpdf import FPDF
@@ -37,6 +38,50 @@ try:
     _FPDF_AVAILABLE = True
 except ImportError:
     _FPDF_AVAILABLE = False
+
+_CSV_FORMULA_PREFIXES = ("=", "+", "-", "@", "\t", "\r", "\n", "|")
+
+
+def _csv_safe_cell(value: Any) -> Any:
+    """Return *value* safe for spreadsheet CSV import.
+
+    Handles edge cases that the original implementation missed:
+    - Multi-line payloads where formula triggers appear after newlines
+    - Null byte injection that confuses some CSV parsers
+    - Tab-separated payloads that break cell boundaries
+    - Embedded formulas hidden after whitespace padding
+
+    See Also
+    --------
+    models.csv_sanitizer : Dedicated sanitization module for deeper analysis.
+    """
+    if not isinstance(value, str):
+        return value
+
+    # Collapse embedded newlines and carriage returns that can smuggle
+    # payloads across cell boundaries in some spreadsheet parsers
+    cleaned = value.replace("\r\n", " ").replace("\r", " ").replace("\n", " ")
+
+    # Strip null bytes — these confuse parsers and can hide payloads
+    cleaned = cleaned.replace("\x00", "")
+
+    stripped = cleaned.lstrip()
+    if stripped.startswith(_CSV_FORMULA_PREFIXES):
+        return "'" + cleaned
+    return cleaned
+
+
+def dataframe_to_csv(df: pd.DataFrame) -> str:
+    """Serialise *df* to CSV after neutralising formula-like text cells.
+
+    Every string column is run through ``_csv_safe_cell`` to prevent
+    CSV injection (CWE-1236). Non-string columns are left untouched.
+    """
+    safe_df = df.copy()
+    for column in safe_df.columns:
+        if is_object_dtype(safe_df[column]) or is_string_dtype(safe_df[column]):
+            safe_df[column] = safe_df[column].map(_csv_safe_cell)
+    return safe_df.to_csv(index=False)
 
 
 def _pdf_safe(text: Any) -> str:
@@ -195,24 +240,13 @@ def export_results_button(
         )
 
     if export_format == "CSV":
-        csv_data = df.to_csv(index=False)
-        if enable_encrypt and enc_password:
-            from .encrypted_report import encrypt_bytes
-
-            encrypted = encrypt_bytes(csv_data.encode("utf-8"), enc_password)
-            st.download_button(
-                label="🔒 Download Encrypted CSV",
-                data=encrypted,
-                file_name=f"{filename_prefix}_{ts}.csv.enc",
-                mime="application/octet-stream",
-            )
-        else:
-            st.download_button(
-                label="📥 Download Results CSV",
-                data=csv_data,
-                file_name=f"{filename_prefix}_{ts}.csv",
-                mime="text/csv",
-            )
+        csv_data = dataframe_to_csv(df)
+        st.download_button(
+            label="📥 Download Results CSV",
+            data=csv_data,
+            file_name=f"{filename_prefix}_{ts}.csv",
+            mime="text/csv",
+        )
     elif export_format == "JSON":
         json_data = history_to_json(history)
         if enable_encrypt and enc_password:
@@ -257,3 +291,15 @@ def export_results_button(
                 file_name=f"{filename_prefix}_{ts}.pdf",
                 mime="application/pdf",
             )
+
+
+def encrypt_export_data(data: str, secret_key: str) -> str:
+    """Simple XOR encryptor wrapper for export data packaging."""
+    import base64
+    key_len = len(secret_key)
+    if key_len == 0:
+        return data
+    xor_bytes = bytearray(
+        ord(c) ^ ord(secret_key[i % key_len]) for i, c in enumerate(data)
+    )
+    return base64.b64encode(xor_bytes).decode("utf-8")

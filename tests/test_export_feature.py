@@ -17,12 +17,73 @@ try:
 except ImportError:
     _FPDF_INSTALLED = False
 
-from models.export_feature import _pdf_safe, history_to_json
+from models.export_feature import (
+    _csv_safe_cell,
+    _pdf_safe,
+    dataframe_to_csv,
+    history_to_json,
+)
 
 if _FPDF_INSTALLED:
     from models.export_feature import dataframe_to_pdf
 
 warnings.filterwarnings("ignore", category=DeprecationWarning)
+
+
+class TestCsvExportSafety:
+    def test_formula_like_strings_are_prefixed(self):
+        assert _csv_safe_cell('=IMPORTXML("http://bad.example")').startswith("'=")
+        assert _csv_safe_cell("+SUM(1,2)").startswith("'+")
+        assert _csv_safe_cell("-10+20").startswith("'-")
+        assert _csv_safe_cell("@cmd").startswith("'@")
+
+    def test_leading_whitespace_before_formula_is_prefixed(self):
+        assert _csv_safe_cell('   =HYPERLINK("http://bad.example")').startswith("'")
+
+    def test_normal_strings_and_numbers_are_unchanged(self):
+        assert _csv_safe_cell("Free prize claim") == "Free prize claim"
+        assert _csv_safe_cell(0.95) == 0.95
+
+    def test_dataframe_to_csv_neutralises_text_cells_only(self):
+        df = pd.DataFrame(
+            [
+                {"message": "=cmd|' /C calc'!A0", "confidence": 0.98},
+                {"message": "See you at 5pm", "confidence": 0.12},
+            ]
+        )
+        csv_data = dataframe_to_csv(df)
+        assert "'=cmd" in csv_data
+        assert "0.98" in csv_data
+        assert "See you at 5pm" in csv_data
+
+    def test_newline_payload_neutralized(self):
+        """Multi-line payloads that hide formulas after a newline."""
+        result = _csv_safe_cell("innocent text\n=CMD('calc')")
+        assert "\n" not in result  # newline should be collapsed
+
+    def test_carriage_return_payload_neutralized(self):
+        result = _csv_safe_cell("normal\r\n=HYPERLINK('http://evil.com')")
+        assert "\r" not in result
+        assert "\n" not in result
+
+    def test_null_byte_stripped(self):
+        result = _csv_safe_cell("hello\x00=CMD('calc')")
+        assert "\x00" not in result
+
+    def test_tab_separated_injection(self):
+        """Tab character used to break into adjacent cells."""
+        result = _csv_safe_cell("\t=SUM(A1:A10)")
+        assert result.startswith("'")
+
+    def test_pipe_command_injection(self):
+        result = _csv_safe_cell("|cmd /c calc")
+        assert result.startswith("'")
+
+    def test_empty_string_unchanged(self):
+        assert _csv_safe_cell("") == ""
+
+    def test_none_value_unchanged(self):
+        assert _csv_safe_cell(None) is None
 
 
 class TestPdfSafe:
@@ -152,6 +213,6 @@ class TestHistoryToJson:
 
 
 def test_export_encryptor():
-    from models.export_encryptor import encrypt_export_data
+    from models.export_feature import encrypt_export_data
 
     assert encrypt_export_data("test", "key") != "test"

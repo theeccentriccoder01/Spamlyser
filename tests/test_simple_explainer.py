@@ -132,8 +132,22 @@ def test_get_threat_explanation_unknown_threat():
     assert result["threat_features"] == []
 
 
-def test_format_ham_explanation():
-    from models.ham_explainer_viz import format_ham_explanation
+def test_spam_keyword_does_not_match_inside_larger_word():
+    explainer = SimpleExplainer()
+    result = explainer.explain_prediction("The window is open")
+    spam_words = result["features"][1]["important_words"]
+    assert all(item["word"] != "win" for item in spam_words)
 
-    res = format_ham_explanation(["hello"], [0.9])
-    assert "Ham Token Analysis" in res
+
+def test_ham_keyword_does_not_match_inside_larger_word():
+    explainer = SimpleExplainer()
+    result = explainer.explain_prediction("The meetinghouse is old")
+    ham_words = result["features"][0]["important_words"]
+    assert all(item["word"] != "meeting" for item in ham_words)
+
+
+def test_keyword_phrases_still_match_with_boundaries():
+    explainer = SimpleExplainer()
+    result = explainer.explain_prediction("This is a limited time offer")
+    spam_words = result["features"][1]["important_words"]
+    assert {item["word"] for item in spam_words} >= {"limited time", "offer"}

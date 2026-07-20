@@ -1,3 +1,4 @@
+import models.lang_routing
 """Boolean rule engine for smart filter expressions (AND / OR / NOT).
 
 Extends the basic allowlist/blocklist with compound conditions so users

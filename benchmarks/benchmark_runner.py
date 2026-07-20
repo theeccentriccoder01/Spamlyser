@@ -62,6 +62,8 @@ def latency_benchmark(
     if samples is None:
         samples = SAMPLE_MESSAGES
 
+    import sys
+
     rows: list[dict[str, Any]] = []
 
     for name in model_names:
@@ -69,6 +71,14 @@ def latency_benchmark(
         if clf is None:
             _logger.info("Skipping %s (not available)", name)
             continue
+
+        # Estimate model memory footprint dynamically
+        mem_bytes = sys.getsizeof(clf)
+        try:
+            if hasattr(clf, "model"):
+                mem_bytes += sys.getsizeof(clf.model)
+        except Exception:
+            pass
 
         for sample_idx, raw in enumerate(samples):
             cleaned = preprocess_message(raw)["cleaned"]
@@ -85,6 +95,7 @@ def latency_benchmark(
                         "run": run - warmup,
                         "sample_idx": sample_idx,
                         "latency_ms": round(elapsed, 2),
+                        "memory_bytes": mem_bytes,
                         "label": pred["label"],
                         "confidence": round(pred["score"], 4),
                     }
@@ -128,6 +139,36 @@ def run_all(output_csv: str | None = None) -> pd.DataFrame:
     if output_csv:
         results.to_csv(output_csv, index=False)
         _logger.info("Saved raw results to %s", output_csv)
+    return results
+
+
+def run_full_benchmark(
+    model_names: list[str] | None = None,
+    samples: list[str] | None = None,
+    warmup: int = 2,
+    runs: int = 10,
+    save_history: bool = True,
+) -> dict[str, Any]:
+    """Run a comprehensive benchmark and persist results for regression tracking.
+
+    Returns a dict keyed by model name with latency percentiles and
+    optional regression warnings.
+    """
+    from models.benchmark_automation import BenchmarkHistory, run_automated_benchmark
+
+    history = BenchmarkHistory() if save_history else None
+    results = run_automated_benchmark(
+        model_names=model_names,
+        samples=samples,
+        warmup=warmup,
+        runs=runs,
+        history=history,
+    )
+    if history and results:
+        for model_name in results:
+            reg = history.get_regression(model_name)
+            if reg:
+                _logger.warning("Regression detected for %s: %s", model_name, reg)
     return results
 
 
