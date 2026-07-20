@@ -45,6 +45,20 @@ def load_global_styles():
 # Callers must pass it explicitly to show_feedback_page(navigate_to=...).
 
 
+def ui_error_boundary(func):
+    """Decorator to isolate component rendering errors and present recovery UI."""
+
+    def wrapper(*args, **kwargs):
+        try:
+            return func(*args, **kwargs)
+        except Exception as e:
+            st.error(f"⚠️ A rendering error occurred in this component: {e!s}")
+            if st.button("🔄 Reload Page / Recover UI", key=f"recover_{func.__name__}"):
+                st.rerun()
+
+    return wrapper
+
+
 def show_feedback_page(navigate_to):
     """Feedback page for user comments, suggestions, and bug reports"""
     # Import the feedback handler

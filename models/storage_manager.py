@@ -1,3 +1,5 @@
+import models.webhook_queue
+import models.workspace_manager
 from models.recovery_agent import attempt_self_healing
 
 """
@@ -91,6 +93,7 @@ class StorageManager:
         if backup and path.exists():
             self._create_backup(path)
 
+        tmp_path = None
         try:
             with tempfile.NamedTemporaryFile(
                 mode="w",
@@ -102,11 +105,23 @@ class StorageManager:
                 json.dump(data, tmp, indent=2, ensure_ascii=False)
                 tmp_path = tmp.name
 
+            if validate is not None:
+                with open(tmp_path, encoding="utf-8") as tmp:
+                    decoded = json.load(tmp)
+                if not validate(decoded):
+                    return False
+
             shutil.move(tmp_path, str(path))
             self._prune_backups(path)
             return True
-        except (OSError, ValueError, TypeError):
+        except (json.JSONDecodeError, OSError, ValueError, TypeError):
             return False
+        finally:
+            if tmp_path and os.path.exists(tmp_path):
+                try:
+                    os.unlink(tmp_path)
+                except OSError:
+                    pass
 
     def load_json(
         self,
@@ -271,3 +286,28 @@ class StorageManager:
 def default_json_validator(data: Any) -> bool:
     """Return ``True`` if *data* is a dict or list (a valid JSON container)."""
     return isinstance(data, (dict, list))
+
+
+def verify_db_integrity(db_path) -> bool:
+    import sqlite3
+    try:
+        conn = sqlite3.connect(str(db_path))
+        cursor = conn.cursor()
+        cursor.execute("PRAGMA integrity_check;")
+        result = cursor.fetchone()
+        conn.close()
+        return result and result[0] == "ok"
+    except Exception:
+        return False
+
+def attempt_self_healing(primary_path, backup_path) -> bool:
+    import shutil
+    if verify_db_integrity(primary_path):
+        return True
+    if backup_path.exists() and verify_db_integrity(backup_path):
+        try:
+            shutil.copy2(str(backup_path), str(primary_path))
+            return True
+        except OSError:
+            pass
+    return False

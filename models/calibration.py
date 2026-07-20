@@ -1,4 +1,4 @@
-from models.calibrator_store import CalibratorStore
+
 
 """
 Model confidence calibration module for Expected Calibration Error (ECE),
@@ -76,7 +76,9 @@ class ConfidenceCalibrator:
     def fit_temperature(self, y_true: np.ndarray, y_prob: np.ndarray) -> float:
         """Find the optimal temperature T using negative log likelihood minimization."""
         if not SCIPY_AVAILABLE:
-            print("Warning: scipy is not installed. Returning default temperature.")
+            import warnings
+
+            warnings.warn("scipy not found, skipping temperature fitting", stacklevel=2)
             self.temperature = 1.0
             return self.temperature
 
@@ -103,10 +105,11 @@ class ConfidenceCalibrator:
     def fit_platt(self, y_true: np.ndarray, y_prob: np.ndarray) -> tuple[float, float]:
         """Find Platt scaling parameters A and B using logistic regression."""
         if not SCIPY_AVAILABLE:
-            print(
-                "Warning: scipy is not installed. Returning default Platt parameters."
-            )
-            self.platt_a, self.platt_b = 1.0, 0.0
+            import warnings
+
+            warnings.warn("scipy not found, skipping Platt scaling", stacklevel=2)
+            self.platt_a = 1.0
+            self.platt_b = 0.0
             return self.platt_a, self.platt_b
 
         y_true = np.array(y_true)
@@ -163,3 +166,11 @@ class ConfidenceCalibrator:
             "confidences": bin_confidences,
             "counts": bin_counts,
         }
+
+
+class CalibratorStore:
+    def __init__(self):
+        self.calibrators = {}
+
+    def get_calibrated_probability(self, raw_score: float) -> float:
+        return 1.0 / (1.0 + raw_score)

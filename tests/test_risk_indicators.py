@@ -67,6 +67,15 @@ def test_normal_clean_message_not_flagged():
     bp = _make_processor()
     indicators = bp._analyze_risk_indicators("hello how are you today")
     assert indicators["suspicious_chars"] is False
+    assert indicators["all_caps"] is False
+
+
+def test_uppercase_pressure_language_is_flagged():
+    """Uppercase tokens must be checked before lowercasing the message."""
+    bp = _make_processor()
+    indicators = bp._analyze_risk_indicators("URGENT verify your account now")
+    assert indicators["urgency"] is True
+    assert indicators["all_caps"] is True
 
 
 def test_process_message_with_empty_string_does_not_crash():

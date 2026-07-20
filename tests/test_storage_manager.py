@@ -121,6 +121,24 @@ def test_save_json_validator_aborts(tmp_path):
     assert not os.path.exists(target)
 
 
+def test_save_json_validates_serialized_payload(tmp_path):
+    target = str(tmp_path / "data.json")
+    mgr = StorageManager()
+
+    def validate_payload(data):
+        return isinstance(data.get("values"), tuple)
+
+    result = mgr.save_json(
+        target,
+        {"values": (1, 2, 3)},
+        validate=validate_payload,
+    )
+
+    assert result is False
+    assert not os.path.exists(target)
+    assert list(tmp_path.glob("*.tmp")) == []
+
+
 def test_backup_dir_default_is_dot_prefixed(tmp_path):
     from pathlib import Path
 
@@ -207,10 +225,16 @@ def test_load_json_safe_restores_primary_file_from_backup(tmp_path):
 
 
 def test_attempt_self_healing(tmp_path):
-    from models.recovery_agent import attempt_self_healing
+    import sqlite3
 
-    primary = tmp_path / "primary.json"
-    backup = tmp_path / "backup.json"
-    backup.write_text("ok")
+    from models.storage_manager import attempt_self_healing
+
+    primary = tmp_path / "primary.db"
+    backup = tmp_path / "backup.db"
+
+    conn = sqlite3.connect(backup)
+    conn.execute("CREATE TABLE t (id INT)")
+    conn.close()
+
     assert attempt_self_healing(primary, backup) is True
-    assert primary.read_text() == "ok"
+    assert primary.exists()

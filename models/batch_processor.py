@@ -1,4 +1,4 @@
-from models.rate_limiter import RateLimiter
+
 
 """
 Module for handling batch processing of SMS messages using ensemble models.
@@ -38,6 +38,15 @@ class BatchProcessor:
             "start_time": None,
             "end_time": None,
         }
+
+    @staticmethod
+    def _normalise_batch_size(batch_size: int, max_workers: int = 10) -> int:
+        """Return a safe ThreadPoolExecutor worker count."""
+        try:
+            parsed = int(batch_size)
+        except (TypeError, ValueError):
+            parsed = 1
+        return min(max(parsed, 1), max_workers)
 
     def process_message(
         self, message: str, sender: str | None = None
@@ -102,6 +111,7 @@ class BatchProcessor:
         Returns:
             Dict of risk indicators and their presence (True/False)
         """
+        original_message = message
         message = message.lower()
 
         # Common risk patterns
@@ -121,7 +131,7 @@ class BatchProcessor:
                 for x in ["password", "account", "login", "ssn", "credit card"]
             ),
             "all_caps": any(
-                word.isupper() and len(word) > 2 for word in message.split()
+                word.isupper() and len(word) > 2 for word in original_message.split()
             ),
             "suspicious_chars": (
                 len([c for c in message if not c.isalnum() and not c.isspace()])
@@ -166,7 +176,8 @@ class BatchProcessor:
             return results, self.batch_stats
 
         # Process messages in parallel batches
-        with ThreadPoolExecutor(max_workers=min(batch_size, 10)) as executor:
+        worker_count = self._normalise_batch_size(batch_size)
+        with ThreadPoolExecutor(max_workers=worker_count) as executor:
             future_to_message = {
                 executor.submit(self.process_message, msg): msg for msg in messages
             }
@@ -350,3 +361,19 @@ class BatchProcessor:
         df = pd.DataFrame(report_data)
 
         return df
+
+
+class RateLimiter:
+    def __init__(self, max_requests: int, window_seconds: float):
+        self.max_requests = max_requests
+        self.window_seconds = window_seconds
+        self.requests = []
+
+    def allow_request(self) -> bool:
+        import time
+        now = time.time()
+        self.requests = [r for r in self.requests if now - r < self.window_seconds]
+        if len(self.requests) < self.max_requests:
+            self.requests.append(now)
+            return True
+        return False

@@ -50,6 +50,28 @@ def test_empty_batch_does_not_crash():
     assert stats["messages_per_second"] == 0.0
 
 
+def test_zero_batch_size_uses_one_worker():
+    """Invalid UI/API batch sizes should not crash ThreadPoolExecutor."""
+    bp = _make_processor()
+    results, stats = bp.process_batch(["hello"], batch_size=0)
+    assert len(results) == 1
+    assert stats["processed_messages"] == 1
+
+
+def test_negative_batch_size_uses_one_worker():
+    """Negative batch sizes are clamped to one worker."""
+    bp = _make_processor()
+    results, stats = bp.process_batch(["hello"], batch_size=-5)
+    assert len(results) == 1
+    assert stats["processed_messages"] == 1
+
+
+def test_batch_size_is_capped_to_max_workers():
+    """Large batch sizes should stay within the worker cap."""
+    assert BatchProcessor._normalise_batch_size(500) == 10
+    assert BatchProcessor._normalise_batch_size("bad") == 1
+
+
 def test_instantaneous_batch_does_not_crash():
     """When elapsed time rounds to 0.0, the throughput guard prevents a crash."""
     bp = _make_processor()
@@ -77,7 +99,7 @@ def test_normal_batch_still_computes_throughput():
 
 
 def test_rate_limiter():
-    from models.rate_limiter import RateLimiter
+    from models.batch_processor import RateLimiter
 
     limiter = RateLimiter(2, 60)
     assert limiter.allow_request() is True

@@ -1,3 +1,4 @@
+import models.quantizer
 import time
 
 """
@@ -81,8 +82,7 @@ def verify_model_availability() -> tuple[bool, str, list]:
         test_model_name = VERIFICATION_MODEL_NAME
         cache_dir = MODEL_CACHE_DIR
         model_cached = cache_dir.exists() and any(
-            test_model_name in str(p.parent) and p.is_dir()
-            for p in cache_dir.rglob(f"*{test_model_name}*")
+            f"models--{test_model_name}" in p.name for p in cache_dir.rglob("*")
         )
 
         if not model_cached:
@@ -212,7 +212,7 @@ try:
 except Exception as e:
     MODEL_STATUS = False
     MODEL_ERROR_MESSAGE = (
-        f"❌ Critical error during model initialization: {e!s}\n"
+        f"[ERROR] Critical error during model initialization: {e!s}\n"
         "   Please check your Python environment and dependencies."
     )
     MODEL_WARNINGS = []

@@ -9,6 +9,25 @@ are available from the **Batch Processor** results panel via the
 The default format.  Every column visible in the results table is included.
 Timestamps are serialised as strings.
 
+### CSV Injection Prevention (CWE-1236)
+
+Spreadsheet applications interpret cell values starting with `=`, `+`, `-`,
+`@`, `|`, or tab/newline characters as executable formulas. A crafted SMS
+message could exploit this to execute arbitrary commands when a user opens
+the exported CSV in Excel or Google Sheets.
+
+Spamlyser applies a two-layer defense:
+
+1. **`_csv_safe_cell()`** in `export_feature.py` — prefixes formula-triggering
+   characters with a single-quote and collapses embedded newlines that could
+   smuggle payloads across cell boundaries.
+2. **`csv_sanitizer.py`** — a dedicated module that additionally checks for
+   dangerous function patterns (`=CMD()`, `=HYPERLINK()`, `=IMPORTXML()`)
+   and strips null bytes that confuse some parsers.
+
+The sanitization can be toggled via the `SPAMLYSER_CSV_SANITIZE_FORMULAS`
+environment variable (defaults to `true`).
+
 **Use when:** you want to open results in Excel, Google Sheets, or process them
 with pandas.
 
@@ -68,11 +87,18 @@ another tool, or archive the complete analysis output.
 
 | Symbol | Module | Purpose |
 |---|---|---|
+| `_csv_safe_cell(value)` | `models/export_feature.py` | neutralises spreadsheet formula prefixes |
+| `dataframe_to_csv(df)` | `models/export_feature.py` | safe CSV serialiser used by the download widget |
 | `_pdf_safe(text)` | `models/export_feature.py` | latin-1 safe encoding with `?` replacement |
 | `_build_pdf(df, title)` | `models/export_feature.py` | internal PDF renderer |
 | `dataframe_to_pdf(df, title)` | `models/export_feature.py` | public helper used by tests |
 | `history_to_json(history)` | `models/export_feature.py` | numpy-safe JSON serialiser |
 | `export_results_button(history)` | `models/export_feature.py` | Streamlit download widget |
+
+Batch exports can also include risk indicator columns produced by
+`BatchProcessor._analyze_risk_indicators`. See
+[`BATCH_RISK_INDICATORS.md`](BATCH_RISK_INDICATORS.md) for the current signal
+definitions and regression coverage.
 
 ## Running export tests
 
@@ -81,3 +107,9 @@ pytest tests/test_export_feature.py -v
 ```
 
 PDF tests are skipped automatically when fpdf2 is not installed.
+
+## Troubleshooting
+
+If exports are failing, ensure that:
+1. `fpdf2` is installed and updated to the latest version for PDF generation.
+2. The history data does not contain raw database connection handles or non-serialisable generator objects.
