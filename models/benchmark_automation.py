@@ -63,6 +63,10 @@ class BenchmarkHistory:
     def get_all(self) -> list[dict[str, Any]]:
         return list(self._history)
 
+    def clear(self):
+        self._history.clear()
+        self._save()
+
     def get_latest(self, model_name: str) -> dict[str, Any] | None:
         for entry in reversed(self._history):
             if entry.get("model_name") == model_name:
