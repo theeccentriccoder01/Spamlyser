@@ -1,3 +1,4 @@
+import models.report_generator
 """Cross-session trend analytics dashboard — Gantt timeline + KPI comparison."""
 
 from datetime import datetime

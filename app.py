@@ -1,3 +1,6 @@
+import models.workspace_manager
+import models.redos_guard
+import models.rules_simulator
 import html
 from datetime import datetime
 
@@ -51,7 +54,7 @@ except ImportError:
 # Import required model components with error handling
 try:
     from models.export_feature import export_results_button
-    from models.label_normalizer import normalize_label
+    from models.smart_preprocess import normalize_label
     from models.text_sanitizer import (
         safe_regex_findall,
         safe_regex_search,

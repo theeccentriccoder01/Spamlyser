@@ -1,3 +1,4 @@
+import models.report_generator
 """Encrypted multi-format report export for Spamlyser Pro.
 
 Provides AES-256-GCM encryption wrappers around CSV, JSON, and PDF export
