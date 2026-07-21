@@ -2,7 +2,7 @@
 # Install with: pip install -r requirements-dev.txt
 
 # Code quality
-ruff>=0.15.21,<1.0.0
+ruff>=0.15.22,<1.0.0
 pre-commit>=4.6.0,<5.0.0
 codespell>=2.4.2,<3.0.0
 
