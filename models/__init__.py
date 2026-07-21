@@ -15,7 +15,11 @@ except ImportError:
     pass
 
 from .batch_processor import BatchProcessor
-from .benchmark_automation import BenchmarkHistory, BenchmarkResult, run_automated_benchmark
+from .benchmark_automation import (
+    BenchmarkHistory,
+    BenchmarkResult,
+    run_automated_benchmark,
+)
 from .calibration import ConfidenceCalibrator
 from .custom_rules_manager import (
     check_custom_rules,
@@ -35,7 +39,7 @@ from .error_boundary import (
 from .export_feature import export_results_button
 from .language_detector import detect_language, is_language_supported
 from .message_categorizer import MessageCategorizer
-from .model_comparator import agreement_score, compare_predictions
+from .ensemble_classifier_method import agreement_score, compare_predictions
 from .rule_engine import (
     check_compound_rules,
     evaluate_compound_rule,
@@ -78,7 +82,6 @@ __all__ = [
     "classify_threat_type",
     "compare_predictions",
     "confidence_distribution",
-    "run_automated_benchmark",
     "default_json_validator",
     "detect_language",
     "error_boundary",
@@ -90,6 +93,7 @@ __all__ = [
     "latency_benchmark",
     "load_custom_rules",
     "run_all",
+    "run_automated_benchmark",
     "save_custom_rules",
     "summary",
     "validate_compound_rules",
