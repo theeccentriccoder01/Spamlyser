@@ -1,6 +1,5 @@
 
 
-
 """
 Safe file storage with atomic writes, automatic backups, and rotation.
 
