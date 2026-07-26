@@ -185,6 +185,7 @@ except ImportError:
 # Core Python imports
 import re
 import time
+from rate_limit import check_rate_limit, check_debounce
 from io import StringIO
 from typing import List
 
@@ -9402,6 +9403,16 @@ with col1:
 
 
 if analyse_btn and user_sms.strip():
+    if not check_debounce("analyse_sms", wait_seconds=2):
+        st.warning("⏳ Please wait a moment before analyzing again.")
+        st.stop()
+    if not check_rate_limit("analyse_sms", max_requests=5, window_seconds=60):
+        st.error("🚦 Rate limit exceeded. Please wait a minute before analyzing more messages.")
+        st.stop()
+    if len(user_sms) > 1000:
+        st.error("❌ Message exceeds the maximum limit of 1000 characters.")
+        st.stop()
+
     if analysis_mode == "Single Model":
         from models.smart_preprocess import preprocess_message
 
@@ -10242,6 +10253,19 @@ if uploaded_csv is not None:
                 analyze_batch = st.button("🔍 Analyze", type="primary")
 
             if analyze_batch:
+                if uploaded_csv.size > 5 * 1024 * 1024:
+                    st.error("❌ File size exceeds the 5MB limit.")
+                    st.stop()
+                if len(df) > 1000:
+                    st.error(f"❌ CSV contains {len(df)} rows, exceeding the limit of 1000 rows.")
+                    st.stop()
+                if not check_debounce("analyze_batch", wait_seconds=2):
+                    st.warning("⏳ Please wait a moment before analyzing again.")
+                    st.stop()
+                if not check_rate_limit("analyze_batch", max_requests=2, window_seconds=60):
+                    st.error("🚦 Rate limit exceeded. Please wait a minute before running another batch.")
+                    st.stop()
+
                 if not selected_models:
                     st.error("Please select at least one model for analysis")
                 else:
