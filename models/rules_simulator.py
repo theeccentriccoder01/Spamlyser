@@ -1,5 +1,6 @@
 import re
 
+
 class ThreatRulesSimulator:
     def __init__(self, rule_pattern: str):
         self.pattern = re.compile(rule_pattern, re.IGNORECASE)

@@ -1,5 +1,5 @@
-import streamlit as st
 import pandas as pd
+import streamlit as st
 
 st.set_page_config(page_title="Custom Rules Editor & Simulator", layout="wide")
 st.title("🛡️ Custom Regex Rules Editor & Sandbox")

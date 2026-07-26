@@ -1,4 +1,5 @@
 import models.drift_tracker
+
 """Automated model benchmarking — compare models, track regressions, persist results."""
 
 import json
@@ -145,7 +146,8 @@ class TelemetryLogger:
         self.log_path = Path(log_path)
 
     def log_inference(self, duration_ms: float, confidence: float, classification: str):
-        import time, json
+        import json
+        import time
         log_entry = {
             "timestamp": time.time(),
             "duration_ms": duration_ms,

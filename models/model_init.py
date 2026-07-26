@@ -1,5 +1,6 @@
-import models.quantizer
 import time
+
+import models.quantizer
 
 """
 Model initialization and verification module

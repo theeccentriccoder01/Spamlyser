@@ -1,4 +1,5 @@
 import models.webhook_queue
+
 """Webhook notification system for real-time SMS threat alerts.
 
 Sends HTTP POST notifications to configured webhook URLs whenever

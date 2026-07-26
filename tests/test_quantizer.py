@@ -1,5 +1,7 @@
 import torch
+
 from models.quantizer import quantize_model_dynamic
+
 
 def test_quantize_model_dynamic():
     class SimpleModel(torch.nn.Module):

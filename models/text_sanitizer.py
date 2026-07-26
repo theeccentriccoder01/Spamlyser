@@ -1,4 +1,3 @@
-import models.redos_guard
 import html
 import logging
 import re
@@ -6,6 +5,8 @@ import signal
 import threading
 from collections.abc import Callable
 from typing import Optional
+
+import models.redos_guard
 
 logger = logging.getLogger(__name__)
 

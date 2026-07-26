@@ -3,7 +3,6 @@ import re
 from config import LANGUAGE_DETECTION_ENABLED
 from models.language_detector import detect_language
 
-
 from .text_sanitizer import safe_regex_findall, safe_regex_sub
 
 ABBREVIATIONS = {

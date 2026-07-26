@@ -4,7 +4,7 @@ Redacts personally identifiable information (PII) like email addresses, phone nu
 """
 
 import re
-from typing import Tuple, Dict
+from typing import Dict, Tuple
 
 
 class DatasetSanitizer:
@@ -15,7 +15,7 @@ class DatasetSanitizer:
     SSN_REGEX = re.compile(r"\b\d{3}-\d{2}-\d{4}\b")
 
     @classmethod
-    def sanitize(cls, text: str) -> Tuple[str, Dict[str, int]]:
+    def sanitize(cls, text: str) -> tuple[str, dict[str, int]]:
         """Replaces PII patterns with standard placeholders [EMAIL], [PHONE], [SSN]."""
         counts = {"emails": 0, "phones": 0, "ssns": 0}
 

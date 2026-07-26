@@ -1,6 +1,3 @@
-import models.workspace_manager
-import models.redos_guard
-import models.rules_simulator
 import html
 from datetime import datetime
 
@@ -9,6 +6,10 @@ import pandas as pd
 import plotly.express as px
 import plotly.graph_objects as go
 import streamlit as st
+
+import models.redos_guard
+import models.rules_simulator
+import models.workspace_manager
 
 # --- Streamlit Page Configuration ---
 st.set_page_config(
@@ -188,11 +189,12 @@ except ImportError:
 # Core Python imports
 import re
 import time
-from rate_limit import check_rate_limit, check_debounce
 from io import StringIO
 from typing import List
 
 import torch
+
+from rate_limit import check_debounce, check_rate_limit
 
 torch.classes.__path__ = []
 from collections import defaultdict  # Added for easier analytics data aggregation
@@ -7647,6 +7649,7 @@ def show_model_compare_page():
         and sample.strip()
     ):
         from models.model_comparator import agreement_score, compare_predictions
+
         from models.smart_preprocess import preprocess_message
 
         preprocessed = preprocess_message(sample)

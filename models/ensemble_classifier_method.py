@@ -1,4 +1,3 @@
-import models.quantizer
 import json
 import logging
 from collections import defaultdict
@@ -7,6 +6,8 @@ from datetime import datetime
 from typing import Any, Dict, List
 
 import numpy as np
+
+import models.quantizer
 
 from .storage_manager import StorageManager
 

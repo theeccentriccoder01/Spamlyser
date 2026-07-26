@@ -4,12 +4,13 @@ Provides interactive visualizations of model performance benchmarks,
 historical trends, and regression detection.
 """
 
-import streamlit as st
+from datetime import datetime
+from pathlib import Path
+
 import pandas as pd
 import plotly.express as px
 import plotly.graph_objects as go
-from datetime import datetime
-from pathlib import Path
+import streamlit as st
 
 
 def render_benchmark_dashboard():

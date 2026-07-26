@@ -1,5 +1,6 @@
 import sqlite3
 
+
 class WebhookRetryQueue:
     def __init__(self, db_path=":memory:"):
         self.db_path = db_path

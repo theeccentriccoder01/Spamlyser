@@ -37,8 +37,8 @@ def test_record_and_get_all(temp_history):
 
 def test_get_latest(temp_history):
     bh = BenchmarkHistory(temp_history)
-    r1 = BenchmarkResult("ModelA", 10.0, 9.0, 15.0, 5)
-    r2 = BenchmarkResult("ModelB", 20.0, 18.0, 30.0, 5)
+    r1 = BenchmarkResult("ModelA", 10.0, 9.0, 15.0, samples_count=5)
+    r2 = BenchmarkResult("ModelB", 20.0, 18.0, 30.0, samples_count=5)
     bh.record(r1)
     bh.record(r2)
     latest = bh.get_latest("ModelA")
@@ -48,7 +48,7 @@ def test_get_latest(temp_history):
 
 def test_clear_history(temp_history):
     bh = BenchmarkHistory(temp_history)
-    result = BenchmarkResult("Test", 10.0, 9.0, 15.0, 5)
+    result = BenchmarkResult("Test", 10.0, 9.0, 15.0, samples_count=5)
     bh.record(result)
     assert len(bh.get_all()) == 1
     bh.clear()
@@ -56,7 +56,7 @@ def test_clear_history(temp_history):
 
 
 def test_benchmark_result_to_dict():
-    result = BenchmarkResult("Test", 10.5, 9.2, 18.0, 20)
+    result = BenchmarkResult("Test", 10.5, 9.2, 18.0, samples_count=20)
     d = result.to_dict()
     assert d["model_name"] == "Test"
     assert d["latency_mean_ms"] == 10.5
@@ -66,7 +66,7 @@ def test_benchmark_result_to_dict():
 
 def test_persistence_across_reload(temp_history):
     bh1 = BenchmarkHistory(temp_history)
-    bh1.record(BenchmarkResult("Persist", 5.0, 4.5, 8.0, 3))
+    bh1.record(BenchmarkResult("Persist", 5.0, 4.5, 8.0, samples_count=3))
     bh2 = BenchmarkHistory(temp_history)
     assert len(bh2.get_all()) == 1
     assert bh2.get_all()[0]["model_name"] == "Persist"
@@ -74,8 +74,8 @@ def test_persistence_across_reload(temp_history):
 
 def test_get_regression_detects_change(temp_history):
     bh = BenchmarkHistory(temp_history)
-    bh.record(BenchmarkResult("Model", 10.0, 9.0, 15.0, 5))
-    bh.record(BenchmarkResult("Model", 20.0, 18.0, 30.0, 5))
+    bh.record(BenchmarkResult("Model", 10.0, 9.0, 15.0, samples_count=5))
+    bh.record(BenchmarkResult("Model", 20.0, 18.0, 30.0, samples_count=5))
     reg = bh.get_regression("Model", threshold_pct=5.0)
     assert reg is not None
     assert "latency_mean_ms" in reg
@@ -84,6 +84,6 @@ def test_get_regression_detects_change(temp_history):
 
 def test_get_regression_insufficient_data(temp_history):
     bh = BenchmarkHistory(temp_history)
-    bh.record(BenchmarkResult("Model", 10.0, 9.0, 15.0, 5))
+    bh.record(BenchmarkResult("Model", 10.0, 9.0, 15.0, samples_count=5))
     reg = bh.get_regression("Model")
     assert reg is None
