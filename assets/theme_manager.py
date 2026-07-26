@@ -49,12 +49,28 @@ def set_theme(theme: Theme) -> None:
 
 
 def theme_css_variables() -> str:
-    """Return a ``<style>`` block with theme-aware CSS custom properties."""
+    """Return a ``<style>`` block with theme-aware CSS custom properties and presets."""
     theme = get_active_theme()
+    preset = st.session_state.get("theme_preset", "Default")
+    
+    # Custom Presets Map
+    presets = {
+        "Deep Space": {"accent": "#8b5cf6", "success": "#10b981", "warning": "#f59e0b", "error": "#ef4444"},
+        "Emerald Guard": {"accent": "#059669", "success": "#34d399", "warning": "#fbbf24", "error": "#f87171"},
+        "Amber Glow": {"accent": "#d97706", "success": "#10b981", "warning": "#fbbf24", "error": "#f87171"},
+        "Ocean Breeze": {"accent": "#0284c7", "success": "#0d9488", "warning": "#ea580c", "error": "#e11d48"},
+    }
+    
+    preset_vals = presets.get(preset, None)
+    
     if theme == "dark":
-        return """
+        accent = preset_vals["accent"] if preset_vals else "#00d4aa"
+        success = preset_vals["success"] if preset_vals else "#51cf66"
+        warning = preset_vals["warning"] if preset_vals else "#fcc419"
+        error = preset_vals["error"] if preset_vals else "#ff6b6b"
+        return f"""
 <style>
-:root {
+:root {{
   --bg-primary: #1a1a1a;
   --bg-secondary: #2d2d2d;
   --text-primary: #e0e0e0;
@@ -63,16 +79,21 @@ def theme_css_variables() -> str:
   --card-border: #404040;
   --input-bg: #333333;
   --input-border: #555555;
-  --focus-ring: #00d4aa;
-  --accent: #00d4aa;
-  --error: #ff6b6b;
-  --success: #51cf66;
-  --warning: #fcc419;
-}
+  --focus-ring: {accent};
+  --accent: {accent};
+  --error: {error};
+  --success: {success};
+  --warning: {warning};
+}}
 </style>"""
-    return """
+    
+    accent = preset_vals["accent"] if preset_vals else "#1e40af"
+    success = preset_vals["success"] if preset_vals else "#2f9e44"
+    warning = preset_vals["warning"] if preset_vals else "#e67700"
+    error = preset_vals["error"] if preset_vals else "#e03131"
+    return f"""
 <style>
-:root {
+:root {{
   --bg-primary: #ffffff;
   --bg-secondary: #f5f7fa;
   --text-primary: #333333;
@@ -81,12 +102,12 @@ def theme_css_variables() -> str:
   --card-border: #e0e0e0;
   --input-bg: #ffffff;
   --input-border: #cccccc;
-  --focus-ring: #1e40af;
-  --accent: #1e40af;
-  --error: #e03131;
-  --success: #2f9e44;
-  --warning: #e67700;
-}
+  --focus-ring: {accent};
+  --accent: {accent};
+  --error: {error};
+  --success: {success};
+  --warning: {warning};
+}}
 </style>"""
 
 
