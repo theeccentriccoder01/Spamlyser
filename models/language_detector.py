@@ -1,3 +1,4 @@
+import models.lang_routing
 """Lightweight language detection for SMS preprocessing.
 
 Uses Unicode script ranges and stop-word frequency heuristics instead of
@@ -54,6 +55,9 @@ LanguageCode = Literal[
     "lt",
     "lv",
     "et",
+    "ne",
+    "kn",
+    "ml",
     "unknown",
 ]
 
@@ -485,7 +489,7 @@ def _detect_script(text: str) -> str | None:
 
     if not counts:
         return None  # Latin or ASCII
-    return max(counts, key=counts.get)  # type: ignore[type-var]
+    return max(counts, key=counts.__getitem__)
 
 
 def _disambiguate_latin(text: str) -> LanguageCode:

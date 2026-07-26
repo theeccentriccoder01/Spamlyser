@@ -97,6 +97,6 @@ class TestCorrectLeetspeak:
 
 
 def test_unicode_handler():
-    from models.unicode_handler import clean_unicode_text
+    from models.smart_preprocess import clean_unicode_text
 
     assert clean_unicode_text("Café") == "Cafe"

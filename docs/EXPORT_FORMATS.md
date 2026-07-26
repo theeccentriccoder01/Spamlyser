@@ -8,8 +8,25 @@ are available from the **Batch Processor** results panel via the
 
 The default format.  Every column visible in the results table is included.
 Timestamps are serialised as strings.
-Formula-like text cells are prefixed with a single quote during export so
-spreadsheet tools import them as text instead of executable formulas.
+
+### CSV Injection Prevention (CWE-1236)
+
+Spreadsheet applications interpret cell values starting with `=`, `+`, `-`,
+`@`, `|`, or tab/newline characters as executable formulas. A crafted SMS
+message could exploit this to execute arbitrary commands when a user opens
+the exported CSV in Excel or Google Sheets.
+
+Spamlyser applies a two-layer defense:
+
+1. **`_csv_safe_cell()`** in `export_feature.py` — prefixes formula-triggering
+   characters with a single-quote and collapses embedded newlines that could
+   smuggle payloads across cell boundaries.
+2. **`csv_sanitizer.py`** — a dedicated module that additionally checks for
+   dangerous function patterns (`=CMD()`, `=HYPERLINK()`, `=IMPORTXML()`)
+   and strips null bytes that confuse some parsers.
+
+The sanitization can be toggled via the `SPAMLYSER_CSV_SANITIZE_FORMULAS`
+environment variable (defaults to `true`).
 
 **Use when:** you want to open results in Excel, Google Sheets, or process them
 with pandas.

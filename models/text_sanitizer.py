@@ -1,3 +1,4 @@
+import models.redos_guard
 import html
 import logging
 import re

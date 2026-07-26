@@ -1,4 +1,4 @@
-from models.rate_limiter import RateLimiter
+
 
 """
 Module for handling batch processing of SMS messages using ensemble models.
@@ -48,7 +48,9 @@ class BatchProcessor:
             parsed = 1
         return min(max(parsed, 1), max_workers)
 
-    def process_message(self, message: str) -> dict[str, Any]:
+    def process_message(
+        self, message: str, sender: str | None = None
+    ) -> dict[str, Any]:
         """
         Process a single message using all models.
 
@@ -129,8 +131,7 @@ class BatchProcessor:
                 for x in ["password", "account", "login", "ssn", "credit card"]
             ),
             "all_caps": any(
-                word.isupper() and len(word) > 2
-                for word in original_message.split()
+                word.isupper() and len(word) > 2 for word in original_message.split()
             ),
             "suspicious_chars": (
                 len([c for c in message if not c.isalnum() and not c.isspace()])
@@ -360,3 +361,19 @@ class BatchProcessor:
         df = pd.DataFrame(report_data)
 
         return df
+
+
+class RateLimiter:
+    def __init__(self, max_requests: int, window_seconds: float):
+        self.max_requests = max_requests
+        self.window_seconds = window_seconds
+        self.requests = []
+
+    def allow_request(self) -> bool:
+        import time
+        now = time.time()
+        self.requests = [r for r in self.requests if now - r < self.window_seconds]
+        if len(self.requests) < self.max_requests:
+            self.requests.append(now)
+            return True
+        return False

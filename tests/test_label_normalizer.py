@@ -10,7 +10,7 @@ helper that fixes both, and explicitly demonstrate the original crash.
 
 import pytest
 
-from models.label_normalizer import normalize_label
+from models.smart_preprocess import normalize_label
 
 
 def test_canonical_spam_ham_passthrough():

@@ -1,3 +1,4 @@
+import pages.theme_customizer
 """Accessibility helpers for Spamlyser Pro — ARIA labels, focus management,
 skip-to-content links, and contrast-safe color utilities.
 """

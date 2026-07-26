@@ -1,5 +1,5 @@
 [build-system]
-requires = ["setuptools>=64.0"]
+requires = ["setuptools>=83.0.0"]
 build-backend = "setuptools.backends._legacy:_Backend"
 
 [tool.pytest.ini_options]
@@ -16,3 +16,7 @@ filterwarnings = [
 samples = 10
 warmup = 1
 runs = 5
+
+[tool.mypy]
+ignore_missing_imports = true
+explicit_package_bases = true

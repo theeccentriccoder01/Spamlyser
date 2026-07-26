@@ -1,4 +1,4 @@
-from models.ham_explainer_viz import format_ham_explanation
+
 
 """
 Lightweight, dependency-free alternative to :class:`ModelExplainer`.
@@ -323,3 +323,11 @@ def _count_keyword_occurrences(keyword: str, text_lower: str) -> int:
     escaped = re.escape(keyword.lower())
     pattern = rf"(?<!\w){escaped}(?!\w)"
     return len(re.findall(pattern, text_lower))
+
+
+def format_ham_explanation(tokens: list[str], weights: list[float]) -> str:
+    """Formats hamminess tokens and weights into markdown explanation."""
+    lines = ["### Ham Token Analysis"]
+    for t, w in zip(tokens, weights, strict=False):
+        lines.append(f"- **{t}**: {w:.4f} (influence towards ham)")
+    return "\n".join(lines)

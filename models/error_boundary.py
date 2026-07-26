@@ -39,6 +39,7 @@ def error_boundary(page_func: F, fallback_message: str | None = None) -> F:
     On failure it logs the traceback and renders a user-friendly error panel
     instead of crashing the whole app.
     """
+
     @functools.wraps(page_func)
     def wrapper(*args, **kwargs):
         try:
@@ -57,13 +58,16 @@ def error_boundary(page_func: F, fallback_message: str | None = None) -> F:
                 recoverable=exc.recoverable,
             )
         except Exception as exc:
-            logger.error("Unhandled error in %s: %s", page_func.__name__, exc, exc_info=True)
+            logger.error(
+                "Unhandled error in %s: %s", page_func.__name__, exc, exc_info=True
+            )
             render_error_panel(
                 title="⚠️ Unexpected Error",
                 message=fallback_message or "Something went wrong. Please try again.",
                 detail=traceback.format_exc(),
                 recoverable=True,
             )
+
     return wrapper  # type: ignore[return-value]
 
 
@@ -76,7 +80,9 @@ def render_error_panel(
     """Display a styled error panel in the Streamlit UI."""
     st.markdown(f"### {title}")
     st.error(message)
-    if detail and st.checkbox("Show technical details", key=f"err_detail_{hash(title)}"):
+    if detail and st.checkbox(
+        "Show technical details", key=f"err_detail_{hash(title)}"
+    ):
         st.code(detail, language="traceback")
     if recoverable:
         st.button("🔄 Retry", on_click=st.rerun, type="primary")
