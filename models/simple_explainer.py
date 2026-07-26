@@ -1,5 +1,3 @@
-
-
 """
 Lightweight, dependency-free alternative to :class:`ModelExplainer`.
 

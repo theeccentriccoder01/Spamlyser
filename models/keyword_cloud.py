@@ -5,16 +5,42 @@ Extracts top indicative spam keywords and weighted frequencies from message sets
 
 import re
 from collections import Counter
-from typing import Dict, List, Tuple
+from typing import ClassVar, Dict, List, Tuple
 
 
 class KeywordCloudGenerator:
     """Extracts top word frequencies for generating spam keyword clouds."""
 
-    STOPWORDS = {
-        "a", "an", "and", "are", "as", "at", "be", "by", "for", "from",
-        "has", "he", "in", "is", "it", "its", "of", "on", "that", "the",
-        "to", "was", "were", "will", "with", "you", "your", "this", "or"
+    STOPWORDS: ClassVar[set[str]] = {
+        "a",
+        "an",
+        "and",
+        "are",
+        "as",
+        "at",
+        "be",
+        "by",
+        "for",
+        "from",
+        "has",
+        "he",
+        "in",
+        "is",
+        "it",
+        "its",
+        "of",
+        "on",
+        "that",
+        "the",
+        "to",
+        "was",
+        "were",
+        "will",
+        "with",
+        "you",
+        "your",
+        "this",
+        "or",
     }
 
     @classmethod

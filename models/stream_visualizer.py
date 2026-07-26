@@ -30,9 +30,9 @@ class StreamVisualizer:
         message = result.get("message", "")[:80]
         model = result.get("method", "Ensemble")
 
-        card_html = f"""<div class="stream-card { 'spam' if is_spam else 'ham' }" style="
+        card_html = f"""<div class="stream-card {"spam" if is_spam else "ham"}" style="
             animation: slideIn 0.3s ease-out;
-            background: {'linear-gradient(135deg, #ff444410, #1a1a1a)' if is_spam else 'linear-gradient(135deg, #44bb4410, #1a1a1a)'};
+            background: {"linear-gradient(135deg, #ff444410, #1a1a1a)" if is_spam else "linear-gradient(135deg, #44bb4410, #1a1a1a)"};
             border-left: 4px solid {color};
             border-radius: 8px; padding: 10px 16px; margin: 4px 0;
             display: flex; justify-content: space-between; align-items: center;">
@@ -49,7 +49,7 @@ class StreamVisualizer:
         </div>"""
 
         existing = self.card_container.markdown("", unsafe_allow_html=True)
-        combined = card_html + (existing if hasattr(self, '_card_html') else "")
+        combined = card_html + (existing if hasattr(self, "_card_html") else "")
         self.card_container.markdown(combined, unsafe_allow_html=True)
         self._card_html = combined
 
@@ -61,32 +61,56 @@ class StreamVisualizer:
         df = df.set_index("ts").last(f"{self.window_seconds}s").reset_index()
 
         fig = make_subplots(
-            rows=2, cols=1,
+            rows=2,
+            cols=1,
             shared_xaxes=True,
             vertical_spacing=0.06,
             subplot_titles=("Spam Probability (Rolling)", "Throughput"),
             row_heights=[0.6, 0.4],
         )
-        fig.add_trace(go.Scatter(
-            x=df["ts"], y=df.get("confidence", [0.5]*len(df)),
-            mode="lines+markers", name="Confidence",
-            line=dict(color="#00d4aa", width=2),
-            marker=dict(size=5, color=df.get("label", ["HAM"]*len(df)).map(
-                lambda l: "#ff4444" if l == "SPAM" else "#44bb44"
-            )),
-        ), row=1, col=1)
-        fig.add_hline(y=0.5, line_dash="dash", line_color="white", opacity=0.3, row=1, col=1)
+        fig.add_trace(
+            go.Scatter(
+                x=df["ts"],
+                y=df.get("confidence", [0.5] * len(df)),
+                mode="lines+markers",
+                name="Confidence",
+                line=dict(color="#00d4aa", width=2),
+                marker=dict(
+                    size=5,
+                    color=df.get("label", ["HAM"] * len(df)).map(
+                        lambda l: "#ff4444" if l == "SPAM" else "#44bb44"
+                    ),
+                ),
+            ),
+            row=1,
+            col=1,
+        )
+        fig.add_hline(
+            y=0.5, line_dash="dash", line_color="white", opacity=0.3, row=1, col=1
+        )
 
-        throughput = df.resample("5s", on="ts").size().reset_index() if len(df) > 1 else df[["ts"]]
+        throughput = (
+            df.resample("5s", on="ts").size().reset_index()
+            if len(df) > 1
+            else df[["ts"]]
+        )
         if len(throughput) > 1:
-            fig.add_trace(go.Bar(
-                x=throughput["ts"], y=throughput.iloc[:,1] if throughput.shape[1] > 1 else [],
-                name="Msg/5s", marker_color="#00d4aa80",
-            ), row=2, col=1)
+            fig.add_trace(
+                go.Bar(
+                    x=throughput["ts"],
+                    y=throughput.iloc[:, 1] if throughput.shape[1] > 1 else [],
+                    name="Msg/5s",
+                    marker_color="#00d4aa80",
+                ),
+                row=2,
+                col=1,
+            )
 
         fig.update_layout(
-            height=300, margin=dict(l=20, r=20, t=30, b=10),
-            paper_bgcolor="rgba(0,0,0,0)", plot_bgcolor="rgba(0,0,0,0)",
+            height=300,
+            margin=dict(l=20, r=20, t=30, b=10),
+            paper_bgcolor="rgba(0,0,0,0)",
+            plot_bgcolor="rgba(0,0,0,0)",
             font=dict(color="#c9d1d9", size=10),
             hovermode="x unified",
             showlegend=False,

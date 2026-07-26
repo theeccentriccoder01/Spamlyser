@@ -1,5 +1,3 @@
-
-
 """
 Module for handling batch processing of SMS messages using ensemble models.
 """
@@ -371,6 +369,7 @@ class RateLimiter:
 
     def allow_request(self) -> bool:
         import time
+
         now = time.time()
         self.requests = [r for r in self.requests if now - r < self.window_seconds]
         if len(self.requests) < self.max_requests:

@@ -4,7 +4,9 @@ import streamlit as st
 
 st.set_page_config(page_title="What-If Scenario Simulator", layout="wide")
 st.title("🎛️ What-If Analysis Scenario Simulator")
-st.markdown("Interactively tweak message features to see how the classifier decision boundary shifts in real-time.")
+st.markdown(
+    "Interactively tweak message features to see how the classifier decision boundary shifts in real-time."
+)
 
 col1, col2 = st.columns([1, 2])
 
@@ -21,10 +23,10 @@ with col2:
     st.subheader("Decision Boundary Visualization")
     st.info("Simulation Result: **HAM (Not Spam)**")
     st.progress(0.25, text="Spam Probability: 25%")
-    
+
     # Mock chart
     chart_data = pd.DataFrame(
         np.random.randn(20, 3) * [0.5, 0.5, 0.5] + [0.25, 0.3, 0.4],
-        columns=['Urgency', 'URL Score', 'Risk']
+        columns=["Urgency", "URL Score", "Risk"],
     )
     st.area_chart(chart_data)

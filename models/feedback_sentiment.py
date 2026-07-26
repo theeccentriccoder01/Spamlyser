@@ -28,7 +28,9 @@ class FeedbackSentimentAnalyzer:
         }
 
     @staticmethod
-    def group_by_model(feedback_entries: list[dict[str, Any]]) -> dict[str, dict[str, Any]]:
+    def group_by_model(
+        feedback_entries: list[dict[str, Any]],
+    ) -> dict[str, dict[str, Any]]:
         """Groups feedback ratings by individual classifier model."""
         grouped: dict[str, list[int]] = {}
         for entry in feedback_entries:

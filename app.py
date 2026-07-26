@@ -1537,27 +1537,37 @@ def show_analyzer_page():
                     # Render streaming card for the just-processed message
                     try:
                         from models.stream_visualizer import StreamVisualizer
-                        viz = StreamVisualizer()
+
+                        StreamVisualizer()
                         result_card = {
-                            "label": result["ensemble_predictions"]["majority_voting"]["label"],
-                            "confidence": result["ensemble_predictions"]["majority_voting"]["confidence"],
+                            "label": result["ensemble_predictions"]["majority_voting"][
+                                "label"
+                            ],
+                            "confidence": result["ensemble_predictions"][
+                                "majority_voting"
+                            ]["confidence"],
                             "method": "Ensemble",
-                            "threat": next(iter(result.get("risk_indicators", {}).keys()), "N/A"),
+                            "threat": next(
+                                iter(result.get("risk_indicators", {}).keys()), "N/A"
+                            ),
                             "message": msg,
                             "timestamp": datetime.now().isoformat(),
                         }
                         with stream_viz_container:
-                            st.markdown(f"""<div class="stream-card {'spam' if result_card['label'] == 'SPAM' else 'ham'}" style="animation:slideIn 0.3s ease-out;background:{'linear-gradient(135deg,#ff444410,#1a1a1a)' if result_card['label'] == 'SPAM' else 'linear-gradient(135deg,#44bb4410,#1a1a1a)'};border-left:4px solid {'#ff4444' if result_card['label'] == 'SPAM' else '#44bb44'};border-radius:8px;padding:8px 14px;margin:3px 0;display:flex;justify-content:space-between;align-items:center">
+                            st.markdown(
+                                f"""<div class="stream-card {"spam" if result_card["label"] == "SPAM" else "ham"}" style="animation:slideIn 0.3s ease-out;background:{"linear-gradient(135deg,#ff444410,#1a1a1a)" if result_card["label"] == "SPAM" else "linear-gradient(135deg,#44bb4410,#1a1a1a)"};border-left:4px solid {"#ff4444" if result_card["label"] == "SPAM" else "#44bb44"};border-radius:8px;padding:8px 14px;margin:3px 0;display:flex;justify-content:space-between;align-items:center">
                                 <div style="flex:1">
-                                    <span style="color:{'#ff4444' if result_card['label'] == 'SPAM' else '#44bb44'};font-weight:700;font-size:0.85rem">{result_card['label']}</span>
-                                    <span style="color:#8b949e;font-size:0.7rem;margin-left:6px">{result_card['method']}</span>
+                                    <span style="color:{"#ff4444" if result_card["label"] == "SPAM" else "#44bb44"};font-weight:700;font-size:0.85rem">{result_card["label"]}</span>
+                                    <span style="color:#8b949e;font-size:0.7rem;margin-left:6px">{result_card["method"]}</span>
                                     <div style="color:#c9d1d9;font-size:0.75rem;margin-top:1px">{msg[:70]}</div>
                                 </div>
                                 <div style="text-align:right;min-width:100px">
-                                    <div style="font-size:0.85rem;font-weight:600;color:{'#ff4444' if result_card['label'] == 'SPAM' else '#44bb44'}">{result_card['confidence']:.1%}</div>
-                                    <div style="font-size:0.65rem;color:#8b949e">{result_card['threat']}</div>
+                                    <div style="font-size:0.85rem;font-weight:600;color:{"#ff4444" if result_card["label"] == "SPAM" else "#44bb44"}">{result_card["confidence"]:.1%}</div>
+                                    <div style="font-size:0.65rem;color:#8b949e">{result_card["threat"]}</div>
                                 </div>
-                            </div>""", unsafe_allow_html=True)
+                            </div>""",
+                                unsafe_allow_html=True,
+                            )
                     except ImportError:
                         pass
 
@@ -6825,8 +6835,20 @@ def show_settings_page():
             st.session_state.theme_preset = "Default"
         theme_preset = st.selectbox(
             "Choose theme preset:",
-            options=["Default", "Deep Space", "Emerald Guard", "Amber Glow", "Ocean Breeze"],
-            index=["Default", "Deep Space", "Emerald Guard", "Amber Glow", "Ocean Breeze"].index(st.session_state.theme_preset),
+            options=[
+                "Default",
+                "Deep Space",
+                "Emerald Guard",
+                "Amber Glow",
+                "Ocean Breeze",
+            ],
+            index=[
+                "Default",
+                "Deep Space",
+                "Emerald Guard",
+                "Amber Glow",
+                "Ocean Breeze",
+            ].index(st.session_state.theme_preset),
             help="Select an accent color preset for your theme",
         )
         st.session_state.theme_preset = theme_preset
@@ -7780,12 +7802,14 @@ def show_model_compare_page():
     elif st.session_state.current_page == "senders":
         try:
             from pages.sender_analytics import render_sender_analytics
+
             render_sender_analytics()
         except ImportError as e:
             st.warning(f"Sender analytics module not available: {e}")
     elif st.session_state.current_page == "benchmarks":
         try:
             from pages.benchmark_dashboard import render_benchmark_dashboard
+
             render_benchmark_dashboard()
         except ImportError as e:
             st.warning(f"Benchmark dashboard module not available: {e}")
@@ -9496,7 +9520,9 @@ if analyse_btn and user_sms.strip():
         st.warning("⏳ Please wait a moment before analyzing again.")
         st.stop()
     if not check_rate_limit("analyse_sms", max_requests=5, window_seconds=60):
-        st.error("🚦 Rate limit exceeded. Please wait a minute before analyzing more messages.")
+        st.error(
+            "🚦 Rate limit exceeded. Please wait a minute before analyzing more messages."
+        )
         st.stop()
     if len(user_sms) > 1000:
         st.error("❌ Message exceeds the maximum limit of 1000 characters.")
@@ -10346,13 +10372,19 @@ if uploaded_csv is not None:
                     st.error("❌ File size exceeds the 5MB limit.")
                     st.stop()
                 if len(df) > 1000:
-                    st.error(f"❌ CSV contains {len(df)} rows, exceeding the limit of 1000 rows.")
+                    st.error(
+                        f"❌ CSV contains {len(df)} rows, exceeding the limit of 1000 rows."
+                    )
                     st.stop()
                 if not check_debounce("analyze_batch", wait_seconds=2):
                     st.warning("⏳ Please wait a moment before analyzing again.")
                     st.stop()
-                if not check_rate_limit("analyze_batch", max_requests=2, window_seconds=60):
-                    st.error("🚦 Rate limit exceeded. Please wait a minute before running another batch.")
+                if not check_rate_limit(
+                    "analyze_batch", max_requests=2, window_seconds=60
+                ):
+                    st.error(
+                        "🚦 Rate limit exceeded. Please wait a minute before running another batch."
+                    )
                     st.stop()
 
                 if not selected_models:

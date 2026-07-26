@@ -143,11 +143,13 @@ def run_automated_benchmark(
 class TelemetryLogger:
     def __init__(self, log_path: str = "spamlyser_telemetry.json"):
         from pathlib import Path
+
         self.log_path = Path(log_path)
 
     def log_inference(self, duration_ms: float, confidence: float, classification: str):
         import json
         import time
+
         log_entry = {
             "timestamp": time.time(),
             "duration_ms": duration_ms,

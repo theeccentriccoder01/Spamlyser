@@ -7,7 +7,7 @@ st.markdown("Customize your workspace appearance and enable accessibility preset
 st.subheader("Theme Presets")
 theme = st.select_slider(
     "Select Global Theme",
-    options=["Light", "Dark", "High Contrast (Vision Impaired)", "Color-Blind Safe"]
+    options=["Light", "Dark", "High Contrast (Vision Impaired)", "Color-Blind Safe"],
 )
 
 st.subheader("Accessibility Controls")

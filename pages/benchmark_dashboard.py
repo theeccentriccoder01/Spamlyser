@@ -38,9 +38,7 @@ def render_benchmark_dashboard():
             sample_size = st.number_input(
                 "Sample size", min_value=5, max_value=50, value=10
             )
-            warmup = st.number_input(
-                "Warmup runs", min_value=0, max_value=5, value=1
-            )
+            warmup = st.number_input("Warmup runs", min_value=0, max_value=5, value=1)
             if st.button("▶️ Run Benchmark", type="primary", use_container_width=True):
                 with st.spinner("Running benchmark... This may take a moment."):
                     result = run_automated_benchmark(
@@ -49,9 +47,7 @@ def render_benchmark_dashboard():
                 if result:
                     st.success("Benchmark completed!")
                     cols = st.columns(4)
-                    cols[0].metric(
-                        "Avg Latency", f"{result.avg_latency_ms:.1f}ms"
-                    )
+                    cols[0].metric("Avg Latency", f"{result.avg_latency_ms:.1f}ms")
                     cols[1].metric("Accuracy", f"{result.accuracy:.1%}")
                     cols[2].metric("Precision", f"{result.precision:.1%}")
                     cols[3].metric("Recall", f"{result.recall:.1%}")
@@ -70,8 +66,9 @@ def render_benchmark_dashboard():
         if records:
             df = pd.DataFrame(records)
             st.dataframe(
-                df[["timestamp", "avg_latency_ms", "accuracy", "precision", "recall"]]
-                .sort_values("timestamp", ascending=False),
+                df[
+                    ["timestamp", "avg_latency_ms", "accuracy", "precision", "recall"]
+                ].sort_values("timestamp", ascending=False),
                 use_container_width=True,
                 hide_index=True,
             )
@@ -160,7 +157,9 @@ def render_benchmark_dashboard():
             )
 
     st.markdown("---")
-    st.caption("Benchmarks run on CPU by default. Performance may vary based on system resources.")
+    st.caption(
+        "Benchmarks run on CPU by default. Performance may vary based on system resources."
+    )
 
 
 if __name__ == "__main__":

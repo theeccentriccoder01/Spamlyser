@@ -78,8 +78,10 @@ if __name__ == "__main__":
 def clean_unicode_text(text: str) -> str:
     """Normalize Unicode characters and remove emojis/diacritics."""
     import unicodedata
+
     normalized = unicodedata.normalize("NFKD", text)
     return "".join(c for c in normalized if not unicodedata.combining(c))
+
 
 def normalize_label(raw_label, spam_probability: float | None = None) -> str:
     label = str(raw_label).strip().upper()

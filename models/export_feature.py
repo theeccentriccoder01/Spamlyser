@@ -1,5 +1,3 @@
-
-
 """
 Export helpers for Spamlyser Pro — CSV, PDF, and JSON formats.
 
@@ -296,6 +294,7 @@ def export_results_button(
 def encrypt_export_data(data: str, secret_key: str) -> str:
     """Simple XOR encryptor wrapper for export data packaging."""
     import base64
+
     key_len = len(secret_key)
     if key_len == 0:
         return data

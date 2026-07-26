@@ -53,7 +53,9 @@ def _compute_kpis(history: list[dict[str, Any]]) -> dict[str, Any]:
     }
 
 
-def _filter_history_by_date(history: list[dict[str, Any]], days: int) -> list[dict[str, Any]]:
+def _filter_history_by_date(
+    history: list[dict[str, Any]], days: int
+) -> list[dict[str, Any]]:
     """Filter history to keep only records from the last `days` days."""
     if days <= 0:
         return history
@@ -83,12 +85,38 @@ def _extract_keywords(history: list[dict[str, Any]]) -> dict[str, int]:
         if h.get("prediction") == "SPAM":
             msg = h.get("preprocessed") or h.get("message", "")
             text += " " + str(msg).lower()
-    
-    words = re.findall(r'\b[a-z]{3,}\b', text)
+
+    words = re.findall(r"\b[a-z]{3,}\b", text)
     stopwords = {
-        "the", "and", "you", "for", "that", "this", "with", "from", "your", "have", 
-        "are", "not", "will", "all", "can", "out", "our", "has", "was", "just", 
-        "get", "how", "what", "who", "when", "why", "but", "they", "them"
+        "the",
+        "and",
+        "you",
+        "for",
+        "that",
+        "this",
+        "with",
+        "from",
+        "your",
+        "have",
+        "are",
+        "not",
+        "will",
+        "all",
+        "can",
+        "out",
+        "our",
+        "has",
+        "was",
+        "just",
+        "get",
+        "how",
+        "what",
+        "who",
+        "when",
+        "why",
+        "but",
+        "they",
+        "them",
     }
     words = [w for w in words if w not in stopwords]
     return dict(collections.Counter(words).most_common(50))
@@ -256,9 +284,9 @@ def render_dashboard():
         time_filter = st.selectbox(
             "Time Range",
             ["All Time", "Last 24 Hours", "Last 7 Days", "Last 30 Days"],
-            index=0
+            index=0,
         )
-    
+
     days_map = {"All Time": 0, "Last 24 Hours": 1, "Last 7 Days": 7, "Last 30 Days": 30}
     days = days_map[time_filter]
 
@@ -279,7 +307,13 @@ def render_dashboard():
         st.metric("Models Used", f"{len(kpis['unique_models'])}")
 
     tab1, tab2, tab3, tab4, tab5 = st.tabs(
-        ["📈 Timeline", "🎯 Threat Distribution", "☁️ Keywords", "🤖 Model Comparison", "⚙️ Export"]
+        [
+            "📈 Timeline",
+            "🎯 Threat Distribution",
+            "☁️ Keywords",
+            "🤖 Model Comparison",
+            "⚙️ Export",
+        ]
     )
 
     with tab1:
@@ -336,6 +370,7 @@ def render_dashboard():
             mime="application/json",
             use_container_width=True,
         )
+
 
 if __name__ == "__main__":
     render_dashboard()
