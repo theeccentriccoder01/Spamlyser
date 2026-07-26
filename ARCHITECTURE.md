@@ -133,50 +133,32 @@ Centralises all tunable settings:
 
 ## 🔄 Data Flow
 
-```
-User Input (SMS text)
-        │
-        ▼
-┌─────────────────────┐
-│  smart_preprocess   │  ← Text normalisation, URL sanitisation
-└────────┬────────────┘
-         │
-         ▼
-┌─────────────────────┐
-│  language_detector  │  ← Detect language → lang_routing
-└────────┬────────────┘
-         │
-         ▼
-┌──────────────────────────────────────────────┐
-│           ensemble_classifier                │
-│  ┌──────────┐ ┌──────┐ ┌─────────┐ ┌───────┐│
-│  │DistilBERT│ │ BERT │ │RoBERTa  │ │ALBERT ││
-│  └──────────┘ └──────┘ └─────────┘ └───────┘│
-│         Weighted voting → final label        │
-└────────┬─────────────────────────────────────┘
-         │
-         ▼
-┌─────────────────────┐
-│    rule_engine      │  ← Apply custom keyword/regex overrides
-└────────┬────────────┘
-         │
-         ▼
-┌─────────────────────┐
-│   threat_analyzer   │  ← Independent phishing/URL check
-└────────┬────────────┘
-         │
-         ▼
-┌─────────────────────┐
-│  model_explainer /  │  ← LIME or simple word-highlight explanation
-│  simple_explainer   │
-└────────┬────────────┘
-         │
-         ▼
-   UI Display (Streamlit)
-   ├── Prediction label (SPAM / HAM)
-   ├── Confidence score (%)
-   ├── Word-level attribution highlights
-   └── Feedback buttons → feedback_handler → storage_manager
+```mermaid
+flowchart TD
+    Input[User Input SMS text] --> Preprocess[smart_preprocess]
+    Preprocess -->|Text normalisation, URL sanitisation| Lang[language_detector]
+    Lang -->|Detect language -> lang_routing| Ensemble[ensemble_classifier]
+    
+    subgraph Ensemble[ensemble_classifier]
+        direction TB
+        D[DistilBERT] & B[BERT] & R[RoBERTa] & A[ALBERT] --> Vote[Weighted voting -> final label]
+    end
+    
+    Ensemble --> Rules[rule_engine]
+    Rules -->|Apply custom keyword/regex overrides| Threat[threat_analyzer]
+    Threat -->|Independent phishing/URL check| Explain[model_explainer / simple_explainer]
+    Explain -->|LIME or simple word-highlight| UI[UI Display Streamlit]
+    
+    subgraph UI_Components [UI Display]
+        direction TB
+        P[Prediction label SPAM/HAM]
+        C[Confidence score %]
+        W[Word-level attribution highlights]
+        F[Feedback buttons]
+    end
+    
+    UI --> UI_Components
+    F -->|feedback_handler| Storage[storage_manager]
 ```
 
 ---
