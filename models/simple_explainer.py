@@ -331,3 +331,14 @@ def format_ham_explanation(tokens: list[str], weights: list[float]) -> str:
     for t, w in zip(tokens, weights, strict=False):
         lines.append(f"- **{t}**: {w:.4f} (influence towards ham)")
     return "\n".join(lines)
+
+
+def export_explanation(explanation: dict, fmt: str = "json") -> str:
+    """Export explanation dict to 'json', 'csv', or 'html' format."""
+    from .explainability_exporter import ExplainabilityExporter
+    if fmt.lower() == "csv":
+        return ExplainabilityExporter.export_csv(explanation)
+    elif fmt.lower() in ("html", "html_report"):
+        return ExplainabilityExporter.export_html_report(explanation)
+    return ExplainabilityExporter.export_json(explanation)
+
