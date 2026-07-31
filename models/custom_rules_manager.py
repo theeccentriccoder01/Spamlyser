@@ -34,11 +34,14 @@ import re
 from typing import Any
 
 from .storage_manager import StorageManager, default_json_validator
+from .rule_version_store import RuleVersionStore
 
 _logger = logging.getLogger(__name__)
 _storage = StorageManager()
+_version_store = RuleVersionStore()
 
 _EMPTY_RULES: dict[str, list] = {"allowlist": [], "blocklist": []}
+
 
 
 def _rules_file_path() -> str:
@@ -198,3 +201,25 @@ def validate_rule_schema(rule: dict) -> bool:
 def validate_rule_structure(rule: dict) -> bool:
     """Validates threat rule structure - alias for schema validation."""
     return validate_rule_schema(rule)
+
+
+def save_custom_rules_versioned(rules: dict[str, list], author: str = "system", comment: str = "Rule update") -> bool:
+    """Save custom rules and commit a version snapshot."""
+    success = save_custom_rules(rules)
+    if success:
+        _version_store.commit_version(rules, author=author, comment=comment)
+    return success
+
+
+def rollback_custom_rules(version_id: int) -> bool:
+    """Rollback custom rules to a previous version ID."""
+    restored = _version_store.rollback(version_id)
+    if restored is not None:
+        return save_custom_rules(restored)
+    return False
+
+
+def get_rule_version_store() -> RuleVersionStore:
+    """Return the global rule version store instance."""
+    return _version_store
+
