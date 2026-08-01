@@ -3,7 +3,6 @@ from pathlib import Path
 import streamlit as st
 
 
-
 def show_model_comparison_legend():
     """Render a small legend explaining comparison result colors."""
     st.markdown(

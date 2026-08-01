@@ -1,8 +1,8 @@
-from typing import Any
-from functools import lru_cache
-import re
 import json
+import re
+from functools import lru_cache
 from pathlib import Path
+from typing import Any
 
 
 def load_custom_categories():

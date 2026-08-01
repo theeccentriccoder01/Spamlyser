@@ -1,26 +1,27 @@
-from transformers import (
-    AutoModelForSequenceClassification,
-    AutoTokenizer,
-    pipeline,
-)
+import html
+import re
+import time
 
 # Added for easier analytics data aggregation
 from collections import defaultdict
-import torch
-from io import StringIO
-import time
-import re
-import models.workspace_manager
-import models.redos_guard
-import models.rules_simulator
-import html
 from datetime import datetime
+from io import StringIO
 
 import numpy as np
 import pandas as pd
 import plotly.express as px
 import plotly.graph_objects as go
 import streamlit as st
+import torch
+from transformers import (
+    AutoModelForSequenceClassification,
+    AutoTokenizer,
+    pipeline,
+)
+
+import models.redos_guard
+import models.rules_simulator
+import models.workspace_manager
 
 # --- Streamlit Page Configuration ---
 st.set_page_config(
@@ -1571,8 +1572,6 @@ def show_analyzer_page():
                     # Render streaming card for the just-processed message
                     try:
                         from models.stream_visualizer import StreamVisualizer
-
-                        viz = StreamVisualizer()
                         result_card = {
                             "label": result["ensemble_predictions"][
                                 "majority_voting"
@@ -8001,6 +8000,7 @@ def show_model_compare_page():
             agreement_score,
             compare_predictions,
         )
+
         from models.smart_preprocess import preprocess_message
 
         preprocessed = preprocess_message(sample)

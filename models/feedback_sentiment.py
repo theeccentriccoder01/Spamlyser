@@ -3,14 +3,14 @@ User Feedback Sentiment & Trend Analyzer for Spamlyser
 Analyzes user rating trends and sentiment feedback for spam classification predictions.
 """
 
-from typing import List, Dict, Any
+from typing import Any, Dict, List
 
 
 class FeedbackSentimentAnalyzer:
     """Aggregates user rating feedback and calculates model satisfaction metrics."""
 
     @staticmethod
-    def calculate_satisfaction(ratings: List[int]) -> Dict[str, Any]:
+    def calculate_satisfaction(ratings: list[int]) -> dict[str, Any]:
         """Calculates average satisfaction score and rating distribution (1 to 5 stars)."""
         if not ratings:
             return {"total_feedback": 0, "avg_rating": 0.0, "distribution": {}}
@@ -31,10 +31,10 @@ class FeedbackSentimentAnalyzer:
 
     @staticmethod
     def group_by_model(
-        feedback_entries: List[Dict[str, Any]]
-    ) -> Dict[str, Dict[str, Any]]:
+        feedback_entries: list[dict[str, Any]]
+    ) -> dict[str, dict[str, Any]]:
         """Groups feedback ratings by individual classifier model."""
-        grouped: Dict[str, List[int]] = {}
+        grouped: dict[str, list[int]] = {}
         for entry in feedback_entries:
             model = entry.get("model_name", "unknown")
             rating = entry.get("rating", 3)

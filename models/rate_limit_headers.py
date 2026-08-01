@@ -13,7 +13,7 @@ class RateLimitHeaderGenerator:
     @staticmethod
     def get_headers(
         max_limit: int, remaining: int, reset_window_sec: int
-    ) -> Dict[str, str]:
+    ) -> dict[str, str]:
         """Builds standard rate limit header dictionary."""
         reset_timestamp = int(time.time()) + reset_window_sec
         return {
@@ -25,7 +25,7 @@ class RateLimitHeaderGenerator:
     @staticmethod
     def evaluate_request(
         current_count: int, max_limit: int, window_sec: int
-    ) -> Tuple[bool, Dict[str, str]]:
+    ) -> tuple[bool, dict[str, str]]:
         """Evaluates whether request exceeds limit and generates headers/Retry-After."""
         remaining = max_limit - current_count
         headers = RateLimitHeaderGenerator.get_headers(

@@ -13,7 +13,7 @@ class DatabaseMaintenanceManager:
     def __init__(self, db_path: str = ":memory:"):
         self.db_path = db_path
 
-    def run_checkpoint(self, mode: str = "PASSIVE") -> Tuple[int, int, int]:
+    def run_checkpoint(self, mode: str = "PASSIVE") -> tuple[int, int, int]:
         """Runs PRAGMA wal_checkpoint(mode) and returns (busy, log, checkpointed) page counts."""
         valid_modes = {"PASSIVE": 0, "FULL": 1, "RESTART": 2, "TRUNCATE": 3}
         mode_upper = mode.upper()

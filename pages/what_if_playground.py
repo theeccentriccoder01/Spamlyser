@@ -1,6 +1,6 @@
-import streamlit as st
-import pandas as pd
 import numpy as np
+import pandas as pd
+import streamlit as st
 
 st.set_page_config(page_title="What-If Scenario Simulator", layout="wide")
 st.title("🎛️ What-If Analysis Scenario Simulator")

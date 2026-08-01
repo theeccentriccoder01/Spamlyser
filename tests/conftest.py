@@ -1,6 +1,7 @@
-import models.model_init
 import sys
 from unittest.mock import MagicMock
+
+import models.model_init
 
 # 1. Always mock heavy / optional modules so imports succeed quickly.
 #    These modules take too long to import for real in test fixtures.

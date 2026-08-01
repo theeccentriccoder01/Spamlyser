@@ -5,13 +5,13 @@ Extracts top indicative spam keywords and weighted frequencies from message sets
 
 import re
 from collections import Counter
-from typing import List, Dict, Tuple
+from typing import Dict, List, Tuple
 
 
 class KeywordCloudGenerator:
     """Extracts top word frequencies for generating spam keyword clouds."""
 
-    STOPWORDS = {
+    STOPWORDS = frozenset({
         "a",
         "an",
         "and",
@@ -41,12 +41,12 @@ class KeywordCloudGenerator:
         "your",
         "this",
         "or",
-    }
+    })
 
     @classmethod
     def generate(
-        cls, messages: List[str], top_n: int = 20
-    ) -> List[Tuple[str, int]]:
+        cls, messages: list[str], top_n: int = 20
+    ) -> list[tuple[str, int]]:
         """Extracts top_n non-stopword token frequencies across messages."""
         token_counter = Counter()
         for msg in messages:
@@ -57,7 +57,7 @@ class KeywordCloudGenerator:
 
     @classmethod
     def generate_dict(
-        cls, messages: List[str], top_n: int = 20
-    ) -> Dict[str, int]:
+        cls, messages: list[str], top_n: int = 20
+    ) -> dict[str, int]:
         """Returns top_n keywords as a dictionary {word: count} for UI wordcloud components."""
         return dict(cls.generate(messages, top_n=top_n))

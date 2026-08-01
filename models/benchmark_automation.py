@@ -155,8 +155,8 @@ class TelemetryLogger:
     def log_inference(
         self, duration_ms: float, confidence: float, classification: str
     ):
-        import time
         import json
+        import time
 
         log_entry = {
             "timestamp": time.time(),

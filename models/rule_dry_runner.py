@@ -4,25 +4,25 @@ Validates custom regex threat rules against sample message corpora without modif
 """
 
 import re
-from typing import List, Dict, Any, Tuple
+from typing import Any, Dict, List, Tuple
 
 
 class RuleDryRunner:
     """Simulates regex rule evaluation across sample message datasets to measure hit rates and false positives."""
 
     @staticmethod
-    def validate_pattern(pattern: str) -> Tuple[bool, str]:
+    def validate_pattern(pattern: str) -> tuple[bool, str]:
         """Validates if a regex pattern compiles cleanly."""
         try:
             re.compile(pattern)
             return True, "Valid Regex"
         except re.error as e:
-            return False, f"Invalid Regex: {str(e)}"
+            return False, f"Invalid Regex: {e!s}"
 
     @classmethod
     def dry_run(
-        cls, pattern: str, corpus: List[Dict[str, str]]
-    ) -> Dict[str, Any]:
+        cls, pattern: str, corpus: list[dict[str, str]]
+    ) -> dict[str, Any]:
         """Runs dry-run evaluation on a list of dicts [{'text': ..., 'label': 'SPAM'/'HAM'}]"""
         is_valid, msg = cls.validate_pattern(pattern)
         if not is_valid:

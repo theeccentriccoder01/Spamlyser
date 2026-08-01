@@ -11,10 +11,11 @@ Tests threat classification engine covering:
 """
 
 import pytest
+
 from models.threat_analyzer import (
+    THREAT_CATEGORIES,
     classify_threat_type,
     get_threat_specific_advice,
-    THREAT_CATEGORIES,
 )
 
 

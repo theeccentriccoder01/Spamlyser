@@ -1,11 +1,11 @@
 
 """Anomaly detection dashboard — surfaces outlier messages and patterns."""
 
+import numpy as np
 import pandas as pd
 import plotly.express as px
 import plotly.graph_objects as go
 import streamlit as st
-import numpy as np
 
 
 def render_anomaly_dashboard() -> None:

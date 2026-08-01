@@ -27,6 +27,7 @@ from .custom_rules_manager import (
     save_custom_rules,
 )
 from .encrypted_report import ReportEncryptor
+from .ensemble_classifier_method import agreement_score, compare_predictions
 from .error_boundary import (
     ConfigurationError,
     DataAccessError,
@@ -37,7 +38,6 @@ from .error_boundary import (
 from .export_feature import export_results_button
 from .language_detector import detect_language, is_language_supported
 from .message_categorizer import MessageCategorizer
-from .ensemble_classifier_method import agreement_score, compare_predictions
 from .rule_engine import (
     check_compound_rules,
     evaluate_compound_rule,
