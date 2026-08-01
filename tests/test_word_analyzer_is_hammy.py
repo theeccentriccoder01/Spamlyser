@@ -6,15 +6,13 @@ overwritten by a stricter expression (line 343), making neutral words appear
 incorrectly in UI highlighting and explanations.
 """
 
+from models.word_analyzer import WordAnalyzer
 import sys
 from unittest.mock import MagicMock
 
 # Stub heavy dependencies before importing models
 sys.modules.setdefault("torch", MagicMock())
 sys.modules.setdefault("transformers", MagicMock())
-
-
-from models.word_analyzer import WordAnalyzer
 
 
 class TestIsHammyNoDuplicateKey:

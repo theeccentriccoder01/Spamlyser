@@ -1,3 +1,4 @@
+import models.model_init
 import sys
 from unittest.mock import MagicMock
 
@@ -36,12 +37,13 @@ mock_pipeline.return_value = [{"label": "SPAM", "score": 0.95}]
 sys.modules["transformers"].pipeline.return_value = mock_pipeline
 
 # 4. Prevent models/model_init.py verification from calling Hugging Face on import
-import models.model_init
 
 models.model_init.MODEL_STATUS = True
 models.model_init.MODEL_ERROR_MESSAGE = ""
 models.model_init.MODEL_WARNINGS = []
-models.model_init.verify_model_availability = MagicMock(return_value=(True, "", []))
+models.model_init.verify_model_availability = MagicMock(
+    return_value=(True, "", [])
+)
 
 sys.modules["torch"].cuda.is_available.return_value = False
 
@@ -51,9 +53,10 @@ mock_pipeline.return_value = [{"label": "SPAM", "score": 0.95}]
 sys.modules["transformers"].pipeline.return_value = mock_pipeline
 
 # 2. Prevent models/model_init.py verification from calling Hugging Face on import
-import models.model_init
 
 models.model_init.MODEL_STATUS = True
 models.model_init.MODEL_ERROR_MESSAGE = ""
 models.model_init.MODEL_WARNINGS = []
-models.model_init.verify_model_availability = MagicMock(return_value=(True, "", []))
+models.model_init.verify_model_availability = MagicMock(
+    return_value=(True, "", [])
+)

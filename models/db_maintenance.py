@@ -4,7 +4,7 @@ Automates PRAGMA wal_checkpoint(PASSIVE/FULL/RESTART) execution and database sto
 """
 
 import sqlite3
-from typing import Dict, Any, Tuple
+from typing import Tuple
 
 
 class DatabaseMaintenanceManager:

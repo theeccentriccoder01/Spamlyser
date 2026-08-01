@@ -33,8 +33,6 @@ from .error_boundary import (
     ModelLoadError,
     PageError,
     error_boundary,
-    render_error_panel,
-    safe_execute,
 )
 from .export_feature import export_results_button
 from .language_detector import detect_language, is_language_supported

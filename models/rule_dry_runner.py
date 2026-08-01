@@ -20,7 +20,9 @@ class RuleDryRunner:
             return False, f"Invalid Regex: {str(e)}"
 
     @classmethod
-    def dry_run(cls, pattern: str, corpus: List[Dict[str, str]]) -> Dict[str, Any]:
+    def dry_run(
+        cls, pattern: str, corpus: List[Dict[str, str]]
+    ) -> Dict[str, Any]:
         """Runs dry-run evaluation on a list of dicts [{'text': ..., 'label': 'SPAM'/'HAM'}]"""
         is_valid, msg = cls.validate_pattern(pattern)
         if not is_valid:

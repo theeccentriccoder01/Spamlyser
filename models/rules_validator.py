@@ -4,7 +4,7 @@ Ensures that all loaded rules are syntactically and semantically valid before us
 """
 
 import re
-from typing import Any, Dict, List, Tuple
+from typing import Any
 
 
 def validate_rule_structure(rule: dict[str, Any]) -> tuple[bool, str]:
@@ -48,11 +48,10 @@ def validate_rules_collection(rules: list[dict[str, Any]]) -> tuple[bool, str]:
         ok, err = validate_rule_structure(rule)
         if not ok:
             return False, f"Rule at index {idx} is invalid: {err}"
-        
+
         name = rule["name"].strip().lower()
         if name in seen_names:
             return False, f"Duplicate rule name detected: '{rule['name']}'"
         seen_names.add(name)
 
     return True, ""
-

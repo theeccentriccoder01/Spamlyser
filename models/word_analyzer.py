@@ -5,9 +5,13 @@ Provides sophisticated word-level analysis with context awareness
 
 import html
 import re
-from typing import Any, Dict, List, Tuple
+from typing import Any
 
-from .text_sanitizer import safe_regex_findall, safe_regex_search, safe_regex_sub
+from .text_sanitizer import (
+    safe_regex_findall,
+    safe_regex_search,
+    safe_regex_sub,
+)
 
 
 class WordAnalyzer:
@@ -217,7 +221,8 @@ class WordAnalyzer:
             (r"tinyurl\.com/[^\s]+", 0.9),  # Shortened URLs
             # Contact information
             (r"\b\d{3}[-.]?\d{3}[-.]?\d{4}\b", 0.7),  # Phone numbers
-            (r"\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b", 0.6),  # Email
+            # Email
+            (r"\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b", 0.6),
             # Suspicious formatting
             (r"\b[A-Z]{3,}\b", 0.5),  # All caps words
             (r"[!]{2,}", 0.6),  # Multiple exclamation marks
@@ -237,7 +242,13 @@ class WordAnalyzer:
         # Context modifiers for better analysis
         self.context_modifiers = {
             "negation": ["not", "no", "never", "none", "nothing", "nobody"],
-            "intensifiers": ["very", "really", "extremely", "absolutely", "completely"],
+            "intensifiers": [
+                "very",
+                "really",
+                "extremely",
+                "absolutely",
+                "completely",
+            ],
             "time_words": ["now", "today", "immediately", "urgent", "asap"],
         }
 
@@ -262,9 +273,13 @@ class WordAnalyzer:
 
         for i, word in enumerate(words):
             # Clean word (remove punctuation but keep original for display)
-            clean_word = safe_regex_sub(r"[^\w]", "", word, default=word).lower()
+            clean_word = safe_regex_sub(
+                r"[^\w]", "", word, default=word
+            ).lower()
             original_word = (
-                original_text.split()[i] if i < len(original_text.split()) else word
+                original_text.split()[i]
+                if i < len(original_text.split())
+                else word
             )
 
             # Get context (previous and next words)
@@ -286,17 +301,23 @@ class WordAnalyzer:
 
             # Check spam indicators
             if clean_word in self.spam_indicators:
-                spam_weight = self.spam_indicators[clean_word] * context_multiplier
+                spam_weight = (
+                    self.spam_indicators[clean_word] * context_multiplier
+                )
                 spam_score += spam_weight
                 word_type = "spam"
             elif clean_word in self.ham_indicators:
-                ham_weight = self.ham_indicators[clean_word] * context_multiplier
+                ham_weight = (
+                    self.ham_indicators[clean_word] * context_multiplier
+                )
                 ham_score += ham_weight
                 word_type = "ham"
 
             # Check for suspicious patterns (case-sensitive for better detection)
             for pattern, weight in self.suspicious_patterns:
-                if safe_regex_search(pattern, original_word, flags=re.IGNORECASE):
+                if safe_regex_search(
+                    pattern, original_word, flags=re.IGNORECASE
+                ):
                     pattern_weight = weight * context_multiplier
                     spam_score += pattern_weight
                     if word_type == "neutral":
@@ -327,7 +348,9 @@ class WordAnalyzer:
             # Add bias for non-spam words in the word analysis
             # This will help ensure neutral words appear as ham in the UI
             is_spammy = spam_weight > ham_weight and spam_weight > 0
-            is_hammy = not is_spammy or word_type == "neutral" or word_type == "ham"
+            is_hammy = (
+                not is_spammy or word_type == "neutral" or word_type == "ham"
+            )
 
             word_analysis.append(
                 {
@@ -348,7 +371,9 @@ class WordAnalyzer:
             )
 
         # Calculate advanced scoring
-        ham_score += base_ham_score  # Add the base ham score for natural language
+        ham_score += (
+            base_ham_score  # Add the base ham score for natural language
+        )
         total_score = spam_score + ham_score
         spam_ratio = spam_score / total_score if total_score > 0 else 0.5
         ham_ratio = ham_score / total_score if total_score > 0 else 0.5
@@ -385,7 +410,9 @@ class WordAnalyzer:
             "total_influence": total_score,
             "length_factor": length_factor,
             "complexity_factor": complexity_factor,
-            "influential_words": [w for w in word_analysis if w["is_influential"]],
+            "influential_words": [
+                w for w in word_analysis if w["is_influential"]
+            ],
         }
 
     def _get_context_multiplier(
@@ -404,20 +431,30 @@ class WordAnalyzer:
 
         # Check for time pressure context
         if any(
-            time_word in context for time_word in self.context_modifiers["time_words"]
+            time_word in context
+            for time_word in self.context_modifiers["time_words"]
         ):
             if word in self.spam_indicators:
                 multiplier *= 1.3
 
         # Check for personal context (reduces spam weight)
-        personal_words = ["friend", "family", "dear", "love", "thanks", "please"]
+        personal_words = [
+            "friend",
+            "family",
+            "dear",
+            "love",
+            "thanks",
+            "please",
+        ]
         if any(personal in context for personal in personal_words):
             if word in self.spam_indicators:
                 multiplier *= 0.7
 
         return multiplier
 
-    def _check_phrases(self, context: str, position: int, words: list[str]) -> float:
+    def _check_phrases(
+        self, context: str, position: int, words: list[str]
+    ) -> float:
         """Check for multi-word spam phrases and only apply weight to tokens
         that are actually part of the matched phrase at the current position.
         Previously this function used a simple substring check on a 3-word
@@ -450,7 +487,8 @@ class WordAnalyzer:
         }
         # Prepare cleaned, lower-cased tokens for matching
         cleaned_words = [
-            safe_regex_sub(r"[^\w]", "", w.lower(), default=w.lower()) for w in words
+            safe_regex_sub(r"[^\w]", "", w.lower(), default=w.lower())
+            for w in words
         ]
 
         for phrase, weight in phrase_weights.items():
@@ -469,7 +507,9 @@ class WordAnalyzer:
                         return weight
         return 0.0
 
-    def _calculate_length_factor(self, word_count: int, char_count: int) -> float:
+    def _calculate_length_factor(
+        self, word_count: int, char_count: int
+    ) -> float:
         """Calculate factor based on message length"""
         if word_count < 3:
             return 0.5  # Very short messages are suspicious
@@ -492,7 +532,9 @@ class WordAnalyzer:
         caps = len(safe_regex_findall(r"[A-Z]", text, default=[]))
 
         # Calculate complexity score
-        complexity = (special_chars + numbers + caps) / len(text) if text else 0
+        complexity = (
+            (special_chars + numbers + caps) / len(text) if text else 0
+        )
 
         if complexity > 0.3:
             return 1.3  # High complexity (suspicious)
@@ -515,7 +557,9 @@ class WordAnalyzer:
             ham_ratio *= 0.8
 
         # Bias toward HAM for low-spam-score messages
-        if spam_ratio < 0.4:  # Lower threshold means more messages default to HAM
+        if (
+            spam_ratio < 0.4
+        ):  # Lower threshold means more messages default to HAM
             ham_ratio = max(ham_ratio, 0.7)  # Ensure strong ham signal
 
         # Determine class
@@ -545,7 +589,8 @@ class WordAnalyzer:
 
         # Force ham prediction for non-spammy messages
         is_ham_message = (
-            analysis.get("predicted_class") == "HAM" or analysis.get("ham_score", 0) > 0
+            analysis.get("predicted_class") == "HAM"
+            or analysis.get("ham_score", 0) > 0
         )
 
         for i, word in enumerate(words):
@@ -557,7 +602,9 @@ class WordAnalyzer:
 
                 # Very aggressive fallback ham highlighting - ALL words in HAM messages
                 # should be green unless they're explicitly spam indicators
-                fallback_ham = is_ham_message and not word_data.get("is_spammy")
+                fallback_ham = is_ham_message and not word_data.get(
+                    "is_spammy"
+                )
 
                 if influence > 0 or fallback_ham:
                     # Calculate color intensity and effects
@@ -573,32 +620,38 @@ class WordAnalyzer:
                         color = f"hsl(0, {int(60 + intensity * 40)}%, {int(30 + intensity * 20)}%)"
                         bg_color = f"rgba(255, 0, 0, {intensity * 0.2})"
                         border_color = f"hsl(0, {int(70 + intensity * 30)}%, {int(40 + intensity * 20)}%)"
-                        shadow_color = f"rgba(255, 0, 0, {glow_intensity * 0.6})"
+                        shadow_color = (
+                            f"rgba(255, 0, 0, {glow_intensity * 0.6})"
+                        )
                         icon = "🚨" if intensity > 0.7 else "⚠️"
                     elif word_data["is_hammy"] or fallback_ham:
                         # Green gradient for ham with glow effect
                         color = f"hsl(120, {int(50 + intensity * 30)}%, {int(25 + intensity * 25)}%)"
                         bg_color = f"rgba(0, 150, 0, {intensity * 0.2})"
                         border_color = f"hsl(120, {int(60 + intensity * 20)}%, {int(35 + intensity * 15)}%)"
-                        shadow_color = f"rgba(0, 150, 0, {glow_intensity * 0.6})"
+                        shadow_color = (
+                            f"rgba(0, 150, 0, {glow_intensity * 0.6})"
+                        )
                         icon = "✅" if intensity > 0.7 else "✓"
                     else:
                         # Orange gradient for suspicious patterns
                         color = f"hsl(30, {int(70 + intensity * 20)}%, {int(40 + intensity * 20)}%)"
                         bg_color = f"rgba(255, 165, 0, {intensity * 0.2})"
                         border_color = f"hsl(30, {int(80 + intensity * 10)}%, {int(50 + intensity * 10)}%)"
-                        shadow_color = f"rgba(255, 165, 0, {glow_intensity * 0.6})"
+                        shadow_color = (
+                            f"rgba(255, 165, 0, {glow_intensity * 0.6})"
+                        )
                         icon = "🔍" if intensity > 0.7 else "?"
 
                     # Create enhanced highlighted word with tooltip
-                    tooltip_text = f"Influence: {influence:.2f} | Type: {word_type}"
+                    tooltip_text = (
+                        f"Influence: {influence:.2f} | Type: {word_type}"
+                    )
                     if word_data.get("context_multiplier", 1.0) != 1.0:
-                        tooltip_text += (
-                            f" | Context: {word_data['context_multiplier']:.1f}x"
-                        )
+                        tooltip_text += f" | Context: {word_data['context_multiplier']:.1f}x"
                     tooltip_text = html.escape(tooltip_text)
 
-                    highlighted_word = f'''<span style="
+                    highlighted_word = f"""<span style="
                         background: linear-gradient(135deg, {bg_color}, {bg_color});
                         color: {color};
                         padding: 4px 8px;
@@ -615,7 +668,7 @@ class WordAnalyzer:
                     title="{tooltip_text}"
                     onmouseover="this.style.transform='scale(1.05)'; this.style.boxShadow='0 0 {int(5 + glow_intensity * 8)}px {shadow_color}'"
                     onmouseout="this.style.transform='scale(1)'; this.style.boxShadow='0 0 {int(3 + glow_intensity * 5)}px {shadow_color}'"
-                    >{icon if is_influential else ""} {word}</span>'''
+                    >{icon if is_influential else ""} {word}</span>"""
                     highlighted_words.append(highlighted_word)
                 else:
                     # For neutral words, show as ham in HAM messages or neutral in SPAM messages
@@ -658,7 +711,9 @@ class WordAnalyzer:
             </div>
         </div>"""
 
-    def get_explanation_summary(self, analysis: dict[str, Any]) -> dict[str, Any]:
+    def get_explanation_summary(
+        self, analysis: dict[str, Any]
+    ) -> dict[str, Any]:
         """Get an enhanced summary of the analysis for display"""
         # Get all words for HAM messages, or just influential words for SPAM messages
         if analysis.get("predicted_class") == "HAM":
@@ -669,7 +724,9 @@ class WordAnalyzer:
             influential_words = [
                 w for w in analysis["words"] if w["total_influence"] > 0
             ]
-            influential_words.sort(key=lambda x: x["total_influence"], reverse=True)
+            influential_words.sort(
+                key=lambda x: x["total_influence"], reverse=True
+            )
 
         # Separate by type
         spam_words = [w for w in influential_words if w["is_spammy"]]
@@ -777,7 +834,9 @@ class WordAnalyzer:
             if w.get("context_multiplier", 1.0) != 1.0
         ]
         if context_multipliers:
-            avg_multiplier = sum(context_multipliers) / len(context_multipliers)
+            avg_multiplier = sum(context_multipliers) / len(
+                context_multipliers
+            )
             if avg_multiplier > 1.2:
                 insights.append("High urgency/pressure language detected")
             elif avg_multiplier < 0.8:
@@ -798,7 +857,9 @@ class WordAnalyzer:
             insights.append("Long message (more context)")
 
         # Check for phrase patterns
-        phrase_words = [w for w in analysis["words"] if w.get("pattern_weight", 0) > 0]
+        phrase_words = [
+            w for w in analysis["words"] if w.get("pattern_weight", 0) > 0
+        ]
         if len(phrase_words) > 2:
             insights.append("Multiple suspicious patterns detected")
 
@@ -835,28 +896,30 @@ class WordAnalyzer:
         elif spam_ratio > 0.6:
             base_analysis = "⚠️ MODERATE SPAM INDICATORS - Several concerning words and patterns found"
         elif spam_ratio > 0.4:
-            base_analysis = (
-                "🤔 MIXED SIGNALS - Some spam indicators but also legitimate language"
-            )
+            base_analysis = "🤔 MIXED SIGNALS - Some spam indicators but also legitimate language"
         elif ham_ratio > 0.75:
-            base_analysis = (
-                "✅ STRONG HAM INDICATORS - Message appears legitimate and personal"
-            )
+            base_analysis = "✅ STRONG HAM INDICATORS - Message appears legitimate and personal"
         elif ham_ratio > 0.6:
             base_analysis = (
                 "✓ MODERATE HAM INDICATORS - Mostly normal language detected"
             )
         else:
-            base_analysis = "⚪ NEUTRAL ANALYSIS - No strong indicators either way"
+            base_analysis = (
+                "⚪ NEUTRAL ANALYSIS - No strong indicators either way"
+            )
 
         # Add confidence and complexity context
         confidence_text = f" (Confidence: {confidence:.1%})"
         complexity_text = ""
 
         if complexity > 1.2:
-            complexity_text = " High complexity suggests automated/spam content."
+            complexity_text = (
+                " High complexity suggests automated/spam content."
+            )
         elif complexity < 0.9:
-            complexity_text = " Simple, natural language suggests human communication."
+            complexity_text = (
+                " Simple, natural language suggests human communication."
+            )
 
         # Add risk level
         risk_text = f" Risk Level: {risk_level}"

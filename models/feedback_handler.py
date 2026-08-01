@@ -1,4 +1,3 @@
-from models.storage_manager import attempt_self_healing
 
 """
 Feedback handler for Spamlyser Pro.
@@ -31,7 +30,7 @@ import sqlite3
 import threading
 import time
 from datetime import datetime
-from typing import Any, Dict, List
+from typing import Any
 
 import streamlit as st
 
@@ -131,7 +130,8 @@ def _get_connection(db_path: str) -> sqlite3.Connection:
             conn.execute("SELECT 1")
         except Exception:
             _logger.warning(
-                "Stale SQLite connection detected for %s — reconnecting.", db_path
+                "Stale SQLite connection detected for %s — reconnecting.",
+                db_path,
             )
             try:
                 conn.close()
@@ -186,7 +186,9 @@ class FeedbackHandler:
 
     def _init_db(self) -> None:
         if self.db_path:
-            os.makedirs(os.path.dirname(os.path.abspath(self.db_path)), exist_ok=True)
+            os.makedirs(
+                os.path.dirname(os.path.abspath(self.db_path)), exist_ok=True
+            )
         conn = _get_connection(self.db_path)
         conn.execute(
             """
@@ -252,14 +254,18 @@ class FeedbackHandler:
         try:
             # Actual save logic
             conn = _get_connection(self.db_path)
-            rows = conn.execute("SELECT id, data FROM feedback ORDER BY id").fetchall()
+            rows = conn.execute(
+                "SELECT id, data FROM feedback ORDER BY id"
+            ).fetchall()
             return [json.loads(row["data"]) for row in rows]
         except Exception:
             return []
 
     def get_feedback_by_type(self, feedback_type: str) -> list[dict[str, Any]]:
         all_feedback = self.get_all_feedback()
-        return [f for f in all_feedback if f.get("feedback_type") == feedback_type]
+        return [
+            f for f in all_feedback if f.get("feedback_type") == feedback_type
+        ]
 
     def get_word_analysis_feedback(self) -> list[dict[str, Any]]:
         all_feedback = self.get_all_feedback()
@@ -269,7 +275,12 @@ class FeedbackHandler:
         feedbacks = self.get_all_feedback()
 
         if not feedbacks:
-            return {"total": 0, "average_rating": 0, "by_type": {}, "has_email": 0}
+            return {
+                "total": 0,
+                "average_rating": 0,
+                "by_type": {},
+                "has_email": 0,
+            }
 
         stats: dict[str, Any] = {
             "total": len(feedbacks),
@@ -286,7 +297,9 @@ class FeedbackHandler:
 
         for feedback in feedbacks:
             feedback_type = feedback.get("feedback_type", "unknown")
-            stats["by_type"][feedback_type] = stats["by_type"].get(feedback_type, 0) + 1
+            stats["by_type"][feedback_type] = (
+                stats["by_type"].get(feedback_type, 0) + 1
+            )
 
         return stats
 

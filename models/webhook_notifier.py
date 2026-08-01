@@ -1,4 +1,4 @@
-import models.webhook_queue
+
 """Webhook notification system for real-time SMS threat alerts.
 
 Sends HTTP POST notifications to configured webhook URLs whenever
@@ -10,7 +10,7 @@ import json
 import logging
 import os
 import threading
-from datetime import UTC, datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
 
@@ -26,7 +26,11 @@ class WebhookNotifier:
         if config_path is None:
             config_path = os.getenv(
                 "SPAMLYSER_WEBHOOK_CONFIG",
-                str(Path(__file__).resolve().parent.parent / "data" / "webhooks.json"),
+                str(
+                    Path(__file__).resolve().parent.parent
+                    / "data"
+                    / "webhooks.json"
+                ),
             )
         self._config_path = Path(config_path)
         self._webhooks: list[dict[str, Any]] = []

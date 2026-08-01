@@ -1,4 +1,3 @@
-import models.rules_simulator
 from models.rules_validator import validate_rule_structure
 
 """
@@ -33,7 +32,7 @@ import logging
 import re
 from typing import Any
 
-from .storage_manager import StorageManager, default_json_validator
+from .storage_manager import StorageManager
 
 _logger = logging.getLogger(__name__)
 _storage = StorageManager()
@@ -94,7 +93,9 @@ def _compile_blocklist_pattern(pattern: str) -> re.Pattern | None:
     try:
         return re.compile(pattern, re.IGNORECASE)
     except re.error as exc:
-        _logger.warning("Skipping invalid blocklist regex %r: %s", pattern, exc)
+        _logger.warning(
+            "Skipping invalid blocklist regex %r: %s", pattern, exc
+        )
         return None
 
 
@@ -105,9 +106,13 @@ def load_custom_rules() -> dict[str, list]:
     cannot be parsed, or fails schema validation.
     """
     path = _rules_file_path()
-    rules = _storage.load_json_safe(path, default=None, validate=_validate_rules)
+    rules = _storage.load_json_safe(
+        path, default=None, validate=_validate_rules
+    )
     if rules is None:
-        _logger.info("No valid custom rules found at %s — using defaults.", path)
+        _logger.info(
+            "No valid custom rules found at %s — using defaults.", path
+        )
         return dict(_EMPTY_RULES)
     return rules
 
@@ -136,7 +141,9 @@ def save_custom_rules(rules: dict[str, list]) -> bool:
     # Warn about invalid blocklist patterns at save time so users get early
     # feedback rather than silent failures during analysis.
     invalid = [
-        p for p in rules.get("blocklist", []) if _compile_blocklist_pattern(p) is None
+        p
+        for p in rules.get("blocklist", [])
+        if _compile_blocklist_pattern(p) is None
     ]
     if invalid:
         _logger.warning(
@@ -146,7 +153,9 @@ def save_custom_rules(rules: dict[str, list]) -> bool:
         )
 
     path = _rules_file_path()
-    return _storage.save_json(path, rules, backup=True, validate=_validate_rules)
+    return _storage.save_json(
+        path, rules, backup=True, validate=_validate_rules
+    )
 
 
 def check_custom_rules(text: str) -> str | None:

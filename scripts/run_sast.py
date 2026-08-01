@@ -34,7 +34,9 @@ def run_sast_checks():
 
     print("==================================================")
     if issues_found > 0:
-        print(f"Scan complete. Found {issues_found} potential security warnings.")
+        print(
+            f"Scan complete. Found {issues_found} potential security warnings."
+        )
     else:
         print("Scan complete. No security warnings found. Code is secure.")
     print("==================================================")

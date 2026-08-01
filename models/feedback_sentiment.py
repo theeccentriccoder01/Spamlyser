@@ -18,7 +18,9 @@ class FeedbackSentimentAnalyzer:
         total = len(ratings)
         avg = sum(ratings) / total
         dist = {star: ratings.count(star) for star in range(1, 6)}
-        satisfaction_pct = round((sum(1 for r in ratings if r >= 4) / total) * 100, 2)
+        satisfaction_pct = round(
+            (sum(1 for r in ratings if r >= 4) / total) * 100, 2
+        )
 
         return {
             "total_feedback": total,
@@ -28,7 +30,9 @@ class FeedbackSentimentAnalyzer:
         }
 
     @staticmethod
-    def group_by_model(feedback_entries: List[Dict[str, Any]]) -> Dict[str, Dict[str, Any]]:
+    def group_by_model(
+        feedback_entries: List[Dict[str, Any]]
+    ) -> Dict[str, Dict[str, Any]]:
         """Groups feedback ratings by individual classifier model."""
         grouped: Dict[str, List[int]] = {}
         for entry in feedback_entries:

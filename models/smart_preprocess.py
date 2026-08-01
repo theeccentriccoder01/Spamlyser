@@ -1,4 +1,3 @@
-import re
 
 from config import LANGUAGE_DETECTION_ENABLED
 from models.language_detector import detect_language
@@ -55,18 +54,26 @@ def count_suspicious_elements(text: str) -> dict:
         "excessive_punct": len(
             safe_regex_findall(r"!{2,}|\?{2,}|\${2,}", text, default=[])
         ),
-        "phone_numbers": len(safe_regex_findall(r"\b\d{10,}\b", text, default=[])),
+        "phone_numbers": len(
+            safe_regex_findall(r"\b\d{10,}\b", text, default=[])
+        ),
         "urls": len(safe_regex_findall(r"https?://|www\.", text, default=[])),
     }
     return suspicious
 
 
 def preprocess_message(text: str) -> dict:
-    detected_lang = detect_language(text) if LANGUAGE_DETECTION_ENABLED else "en"
+    detected_lang = (
+        detect_language(text) if LANGUAGE_DETECTION_ENABLED else "en"
+    )
     cleaned = expand_abbreviations(text)
     cleaned = correct_leetspeak(cleaned)
     suspicious = count_suspicious_elements(cleaned)
-    return {"cleaned": cleaned, "suspicious": suspicious, "language": detected_lang}
+    return {
+        "cleaned": cleaned,
+        "suspicious": suspicious,
+        "language": detected_lang,
+    }
 
 
 # Example usage
@@ -79,8 +86,10 @@ if __name__ == "__main__":
 def clean_unicode_text(text: str) -> str:
     """Normalize Unicode characters and remove emojis/diacritics."""
     import unicodedata
+
     normalized = unicodedata.normalize("NFKD", text)
     return "".join(c for c in normalized if not unicodedata.combining(c))
+
 
 def normalize_label(raw_label, spam_probability: float | None = None) -> str:
     label = str(raw_label).strip().upper()

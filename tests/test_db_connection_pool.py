@@ -1,8 +1,5 @@
 """Tests for the SQLite connection pool module."""
 
-import os
-import sqlite3
-import tempfile
 import threading
 
 import pytest

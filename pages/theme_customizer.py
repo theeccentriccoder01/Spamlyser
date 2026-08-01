@@ -2,12 +2,19 @@ import streamlit as st
 
 st.set_page_config(page_title="Dynamic Theme Customizer", layout="centered")
 st.title("🎨 Dynamic Theme & Accessibility")
-st.markdown("Customize your workspace appearance and enable accessibility presets.")
+st.markdown(
+    "Customize your workspace appearance and enable accessibility presets."
+)
 
 st.subheader("Theme Presets")
 theme = st.select_slider(
     "Select Global Theme",
-    options=["Light", "Dark", "High Contrast (Vision Impaired)", "Color-Blind Safe"]
+    options=[
+        "Light",
+        "Dark",
+        "High Contrast (Vision Impaired)",
+        "Color-Blind Safe",
+    ],
 )
 
 st.subheader("Accessibility Controls")

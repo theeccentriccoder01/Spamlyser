@@ -2,7 +2,6 @@ from pathlib import Path
 
 import streamlit as st
 
-from pages.analytics_dashboard import render_dashboard
 
 
 def show_model_comparison_legend():
@@ -53,7 +52,9 @@ def ui_error_boundary(func):
             return func(*args, **kwargs)
         except Exception as e:
             st.error(f"⚠️ A rendering error occurred in this component: {e!s}")
-            if st.button("🔄 Reload Page / Recover UI", key=f"recover_{func.__name__}"):
+            if st.button(
+                "🔄 Reload Page / Recover UI", key=f"recover_{func.__name__}"
+            ):
                 st.rerun()
 
     return wrapper
@@ -106,7 +107,8 @@ def show_feedback_page(navigate_to):
     else:
         # Main feedback form
         with st.container():
-            st.markdown("""
+            st.markdown(
+                """
             ## 📝 Share Your Feedback
 
             Your insights are valuable to us! Use this form to:
@@ -114,7 +116,8 @@ def show_feedback_page(navigate_to):
             - Request new features
             - Suggest improvements
             - Share your experience
-            """)
+            """
+            )
 
             # Create a form to collect feedback
             with st.form("feedback_form"):
@@ -198,7 +201,9 @@ def show_feedback_page(navigate_to):
                 # Handle form submission
                 if submit_button:
                     if not feedback_message:
-                        st.error("Please provide some feedback before submitting.")
+                        st.error(
+                            "Please provide some feedback before submitting."
+                        )
                     else:
                         # Prepare feedback data
                         feedback_data = {
@@ -206,9 +211,11 @@ def show_feedback_page(navigate_to):
                             "rating": rating,
                             "message": feedback_message,
                             "email": email if email else None,
-                            "context": st.session_state.feedback_context
-                            if st.session_state.feedback_context
-                            else "General",
+                            "context": (
+                                st.session_state.feedback_context
+                                if st.session_state.feedback_context
+                                else "General"
+                            ),
                         }
 
                         # Reset context after using it
@@ -216,7 +223,9 @@ def show_feedback_page(navigate_to):
 
                         # Save feedback if handler is available
                         if feedback_handler:
-                            success = feedback_handler.save_feedback(feedback_data)
+                            success = feedback_handler.save_feedback(
+                                feedback_data
+                            )
                             if success:
                                 st.session_state.feedback_submitted = True
                                 st.session_state.feedback_rating = rating
@@ -233,7 +242,8 @@ def show_feedback_page(navigate_to):
 
         # Additional information
         with st.expander("Why We Value Your Feedback"):
-            st.markdown("""
+            st.markdown(
+                """
             ### 🚀 Improving Together
 
             At Spamlyser, we believe in continuous improvement, and your feedback is essential to this process. Here's how your input helps:
@@ -246,7 +256,8 @@ def show_feedback_page(navigate_to):
             ### 🔄 Feedback Loop
 
             We review all feedback regularly and use it to prioritize improvements and new features. If you've provided your email, we may reach out for clarification or to let you know when your suggestion has been implemented.
-            """)
+            """
+            )
 
     # Navigation buttons
     st.markdown("<hr>", unsafe_allow_html=True)

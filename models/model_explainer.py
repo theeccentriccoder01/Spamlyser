@@ -1,4 +1,4 @@
-import pages.what_if_playground
+
 """
 Model explainability module for Spamlyser Pro using LIME
 
@@ -7,7 +7,7 @@ This module provides functionality to explain the model predictions using LIME
 """
 
 from collections.abc import Callable
-from typing import Any, Dict, List
+from typing import Any
 
 import lime
 import lime.lime_text
@@ -16,7 +16,9 @@ import lime.lime_text
 class ModelExplainer:
     """Class for explaining model predictions using LIME"""
 
-    def __init__(self, predict_fn: Callable, class_names: list[str] | None = None):
+    def __init__(
+        self, predict_fn: Callable, class_names: list[str] | None = None
+    ):
         """
         Initialize the explainer.
 
@@ -84,7 +86,11 @@ class ModelExplainer:
                 except Exception as e:
                     # If we can't get features for this class, add empty list
                     explanation_data["features"].append(
-                        {"class": class_name, "important_words": [], "error": str(e)}
+                        {
+                            "class": class_name,
+                            "important_words": [],
+                            "error": str(e),
+                        }
                     )
 
             return explanation_data
@@ -100,7 +106,9 @@ class ModelExplainer:
                 ],
             }
 
-    def visualize_explanation(self, explanation_data: dict[str, Any]) -> dict[str, Any]:
+    def visualize_explanation(
+        self, explanation_data: dict[str, Any]
+    ) -> dict[str, Any]:
         """
         Create visualization data for the explanation.
 
@@ -146,20 +154,28 @@ class ModelExplainer:
                     {
                         "feature": item["word"],
                         "importance": abs(item["weight"]),
-                        "effect": "positive" if item["is_positive"] else "negative",
+                        "effect": (
+                            "positive" if item["is_positive"] else "negative"
+                        ),
                         "weight": item["weight"],
                     }
                 )
 
             # Sort by absolute importance
             feature_importance = sorted(
-                feature_importance, key=lambda x: abs(x["weight"]), reverse=True
+                feature_importance,
+                key=lambda x: abs(x["weight"]),
+                reverse=True,
             )
-            visualization["feature_importance"][class_name] = feature_importance
+            visualization["feature_importance"][
+                class_name
+            ] = feature_importance
 
         return visualization
 
-    def get_threat_explanation(self, text: str, threat_type: str) -> dict[str, Any]:
+    def get_threat_explanation(
+        self, text: str, threat_type: str
+    ) -> dict[str, Any]:
         """
         Generate an explanation specific to the threat type.
 
@@ -250,19 +266,25 @@ class ModelExplainer:
             for class_data in explanation_data["features"]:
                 for word_data in class_data.get("important_words", []):
                     word = word_data.get("word", "")
-                    if any(keyword.lower() in word.lower() for keyword in keywords):
+                    if any(
+                        keyword.lower() in word.lower() for keyword in keywords
+                    ):
                         threat_features.append(
                             {
                                 "word": word,
                                 "weight": word_data.get("weight", 0),
                                 "class": class_data.get("class", ""),
-                                "is_positive": word_data.get("is_positive", False),
+                                "is_positive": word_data.get(
+                                    "is_positive", False
+                                ),
                             }
                         )
 
             # Sort by absolute weight
             threat_features = sorted(
-                threat_features, key=lambda x: abs(x.get("weight", 0)), reverse=True
+                threat_features,
+                key=lambda x: abs(x.get("weight", 0)),
+                reverse=True,
             )
 
             # Create threat-specific explanation

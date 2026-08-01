@@ -1,8 +1,7 @@
-import pages.theme_customizer
+
 """Theme manager for Spamlyser Pro — persistent dark/light mode with session state."""
 
 import json
-import os
 from pathlib import Path
 from typing import Literal
 
@@ -10,7 +9,9 @@ import streamlit as st
 
 Theme = Literal["light", "dark", "auto"]
 
-_THEME_FILE = Path(__file__).resolve().parent.parent / "data" / "theme_pref.json"
+_THEME_FILE = (
+    Path(__file__).resolve().parent.parent / "data" / "theme_pref.json"
+)
 
 
 def _persist(theme: Theme) -> None:
@@ -52,17 +53,37 @@ def theme_css_variables() -> str:
     """Return a ``<style>`` block with theme-aware CSS custom properties and presets."""
     theme = get_active_theme()
     preset = st.session_state.get("theme_preset", "Default")
-    
+
     # Custom Presets Map
     presets = {
-        "Deep Space": {"accent": "#8b5cf6", "success": "#10b981", "warning": "#f59e0b", "error": "#ef4444"},
-        "Emerald Guard": {"accent": "#059669", "success": "#34d399", "warning": "#fbbf24", "error": "#f87171"},
-        "Amber Glow": {"accent": "#d97706", "success": "#10b981", "warning": "#fbbf24", "error": "#f87171"},
-        "Ocean Breeze": {"accent": "#0284c7", "success": "#0d9488", "warning": "#ea580c", "error": "#e11d48"},
+        "Deep Space": {
+            "accent": "#8b5cf6",
+            "success": "#10b981",
+            "warning": "#f59e0b",
+            "error": "#ef4444",
+        },
+        "Emerald Guard": {
+            "accent": "#059669",
+            "success": "#34d399",
+            "warning": "#fbbf24",
+            "error": "#f87171",
+        },
+        "Amber Glow": {
+            "accent": "#d97706",
+            "success": "#10b981",
+            "warning": "#fbbf24",
+            "error": "#f87171",
+        },
+        "Ocean Breeze": {
+            "accent": "#0284c7",
+            "success": "#0d9488",
+            "warning": "#ea580c",
+            "error": "#e11d48",
+        },
     }
-    
+
     preset_vals = presets.get(preset, None)
-    
+
     if theme == "dark":
         accent = preset_vals["accent"] if preset_vals else "#00d4aa"
         success = preset_vals["success"] if preset_vals else "#51cf66"
@@ -86,7 +107,7 @@ def theme_css_variables() -> str:
   --warning: {warning};
 }}
 </style>"""
-    
+
     accent = preset_vals["accent"] if preset_vals else "#1e40af"
     success = preset_vals["success"] if preset_vals else "#2f9e44"
     warning = preset_vals["warning"] if preset_vals else "#e67700"
