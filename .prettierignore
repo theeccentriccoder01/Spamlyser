@@ -1,0 +1,52 @@
+# Python files are handled by Ruff (ruff.toml) — not Prettier
+*.py
+
+# Virtual environment and dependency dirs
+.venv/
+venv/
+env/
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.egg-info/
+dist/
+build/
+
+# Model weight files and datasets (binary/large)
+*.bin
+*.pt
+*.pth
+*.pkl
+*.ckpt
+*.safetensors
+*.h5
+*.npz
+*.npy
+*.csv
+*.tsv
+*.parquet
+
+# Git internals
+.git/
+
+# Diff/patch files
+*.patch
+
+# Streamlit cache
+.streamlit/cache/
+
+# Environment files (may contain secrets)
+.env
+.env.*
+
+# Lock files (auto-generated, not hand-edited)
+package-lock.json
+yarn.lock
+
+# Docker
+Dockerfile
+.dockerignore
+
+# Pre-commit cache
+.pre-commit-cache/
