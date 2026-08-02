@@ -27,7 +27,9 @@ def isolated_rules_file(tmp_path):
 def test_validate_rules_accepts_valid_structure():
     assert crm._validate_rules({"allowlist": [], "blocklist": []}) is True
     assert (
-        crm._validate_rules({"allowlist": ["a.com"], "blocklist": [r"\bspam\b"]})
+        crm._validate_rules(
+            {"allowlist": ["a.com"], "blocklist": [r"\bspam\b"]}
+        )
         is True
     )
 
@@ -77,7 +79,9 @@ def test_save_warns_on_invalid_regex_but_still_saves(caplog):
     import logging
 
     rules = {"allowlist": [], "blocklist": ["[invalid("]}
-    with caplog.at_level(logging.WARNING, logger="models.custom_rules_manager"):
+    with caplog.at_level(
+        logging.WARNING, logger="models.custom_rules_manager"
+    ):
         result = crm.save_custom_rules(rules)
     assert result is True
     assert "invalid" in caplog.text.lower() or "Skipping" in caplog.text
@@ -94,15 +98,23 @@ def test_allowlist_matched_first():
 
 
 def test_allowlist_no_match_returns_none():
-    crm.save_custom_rules({"allowlist": ["trusted-partner.com"], "blocklist": []})
+    crm.save_custom_rules(
+        {"allowlist": ["trusted-partner.com"], "blocklist": []}
+    )
     assert crm.check_custom_rules("Hello, how are you?") is None
 
 
 def test_blocklist_regex_matched():
     crm.save_custom_rules(
-        {"allowlist": [], "blocklist": [r"\bwin-free-100k\b", "click-now-scam"]}
+        {
+            "allowlist": [],
+            "blocklist": [r"\bwin-free-100k\b", "click-now-scam"],
+        }
     )
-    assert crm.check_custom_rules("Congrats! You can win-free-100k today!") == "SPAM"
+    assert (
+        crm.check_custom_rules("Congrats! You can win-free-100k today!")
+        == "SPAM"
+    )
 
 
 def test_blocklist_keyword_matched():
@@ -127,6 +139,8 @@ def test_clean_message_returns_none():
 
 def test_invalid_regex_in_blocklist_skipped_gracefully():
     """A broken regex should not crash check_custom_rules; it is skipped."""
-    crm.save_custom_rules({"allowlist": [], "blocklist": ["[invalid(", "spam-keyword"]})
+    crm.save_custom_rules(
+        {"allowlist": [], "blocklist": ["[invalid(", "spam-keyword"]}
+    )
     assert crm.check_custom_rules("This is a spam-keyword message") == "SPAM"
     assert crm.check_custom_rules("A totally harmless message") is None

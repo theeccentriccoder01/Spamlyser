@@ -4,12 +4,11 @@ Provides interactive visualizations of model performance benchmarks,
 historical trends, and regression detection.
 """
 
-import streamlit as st
+from datetime import datetime
+
 import pandas as pd
 import plotly.express as px
-import plotly.graph_objects as go
-from datetime import datetime
-from pathlib import Path
+import streamlit as st
 
 
 def render_benchmark_dashboard():
@@ -25,7 +24,7 @@ def render_benchmark_dashboard():
         st.warning("Benchmark automation module not available.")
         return
 
-    from config import BENCHMARK_AUTO_RUNS, BENCHMARK_HISTORY_PATH
+    from config import BENCHMARK_HISTORY_PATH
 
     history = BenchmarkHistory(BENCHMARK_HISTORY_PATH)
 
@@ -40,8 +39,12 @@ def render_benchmark_dashboard():
             warmup = st.number_input(
                 "Warmup runs", min_value=0, max_value=5, value=1
             )
-            if st.button("▶️ Run Benchmark", type="primary", use_container_width=True):
-                with st.spinner("Running benchmark... This may take a moment."):
+            if st.button(
+                "▶️ Run Benchmark", type="primary", use_container_width=True
+            ):
+                with st.spinner(
+                    "Running benchmark... This may take a moment."
+                ):
                     result = run_automated_benchmark(
                         sample_size=sample_size, warmup_runs=warmup
                     )
@@ -69,8 +72,15 @@ def render_benchmark_dashboard():
         if records:
             df = pd.DataFrame(records)
             st.dataframe(
-                df[["timestamp", "avg_latency_ms", "accuracy", "precision", "recall"]]
-                .sort_values("timestamp", ascending=False),
+                df[
+                    [
+                        "timestamp",
+                        "avg_latency_ms",
+                        "accuracy",
+                        "precision",
+                        "recall",
+                    ]
+                ].sort_values("timestamp", ascending=False),
                 use_container_width=True,
                 hide_index=True,
             )
@@ -86,7 +96,9 @@ def render_benchmark_dashboard():
                 history.clear()
                 st.rerun()
         else:
-            st.info("No benchmark records yet. Run a benchmark to generate data.")
+            st.info(
+                "No benchmark records yet. Run a benchmark to generate data."
+            )
 
     with tab3:
         records = history.get_all()
@@ -159,7 +171,9 @@ def render_benchmark_dashboard():
             )
 
     st.markdown("---")
-    st.caption("Benchmarks run on CPU by default. Performance may vary based on system resources.")
+    st.caption(
+        "Benchmarks run on CPU by default. Performance may vary based on system resources."
+    )
 
 
 if __name__ == "__main__":

@@ -1,4 +1,4 @@
-import re
+
 
 def is_safe_regex_input(text: str, max_len: int = 1000) -> bool:
     """Checks input lengths and prevents catastrophic backtracking patterns."""

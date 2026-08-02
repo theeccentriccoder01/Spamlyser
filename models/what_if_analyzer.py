@@ -1,10 +1,9 @@
-import pages.what_if_playground
+
 """What-If Analysis — compare predictions across models as text changes."""
 
 import time
 from typing import Any
 
-import pandas as pd
 import streamlit as st
 
 
@@ -57,11 +56,17 @@ class WhatIfAnalyzer:
         return "SPAM" if spams > 0 else "HAM"
 
     def _avg_confidence(self, predictions: dict) -> float:
-        confs = [p["confidence"] for p in predictions.values() if p["label"] != "ERROR"]
+        confs = [
+            p["confidence"]
+            for p in predictions.values()
+            if p["label"] != "ERROR"
+        ]
         return sum(confs) / len(confs) if confs else 0.0
 
     def _agreement_score(self, predictions: dict) -> float:
-        labels = [p["label"] for p in predictions.values() if p["label"] != "ERROR"]
+        labels = [
+            p["label"] for p in predictions.values() if p["label"] != "ERROR"
+        ]
         if not labels:
             return 0.0
         majority = max(set(labels), key=labels.count)
@@ -77,9 +82,11 @@ class WhatIfAnalyzer:
                 delta = curr_conf - prev_conf
                 deltas[model_name] = {
                     "delta": delta,
-                    "direction": "up"
-                    if delta > 0.01
-                    else ("down" if delta < -0.01 else "stable"),
+                    "direction": (
+                        "up"
+                        if delta > 0.01
+                        else ("down" if delta < -0.01 else "stable")
+                    ),
                     "label_changed": (
                         prev["predictions"][model_name]["label"]
                         != current["predictions"][model_name]["label"]
@@ -128,7 +135,10 @@ def render_what_if_playground(classifier) -> None:
                 "💰 Prize Scam",
                 "CONGRATULATIONS! You've won $1,000,000 in the international lottery! Call +1234567890 now to claim!",
             ),
-            ("👋 Personal", "Hey! Are we still meeting for coffee at 3pm tomorrow?"),
+            (
+                "👋 Personal",
+                "Hey! Are we still meeting for coffee at 3pm tomorrow?",
+            ),
             (
                 "🏪 Promo",
                 "Exclusive 50% off at Walmart! Shop now before the offer ends!",
@@ -202,7 +212,9 @@ def render_what_if_playground(classifier) -> None:
                     "whatif-delta-up"
                     if delta_info["direction"] == "up"
                     else (
-                        "whatif-delta-down" if delta_info["direction"] == "down" else ""
+                        "whatif-delta-down"
+                        if delta_info["direction"] == "down"
+                        else ""
                     )
                 )
                 st.markdown(
@@ -218,7 +230,9 @@ def render_what_if_playground(classifier) -> None:
 
     st.markdown("---")
     st.markdown("### 📈 Word Impact Analysis")
-    st.markdown("Words are colored by their influence on the ensemble prediction:")
+    st.markdown(
+        "Words are colored by their influence on the ensemble prediction:"
+    )
     words = text.split()
     if words:
         impact_html = ""

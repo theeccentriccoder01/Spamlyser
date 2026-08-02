@@ -1,16 +1,14 @@
-import models.report_generator
+
 """Encrypted multi-format report export for Spamlyser Pro.
 
 Provides AES-256-GCM encryption wrappers around CSV, JSON, and PDF export
 data so sensitive classification results can be shared securely.
 """
 
-import io
 import json
 import logging
 import os
-from datetime import UTC, datetime, timezone
-from pathlib import Path
+from datetime import UTC, datetime
 from typing import Any
 
 from cryptography.hazmat.primitives.ciphers.aead import AESGCM
@@ -18,7 +16,9 @@ from cryptography.hazmat.primitives.ciphers.aead import AESGCM
 logger = logging.getLogger(__name__)
 
 
-def _derive_key(master_password: str, salt: bytes | None = None) -> tuple[bytes, bytes]:
+def _derive_key(
+    master_password: str, salt: bytes | None = None
+) -> tuple[bytes, bytes]:
     """Derive a 256-bit AES key from *master_password* using a random salt.
 
     Returns ``(key, salt)``.  The salt **must** be persisted alongside the

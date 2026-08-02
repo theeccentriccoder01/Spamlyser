@@ -1,9 +1,8 @@
-import pages.theme_customizer
+
 """Accessibility helpers for Spamlyser Pro — ARIA labels, focus management,
 skip-to-content links, and contrast-safe color utilities.
 """
 
-import re
 from typing import Any
 
 import streamlit as st
@@ -89,7 +88,9 @@ def contrast_safe_color(hex_color: str, against: str = "#1a1a1a") -> str:
     l1 = _lum(hex_color)
     l2 = _lum(against)
     ratio = (max(l1, l2) + 0.05) / (min(l1, l2) + 0.05)
-    return hex_color if ratio >= 4.5 else "#00d4aa"  # fallback to accessible accent
+    return (
+        hex_color if ratio >= 4.5 else "#00d4aa"
+    )  # fallback to accessible accent
 
 
 def accessible_button(

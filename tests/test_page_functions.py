@@ -23,9 +23,9 @@ class TestShowFeedbackPageSignature:
         accidentally pass the old module-level None."""
         sig = inspect.signature(page_functions.show_feedback_page)
         param = sig.parameters["navigate_to"]
-        assert param.default is inspect.Parameter.empty, (
-            "navigate_to should be a required parameter with no default."
-        )
+        assert (
+            param.default is inspect.Parameter.empty
+        ), "navigate_to should be a required parameter with no default."
 
     def test_no_module_level_none_sentinel(self):
         """The old `navigate_to = None` module-level sentinel must be gone."""
@@ -71,9 +71,11 @@ class TestShowFeedbackPageCallable:
                 pf.show_feedback_page(navigate_to=fake_navigate)
             except Exception as exc:
                 # Only fail for the specific error the bug caused
-                assert "NoneType" not in str(exc) and "not callable" not in str(exc), (
-                    f"show_feedback_page raised the original bug error: {exc}"
-                )
+                assert "NoneType" not in str(
+                    exc
+                ) and "not callable" not in str(
+                    exc
+                ), f"show_feedback_page raised the original bug error: {exc}"
 
     def test_none_navigate_to_raises_clearly(self):
         """Passing None explicitly must fail with TypeError, not silently

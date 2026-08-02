@@ -1,4 +1,4 @@
-import models.lang_routing
+
 """Boolean rule engine for smart filter expressions (AND / OR / NOT).
 
 Extends the basic allowlist/blocklist with compound conditions so users
@@ -15,7 +15,11 @@ _logger = logging.getLogger(__name__)
 
 # --- Condition types -------------------------------------------------------
 
-_EMPTY_RULES: dict[str, list] = {"allowlist": [], "blocklist": [], "compounds": []}
+_EMPTY_RULES: dict[str, list] = {
+    "allowlist": [],
+    "blocklist": [],
+    "compounds": [],
+}
 
 
 def _match_keyword(text: str, keyword: str) -> bool:
@@ -103,7 +107,9 @@ def evaluate_compound_rule(rule: dict[str, Any], text: str) -> bool | None:
     return any(results)
 
 
-def check_compound_rules(text: str, compounds: list[dict[str, Any]]) -> str | None:
+def check_compound_rules(
+    text: str, compounds: list[dict[str, Any]]
+) -> str | None:
     """Run *text* through all compound rules.
 
     Returns ``"SPAM"``, ``"HAM"``, or ``None``.

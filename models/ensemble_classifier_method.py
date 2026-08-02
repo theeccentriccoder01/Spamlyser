@@ -1,10 +1,8 @@
-import models.quantizer
-import json
 import logging
 from collections import defaultdict
 from dataclasses import dataclass
 from datetime import datetime
-from typing import Any, Dict, List
+from typing import Any
 
 import numpy as np
 
@@ -21,7 +19,8 @@ class PredictionResult:
     spam_probability: float
     details: str
     metadata: dict[str, Any]
-    threat_type: str = None  # Can be "Phishing", "Scam/Fraud", "Unwanted Marketing", "Other", or None for HAM
+    # Can be "Phishing", "Scam/Fraud", "Unwanted Marketing", "Other", or None for HAM
+    threat_type: str = None
 
     @property
     def score(self) -> float:
@@ -39,7 +38,9 @@ class EnsembleSpamClassifier:
     # Enhanced ensemble classifier that combines predictions from multiple spam detection models
 
     def __init__(
-        self, model_weights: dict[str, float] | None = None, performance_tracker=None
+        self,
+        model_weights: dict[str, float] | None = None,
+        performance_tracker=None,
     ):
         self.default_weights = {
             "DistilBERT": 0.20,  # Fast but less accurate
@@ -66,9 +67,13 @@ class EnsembleSpamClassifier:
         else:
             # Fallback to equal weights
             n_models = len(self.model_weights)
-            self.model_weights = {k: 1 / n_models for k in self.model_weights.keys()}
+            self.model_weights = {
+                k: 1 / n_models for k in self.model_weights.keys()
+            }
 
-    def _validate_predictions(self, predictions: dict[str, dict[str, Any]]) -> bool:
+    def _validate_predictions(
+        self, predictions: dict[str, dict[str, Any]]
+    ) -> bool:
         """Validate input predictions format"""
         if not predictions or not isinstance(predictions, dict):
             self.logger.error("Predictions must be a non-empty dictionary")
@@ -76,7 +81,9 @@ class EnsembleSpamClassifier:
 
         for model_name, pred in predictions.items():
             if not isinstance(pred, dict):
-                self.logger.error(f"Prediction for {model_name} must be a dictionary")
+                self.logger.error(
+                    f"Prediction for {model_name} must be a dictionary"
+                )
                 return False
 
             if "label" not in pred or "score" not in pred:
@@ -89,16 +96,22 @@ class EnsembleSpamClassifier:
                 not isinstance(pred["score"], (int, float))
                 or not 0 <= pred["score"] <= 1
             ):
-                self.logger.error(f"Score for {model_name} must be between 0 and 1")
+                self.logger.error(
+                    f"Score for {model_name} must be between 0 and 1"
+                )
                 return False
 
             if pred["label"].upper() not in ["SPAM", "HAM"]:
-                self.logger.error(f"Label for {model_name} must be 'SPAM' or 'HAM'")
+                self.logger.error(
+                    f"Label for {model_name} must be 'SPAM' or 'HAM'"
+                )
                 return False
 
         return True
 
-    def majority_voting(self, predictions: dict[str, dict[str, Any]]) -> dict[str, Any]:
+    def majority_voting(
+        self, predictions: dict[str, dict[str, Any]]
+    ) -> dict[str, Any]:
 
         # Approach 1: Majority Voting
         try:
@@ -115,7 +128,11 @@ class EnsembleSpamClassifier:
                 confidence = pred["score"]
 
                 model_predictions.append(
-                    {"model": model_name, "prediction": label, "confidence": confidence}
+                    {
+                        "model": model_name,
+                        "prediction": label,
+                        "confidence": confidence,
+                    }
                 )
 
                 if label == "SPAM":
@@ -155,8 +172,12 @@ class EnsembleSpamClassifier:
                     spam_prob = 0.5
                 vote_ratio = 0.5
 
-            avg_confidence = total_confidence / len(predictions) if predictions else 0.5
-            final_confidence = spam_prob if final_label == "SPAM" else (1 - spam_prob)
+            avg_confidence = (
+                total_confidence / len(predictions) if predictions else 0.5
+            )
+            final_confidence = (
+                spam_prob if final_label == "SPAM" else (1 - spam_prob)
+            )
 
             return {
                 "method": "Majority Voting",
@@ -189,7 +210,9 @@ class EnsembleSpamClassifier:
 
             # Update weights from performance tracker if available
             if self.performance_tracker:
-                self.model_weights = self.performance_tracker.get_dynamic_weights()
+                self.model_weights = (
+                    self.performance_tracker.get_dynamic_weights()
+                )
                 self._normalize_weights()
 
             weighted_spam_prob = 0.0
@@ -198,7 +221,9 @@ class EnsembleSpamClassifier:
 
             for model_name, pred in predictions.items():
                 # Use default weight if model not in weights
-                weight = self.model_weights.get(model_name, 1 / len(predictions))
+                weight = self.model_weights.get(
+                    model_name, 1 / len(predictions)
+                )
 
                 label = pred["label"].upper()
                 confidence = pred["score"]
@@ -223,7 +248,9 @@ class EnsembleSpamClassifier:
 
             # Normalize by total weight used
             final_spam_prob = (
-                weighted_spam_prob / total_weight_used if total_weight_used > 0 else 0.5
+                weighted_spam_prob / total_weight_used
+                if total_weight_used > 0
+                else 0.5
             )
 
             # Make final decision
@@ -265,7 +292,9 @@ class EnsembleSpamClassifier:
 
             # Update weights from performance tracker if available
             if self.performance_tracker:
-                self.model_weights = self.performance_tracker.get_dynamic_weights()
+                self.model_weights = (
+                    self.performance_tracker.get_dynamic_weights()
+                )
                 self._normalize_weights()
 
             spam_weight = 0.0
@@ -279,8 +308,13 @@ class EnsembleSpamClassifier:
                 # Incorporate per-model reliability score and recent accuracy
                 reliability = self.model_weights.get(model_name, 1.0)
                 accuracy = 1.0
-                if hasattr(self, "performance_tracker") and self.performance_tracker:
-                    stats = self.performance_tracker.get_model_stats(model_name)
+                if (
+                    hasattr(self, "performance_tracker")
+                    and self.performance_tracker
+                ):
+                    stats = self.performance_tracker.get_model_stats(
+                        model_name
+                    )
                     accuracy = stats.get("recent_accuracy", 1.0)
 
                 # Weight the vote by adjusted confidence (reliability * accuracy)
@@ -345,7 +379,9 @@ class EnsembleSpamClassifier:
             return self._fallback_prediction(predictions)
 
     def adaptive_threshold_ensemble(
-        self, predictions: dict[str, dict[str, Any]], base_threshold: float = 0.5
+        self,
+        predictions: dict[str, dict[str, Any]],
+        base_threshold: float = 0.5,
     ) -> dict[str, Any]:
 
         # Approach 4: Adaptive Threshold Ensemble
@@ -354,20 +390,27 @@ class EnsembleSpamClassifier:
                 return self._fallback_prediction(predictions)
 
             # First get weighted average result
-            weighted_result = self.weighted_average(predictions, base_threshold)
+            weighted_result = self.weighted_average(
+                predictions, base_threshold
+            )
 
             # Calculate model agreement
             spam_predictions = sum(
-                1 for pred in predictions.values() if pred["label"].upper() == "SPAM"
+                1
+                for pred in predictions.values()
+                if pred["label"].upper() == "SPAM"
             )
             total_models = len(predictions)
             agreement_ratio = (
-                max(spam_predictions, total_models - spam_predictions) / total_models
+                max(spam_predictions, total_models - spam_predictions)
+                / total_models
             )
 
             # Calculate confidence variance
             confidences = [pred["score"] for pred in predictions.values()]
-            confidence_variance = np.var(confidences) if len(confidences) > 1 else 0
+            confidence_variance = (
+                np.var(confidences) if len(confidences) > 1 else 0
+            )
             avg_confidence = np.mean(confidences)
 
             # Adjust threshold based on agreement and confidence distribution
@@ -421,7 +464,9 @@ class EnsembleSpamClassifier:
             self.logger.error(f"Error in adaptive threshold ensemble: {e!s}")
             return self._fallback_prediction(predictions)
 
-    def meta_ensemble(self, predictions: dict[str, dict[str, Any]]) -> dict[str, Any]:
+    def meta_ensemble(
+        self, predictions: dict[str, dict[str, Any]]
+    ) -> dict[str, Any]:
 
         #   Approach 5: Meta-Ensemble
         #   Combines all ensemble methods and chooses the most confident result
@@ -449,7 +494,9 @@ class EnsembleSpamClassifier:
                 return self._fallback_prediction(predictions)
 
             # Find the method with highest confidence
-            best_method = max(method_results.items(), key=lambda x: x[1]["confidence"])
+            best_method = max(
+                method_results.items(), key=lambda x: x[1]["confidence"]
+            )
             best_result = best_method[1].copy()
 
             # Update metadata to show it's a meta-ensemble
@@ -470,7 +517,9 @@ class EnsembleSpamClassifier:
             return self._fallback_prediction(predictions)
 
     def get_ensemble_prediction(
-        self, predictions: dict[str, dict[str, Any]], method: str = "weighted_average"
+        self,
+        predictions: dict[str, dict[str, Any]],
+        method: str = "weighted_average",
     ) -> dict[str, Any]:
         method_map = {
             "majority_voting": self.majority_voting,
@@ -481,7 +530,9 @@ class EnsembleSpamClassifier:
         }
 
         if method not in method_map:
-            self.logger.warning(f"Unknown method {method}, using weighted_average")
+            self.logger.warning(
+                f"Unknown method {method}, using weighted_average"
+            )
             method = "weighted_average"
 
         result = method_map[method](predictions)
@@ -511,7 +562,9 @@ class EnsembleSpamClassifier:
         results = {}
         for method in methods:
             try:
-                results[method] = self.get_ensemble_prediction(predictions, method)
+                results[method] = self.get_ensemble_prediction(
+                    predictions, method
+                )
             except Exception as e:
                 self.logger.error(
                     f"Failed to get prediction for method {method}: {e!s}"
@@ -520,7 +573,9 @@ class EnsembleSpamClassifier:
 
         return results
 
-    def get_model_prediction(self, model_name: str, message: str) -> "PredictionResult":
+    def get_model_prediction(
+        self, model_name: str, message: str
+    ) -> "PredictionResult":
         """Return a per-model prediction for *message*.
 
         The actual transformer inference lives in ``app.py`` where the models
@@ -581,7 +636,9 @@ class EnsembleSpamClassifier:
                     "metadata": {"fallback_reason": "no_predictions"},
                 }
 
-            best_pred = max(predictions.values(), key=lambda x: x.get("score", 0))
+            best_pred = max(
+                predictions.values(), key=lambda x: x.get("score", 0)
+            )
             spam_prob = (
                 best_pred["score"]
                 if best_pred["label"].upper() == "SPAM"
@@ -657,9 +714,9 @@ class ModelPerformanceTracker:
 
         # Keep only recent history
         if len(self.performance_history[model_name]) > self.history_size:
-            self.performance_history[model_name] = self.performance_history[model_name][
-                -self.history_size :
-            ]
+            self.performance_history[model_name] = self.performance_history[
+                model_name
+            ][-self.history_size :]
 
         # Update detailed metrics
         metrics = self.model_metrics[model_name]
@@ -709,9 +766,12 @@ class ModelPerformanceTracker:
 
                 # Apply smoothing to prevent extreme weights
                 smoothed_weight = (
-                    0.7 * recent_accuracy + 0.3 * self.default_weights[model_name]
+                    0.7 * recent_accuracy
+                    + 0.3 * self.default_weights[model_name]
                 )
-                weights[model_name] = max(0.05, smoothed_weight)  # Minimum weight of 5%
+                weights[model_name] = max(
+                    0.05, smoothed_weight
+                )  # Minimum weight of 5%
             else:
                 # Use default weight if insufficient history
                 weights[model_name] = self.default_weights[model_name]
@@ -763,7 +823,8 @@ class ModelPerformanceTracker:
     def get_all_stats(self) -> dict[str, dict[str, Any]]:
         # Get statistics for all models
         return {
-            model: self.get_model_stats(model) for model in self.default_weights.keys()
+            model: self.get_model_stats(model)
+            for model in self.default_weights.keys()
         }
 
     def save_to_file(self, filepath: str):
@@ -856,29 +917,49 @@ def test_ensemble_classifier():
     print("-" * 30)
     all_results = classifier.get_all_predictions(predictions)
     for method, result in all_results.items():
-        print(f"{method:20} | {result['label']:4} | {result['confidence']:.3f}")
+        print(
+            f"{method:20} | {result['label']:4} | {result['confidence']:.3f}"
+        )
 
 
 if __name__ == "__main__":
     test_ensemble_classifier()
 
 
-def compare_predictions(cleaned_sms: str, models: dict, fallback_label: str) -> list:
+def compare_predictions(
+    cleaned_sms: str, models: dict, fallback_label: str
+) -> list:
     from models.custom_rules_manager import check_custom_rules
+
     results = []
     for name, clf in models.items():
         if clf is None:
             continue
         rule_match = check_custom_rules(cleaned_sms)
         if rule_match is not None:
-            results.append(dict(model=name, label=rule_match, confidence=1.0, is_rule_override=True))
+            results.append(
+                dict(
+                    model=name,
+                    label=rule_match,
+                    confidence=1.0,
+                    is_rule_override=True,
+                )
+            )
         else:
             pred = clf([cleaned_sms])[0]
             lbl = pred["label"].upper()
             if lbl not in ("SPAM", "HAM"):
                 lbl = "SPAM" if pred.get("score", 0.5) > 0.5 else "HAM"
-            results.append(dict(model=name, label=lbl, confidence=pred["score"], is_rule_override=False))
+            results.append(
+                dict(
+                    model=name,
+                    label=lbl,
+                    confidence=pred["score"],
+                    is_rule_override=False,
+                )
+            )
     return results
+
 
 def agreement_score(results: list) -> tuple:
     if not results:

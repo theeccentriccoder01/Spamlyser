@@ -1,5 +1,3 @@
-
-
 """
 Export helpers for Spamlyser Pro — CSV, PDF, and JSON formats.
 
@@ -79,7 +77,9 @@ def dataframe_to_csv(df: pd.DataFrame) -> str:
     """
     safe_df = df.copy()
     for column in safe_df.columns:
-        if is_object_dtype(safe_df[column]) or is_string_dtype(safe_df[column]):
+        if is_object_dtype(safe_df[column]) or is_string_dtype(
+            safe_df[column]
+        ):
             safe_df[column] = safe_df[column].map(_csv_safe_cell)
     return safe_df.to_csv(index=False)
 
@@ -142,7 +142,9 @@ def _build_pdf(df: pd.DataFrame, title: str = "Spamlyser Results") -> BytesIO:
     pdf.set_font("helvetica", "B", font_size)
     pdf.set_fill_color(230, 230, 230)
     for col in df.columns:
-        pdf.cell(col_width, row_height, _fit(col), border=1, align="C", fill=True)
+        pdf.cell(
+            col_width, row_height, _fit(col), border=1, align="C", fill=True
+        )
     pdf.ln(row_height)
 
     # Data rows — alternate light background for readability
@@ -163,10 +165,14 @@ def _build_pdf(df: pd.DataFrame, title: str = "Spamlyser Results") -> BytesIO:
 
     # fpdf2's output() returns a bytearray; legacy PyFPDF output(dest="S") a str
     raw = pdf.output(dest="S")
-    return BytesIO(raw.encode("latin-1") if isinstance(raw, str) else bytes(raw))
+    return BytesIO(
+        raw.encode("latin-1") if isinstance(raw, str) else bytes(raw)
+    )
 
 
-def dataframe_to_pdf(df: pd.DataFrame, title: str = "Spamlyser Results") -> BytesIO:
+def dataframe_to_pdf(
+    df: pd.DataFrame, title: str = "Spamlyser Results"
+) -> BytesIO:
     """Public helper — convert *df* to a PDF and return a ``BytesIO`` object."""
     return _build_pdf(df, title=title)
 
@@ -296,6 +302,7 @@ def export_results_button(
 def encrypt_export_data(data: str, secret_key: str) -> str:
     """Simple XOR encryptor wrapper for export data packaging."""
     import base64
+
     key_len = len(secret_key)
     if key_len == 0:
         return data

