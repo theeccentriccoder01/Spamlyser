@@ -20,3 +20,17 @@ runs = 5
 [tool.mypy]
 ignore_missing_imports = true
 explicit_package_bases = true
+
+# ──────────────────────────────────────────────────────────────
+# Prettier — formats JSON, YAML, and Markdown files
+# Python formatting is handled by Ruff (see ruff.toml)
+#
+# Usage:
+#   npx prettier --write .          # format all non-ignored files
+#   npx prettier --check .          # check without modifying
+#
+# Config: .prettierrc
+# Ignore: .prettierignore
+# ──────────────────────────────────────────────────────────────
+[tool.prettier]
+config = ".prettierrc"

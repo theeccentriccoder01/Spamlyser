@@ -8,10 +8,8 @@ import collections
 import json
 import re
 from datetime import datetime, timedelta
-from pathlib import Path
 from typing import Any
 
-import numpy as np
 import pandas as pd
 import plotly.express as px
 import plotly.graph_objects as go
@@ -53,7 +51,9 @@ def _compute_kpis(history: list[dict[str, Any]]) -> dict[str, Any]:
     }
 
 
-def _filter_history_by_date(history: list[dict[str, Any]], days: int) -> list[dict[str, Any]]:
+def _filter_history_by_date(
+    history: list[dict[str, Any]], days: int
+) -> list[dict[str, Any]]:
     """Filter history to keep only records from the last `days` days."""
     if days <= 0:
         return history
@@ -83,12 +83,38 @@ def _extract_keywords(history: list[dict[str, Any]]) -> dict[str, int]:
         if h.get("prediction") == "SPAM":
             msg = h.get("preprocessed") or h.get("message", "")
             text += " " + str(msg).lower()
-    
-    words = re.findall(r'\b[a-z]{3,}\b', text)
+
+    words = re.findall(r"\b[a-z]{3,}\b", text)
     stopwords = {
-        "the", "and", "you", "for", "that", "this", "with", "from", "your", "have", 
-        "are", "not", "will", "all", "can", "out", "our", "has", "was", "just", 
-        "get", "how", "what", "who", "when", "why", "but", "they", "them"
+        "the",
+        "and",
+        "you",
+        "for",
+        "that",
+        "this",
+        "with",
+        "from",
+        "your",
+        "have",
+        "are",
+        "not",
+        "will",
+        "all",
+        "can",
+        "out",
+        "our",
+        "has",
+        "was",
+        "just",
+        "get",
+        "how",
+        "what",
+        "who",
+        "when",
+        "why",
+        "but",
+        "they",
+        "them",
     }
     words = [w for w in words if w not in stopwords]
     return dict(collections.Counter(words).most_common(50))
@@ -118,7 +144,9 @@ def _build_keyword_treemap(keyword_counts: dict[str, int]) -> go.Figure:
     """Build a treemap visualization of SPAM keywords."""
     if not keyword_counts:
         return go.Figure()
-    df = pd.DataFrame(list(keyword_counts.items()), columns=["Keyword", "Frequency"])
+    df = pd.DataFrame(
+        list(keyword_counts.items()), columns=["Keyword", "Frequency"]
+    )
     df["Root"] = "SPAM Keywords"
     fig = px.treemap(
         df,
@@ -202,7 +230,10 @@ def _build_model_comparison(history: list[dict[str, Any]]) -> go.Figure:
         return go.Figure()
     stats = (
         df.groupby("model")
-        .agg(avg_confidence=("confidence", "mean"), count=("confidence", "count"))
+        .agg(
+            avg_confidence=("confidence", "mean"),
+            count=("confidence", "count"),
+        )
         .reset_index()
     )
     fig = go.Figure()
@@ -256,10 +287,15 @@ def render_dashboard():
         time_filter = st.selectbox(
             "Time Range",
             ["All Time", "Last 24 Hours", "Last 7 Days", "Last 30 Days"],
-            index=0
+            index=0,
         )
-    
-    days_map = {"All Time": 0, "Last 24 Hours": 1, "Last 7 Days": 7, "Last 30 Days": 30}
+
+    days_map = {
+        "All Time": 0,
+        "Last 24 Hours": 1,
+        "Last 7 Days": 7,
+        "Last 30 Days": 30,
+    }
     days = days_map[time_filter]
 
     raw_history = _load_analysis_history()
@@ -279,7 +315,13 @@ def render_dashboard():
         st.metric("Models Used", f"{len(kpis['unique_models'])}")
 
     tab1, tab2, tab3, tab4, tab5 = st.tabs(
-        ["📈 Timeline", "🎯 Threat Distribution", "☁️ Keywords", "🤖 Model Comparison", "⚙️ Export"]
+        [
+            "📈 Timeline",
+            "🎯 Threat Distribution",
+            "☁️ Keywords",
+            "🤖 Model Comparison",
+            "⚙️ Export",
+        ]
     )
 
     with tab1:
@@ -287,7 +329,9 @@ def render_dashboard():
         if fig.data:
             st.plotly_chart(fig, use_container_width=True)
         else:
-            st.info("No analysis history available yet. Run some analyses first!")
+            st.info(
+                "No analysis history available yet. Run some analyses first!"
+            )
 
     with tab2:
         fig = _build_threat_distribution(history)
@@ -307,7 +351,9 @@ def render_dashboard():
                 fig_tree = _build_keyword_treemap(kw_counts)
                 st.plotly_chart(fig_tree, use_container_width=True)
         else:
-            st.info("No SPAM keyword data available for the selected timeframe.")
+            st.info(
+                "No SPAM keyword data available for the selected timeframe."
+            )
 
     with tab4:
         fig = _build_model_comparison(history)
@@ -322,7 +368,10 @@ def render_dashboard():
             {
                 "kpis": kpis,
                 "history": [
-                    {k: str(v) if isinstance(v, datetime) else v for k, v in h.items()}
+                    {
+                        k: str(v) if isinstance(v, datetime) else v
+                        for k, v in h.items()
+                    }
                     for h in history
                 ],
             },
@@ -336,6 +385,7 @@ def render_dashboard():
             mime="application/json",
             use_container_width=True,
         )
+
 
 if __name__ == "__main__":
     render_dashboard()

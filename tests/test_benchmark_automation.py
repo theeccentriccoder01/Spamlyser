@@ -56,7 +56,7 @@ def test_clear_history(temp_history):
 
 
 def test_benchmark_result_to_dict():
-    result = BenchmarkResult("Test", 10.5, 9.2, 18.0, 20)
+    result = BenchmarkResult("Test", 10.5, 9.2, 18.0, samples_count=20)
     d = result.to_dict()
     assert d["model_name"] == "Test"
     assert d["latency_mean_ms"] == 10.5

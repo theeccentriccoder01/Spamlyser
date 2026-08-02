@@ -20,9 +20,9 @@ class TestCorrectLeetspeak:
     # ------------------------------------------------------------------
     def test_integer_not_corrupted(self):
         """'100' must stay '100', not become 'ioo'."""
-        assert correct_leetspeak("100") == "100", (
-            "'100' was corrupted — digit lookaround not working."
-        )
+        assert (
+            correct_leetspeak("100") == "100"
+        ), "'100' was corrupted — digit lookaround not working."
 
     def test_year_not_corrupted(self):
         """'2024' must stay '2024', not become 'zo24' or 'zoze'."""
@@ -37,7 +37,9 @@ class TestCorrectLeetspeak:
     def test_phone_number_not_corrupted(self):
         """A phone-like number must not have its digits replaced."""
         result = correct_leetspeak("9876543210")
-        assert result == "9876543210", f"Phone number was corrupted to '{result}'"
+        assert (
+            result == "9876543210"
+        ), f"Phone number was corrupted to '{result}'"
 
     def test_price_not_corrupted(self):
         """'$100' must stay '$100'."""
@@ -91,9 +93,9 @@ class TestCorrectLeetspeak:
         result = preprocess_message(msg)
         cleaned = result["cleaned"]
         # "Fr33" → "Free", "M0n3y" → "Money"
-        assert "Free" in cleaned or "free" in cleaned, (
-            f"Leet 'Fr33' not decoded in: '{cleaned}'"
-        )
+        assert (
+            "Free" in cleaned or "free" in cleaned
+        ), f"Leet 'Fr33' not decoded in: '{cleaned}'"
 
 
 def test_unicode_handler():

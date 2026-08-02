@@ -82,7 +82,8 @@ def test_instantaneous_batch_does_not_crash():
         results, stats = bp.process_batch(["hello", "win cash now"])
     assert len(results) == 2
     assert stats["processing_time"] == 0.0
-    assert stats["messages_per_second"] == 0.0  # guarded, not ZeroDivisionError
+    # guarded, not ZeroDivisionError
+    assert stats["messages_per_second"] == 0.0
 
 
 def test_normal_batch_still_computes_throughput():

@@ -1,9 +1,8 @@
-import models.drift_tracker
+
 """Automated model benchmarking — compare models, track regressions, persist results."""
 
 import json
 import logging
-import time
 from dataclasses import asdict, dataclass, field
 from datetime import datetime
 from pathlib import Path
@@ -46,14 +45,17 @@ class BenchmarkHistory:
     def _load(self) -> None:
         if self._path.exists():
             try:
-                self._history = json.loads(self._path.read_text(encoding="utf-8"))
+                self._history = json.loads(
+                    self._path.read_text(encoding="utf-8")
+                )
             except (json.JSONDecodeError, OSError):
                 self._history = []
 
     def _save(self) -> None:
         self._path.parent.mkdir(parents=True, exist_ok=True)
         self._path.write_text(
-            json.dumps(self._history, indent=2, ensure_ascii=False), encoding="utf-8"
+            json.dumps(self._history, indent=2, ensure_ascii=False),
+            encoding="utf-8",
         )
 
     def record(self, result: BenchmarkResult) -> None:
@@ -86,7 +88,12 @@ class BenchmarkHistory:
             return None
         prev, curr = runs[-2], runs[-1]
         regressions: dict[str, Any] = {}
-        for metric in ("latency_mean_ms", "latency_p95_ms", "accuracy", "f1_score"):
+        for metric in (
+            "latency_mean_ms",
+            "latency_p95_ms",
+            "accuracy",
+            "f1_score",
+        ):
             if metric in prev and metric in curr:
                 old_val = prev[metric]
                 new_val = curr[metric]
@@ -142,10 +149,15 @@ def run_automated_benchmark(
 class TelemetryLogger:
     def __init__(self, log_path: str = "spamlyser_telemetry.json"):
         from pathlib import Path
+
         self.log_path = Path(log_path)
 
-    def log_inference(self, duration_ms: float, confidence: float, classification: str):
-        import time, json
+    def log_inference(
+        self, duration_ms: float, confidence: float, classification: str
+    ):
+        import json
+        import time
+
         log_entry = {
             "timestamp": time.time(),
             "duration_ms": duration_ms,

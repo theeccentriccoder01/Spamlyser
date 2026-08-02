@@ -1,11 +1,9 @@
-
-
 """
 Model confidence calibration module for Expected Calibration Error (ECE),
 Platt Scaling, and Temperature Scaling.
 """
 
-from typing import Any, Dict, Tuple
+from typing import Any
 
 import numpy as np
 
@@ -19,7 +17,10 @@ except ImportError:
 
 class ConfidenceCalibrator:
     def __init__(
-        self, temperature: float = 1.0, platt_a: float = 1.0, platt_b: float = 0.0
+        self,
+        temperature: float = 1.0,
+        platt_a: float = 1.0,
+        platt_b: float = 0.0,
     ):
         self.temperature = temperature
         self.platt_a = platt_a
@@ -35,7 +36,9 @@ class ConfidenceCalibrator:
     def sigmoid(x: float) -> float:
         return 1.0 / (1.0 + np.exp(-x))
 
-    def calibrate_probability(self, prob: float, method: str = "temperature") -> float:
+    def calibrate_probability(
+        self, prob: float, method: str = "temperature"
+    ) -> float:
         """Calibrate a single probability using temperature scaling or Platt scaling."""
         if method == "temperature":
             l = self.logit(prob)
@@ -69,7 +72,9 @@ class ConfidenceCalibrator:
             if prop_in_bin > 0:
                 accuracy_in_bin = np.mean(accuracies[in_bin])
                 avg_confidence_in_bin = np.mean(confidences[in_bin])
-                ece += prop_in_bin * np.abs(avg_confidence_in_bin - accuracy_in_bin)
+                ece += prop_in_bin * np.abs(
+                    avg_confidence_in_bin - accuracy_in_bin
+                )
 
         return ece
 
@@ -78,7 +83,9 @@ class ConfidenceCalibrator:
         if not SCIPY_AVAILABLE:
             import warnings
 
-            warnings.warn("scipy not found, skipping temperature fitting", stacklevel=2)
+            warnings.warn(
+                "scipy not found, skipping temperature fitting", stacklevel=2
+            )
             self.temperature = 1.0
             return self.temperature
 
@@ -102,12 +109,16 @@ class ConfidenceCalibrator:
         self.is_calibrated = True
         return self.temperature
 
-    def fit_platt(self, y_true: np.ndarray, y_prob: np.ndarray) -> tuple[float, float]:
+    def fit_platt(
+        self, y_true: np.ndarray, y_prob: np.ndarray
+    ) -> tuple[float, float]:
         """Find Platt scaling parameters A and B using logistic regression."""
         if not SCIPY_AVAILABLE:
             import warnings
 
-            warnings.warn("scipy not found, skipping Platt scaling", stacklevel=2)
+            warnings.warn(
+                "scipy not found, skipping Platt scaling", stacklevel=2
+            )
             self.platt_a = 1.0
             self.platt_b = 0.0
             return self.platt_a, self.platt_b

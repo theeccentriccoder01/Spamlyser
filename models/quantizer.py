@@ -1,5 +1,6 @@
 import torch
 
+
 def quantize_model_dynamic(model):
     """Applies dynamic INT8 quantization to a PyTorch model to optimize CPU inference."""
     try:

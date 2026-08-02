@@ -1,5 +1,3 @@
-import models.quantizer
-import time
 
 """
 Model initialization and verification module
@@ -15,12 +13,10 @@ Features:
 """
 
 from pathlib import Path
-from typing import Dict, Tuple
 
 from config import (
     MODEL_CACHE_DIR,
     VERIFICATION_MODEL_NAME,
-    get_optional,
 )
 
 # Global flag to track model availability
@@ -57,7 +53,10 @@ def verify_model_availability() -> tuple[bool, str, list]:
 
     # Check transformers library
     try:
-        from transformers import AutoModelForSequenceClassification, AutoTokenizer
+        from transformers import (
+            AutoModelForSequenceClassification,
+            AutoTokenizer,
+        )
     except ImportError as e:
         error_msg = (
             "Transformers library is not installed. Please install it with:\n"
@@ -77,12 +76,15 @@ def verify_model_availability() -> tuple[bool, str, list]:
 
     # Try to load a test model to verify transformers setup
     try:
-        print("Verifying model availability... This may take a moment on first run.")
+        print(
+            "Verifying model availability... This may take a moment on first run."
+        )
 
         test_model_name = VERIFICATION_MODEL_NAME
         cache_dir = MODEL_CACHE_DIR
         model_cached = cache_dir.exists() and any(
-            f"models--{test_model_name}" in p.name for p in cache_dir.rglob("*")
+            f"models--{test_model_name}" in p.name
+            for p in cache_dir.rglob("*")
         )
 
         if not model_cached:
@@ -208,7 +210,9 @@ def display_model_status_ui():
 
 # Initialize models on module load
 try:
-    MODEL_STATUS, MODEL_ERROR_MESSAGE, MODEL_WARNINGS = verify_model_availability()
+    MODEL_STATUS, MODEL_ERROR_MESSAGE, MODEL_WARNINGS = (
+        verify_model_availability()
+    )
 except Exception as e:
     MODEL_STATUS = False
     MODEL_ERROR_MESSAGE = (

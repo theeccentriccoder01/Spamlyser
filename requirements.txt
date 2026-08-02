@@ -11,12 +11,12 @@ scikit-learn>=1.9.0,<2.0.0
 lime>=0.2.0.1
 
 # Hugging Face Ecosystem
-datasets>=5.0.0,<6.0.0
+datasets>=5.0.1,<6.0.0
 sentencepiece!=0.1.100,>=0.2.2
 protobuf>=7.35.1,<8.0.0
 
 # Development & Utilities
-tqdm>=4.69.0,<5.0.0
+tqdm>=4.70.0,<5.0.0
 requests>=2.34.2,<3.0.0
 python-dotenv>=1.2.2,<2.0.0
 

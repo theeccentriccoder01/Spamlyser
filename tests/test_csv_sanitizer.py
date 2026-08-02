@@ -1,8 +1,11 @@
 """Tests for the CSV injection sanitizer module."""
 
-import pytest
 
-from models.csv_sanitizer import is_formula_payload, sanitize_cell, sanitize_row
+from models.csv_sanitizer import (
+    is_formula_payload,
+    sanitize_cell,
+    sanitize_row,
+)
 
 
 class TestSanitizeCell:

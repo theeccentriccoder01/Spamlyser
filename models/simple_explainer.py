@@ -1,5 +1,3 @@
-
-
 """
 Lightweight, dependency-free alternative to :class:`ModelExplainer`.
 
@@ -9,7 +7,7 @@ Provides keyword-based spam explanations without requiring LIME.  Useful when
 
 import re
 from collections.abc import Callable
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 # Default spam-indicative keywords grouped by category.
 SPAM_KEYWORDS: dict[str, list[str]] = {
@@ -192,7 +190,9 @@ class SimpleExplainer:
                 important_words = self._find_ham_indicators(text_lower)
 
             important_words = important_words[:num_features]
-            features.append({"class": class_name, "important_words": important_words})
+            features.append(
+                {"class": class_name, "important_words": important_words}
+            )
 
         return {
             "text": text,
@@ -201,7 +201,9 @@ class SimpleExplainer:
             "explanation": None,
         }
 
-    def visualize_explanation(self, explanation_data: dict[str, Any]) -> dict[str, Any]:
+    def visualize_explanation(
+        self, explanation_data: dict[str, Any]
+    ) -> dict[str, Any]:
         """Produce a visualisation dict compatible with ``ModelExplainer``.
 
         Returns a dict with ``feature_importance`` per class (each entry
@@ -222,12 +224,18 @@ class SimpleExplainer:
                     {
                         "feature": item["word"],
                         "importance": abs(item["weight"]),
-                        "effect": "positive" if item["is_positive"] else "negative",
+                        "effect": (
+                            "positive" if item["is_positive"] else "negative"
+                        ),
                         "weight": item["weight"],
                     }
                 )
-            feature_importance.sort(key=lambda x: abs(x["weight"]), reverse=True)
-            visualization["feature_importance"][class_name] = feature_importance
+            feature_importance.sort(
+                key=lambda x: abs(x["weight"]), reverse=True
+            )
+            visualization["feature_importance"][
+                class_name
+            ] = feature_importance
 
         spam_features = visualization["feature_importance"].get("SPAM", [])
         if spam_features:

@@ -50,7 +50,9 @@ def test_concurrent_feedback_writes(tmp_path):
         except Exception as exc:
             errors.append(exc)
 
-    threads = [threading.Thread(target=write_feedback, args=(i,)) for i in range(8)]
+    threads = [
+        threading.Thread(target=write_feedback, args=(i,)) for i in range(8)
+    ]
     for t in threads:
         t.start()
     for t in threads:

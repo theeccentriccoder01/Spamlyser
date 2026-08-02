@@ -1,6 +1,10 @@
 """Tests for text sanitization helpers."""
 
-from models.text_sanitizer import sanitize_text, strip_html_unsafe, validate_sms_message
+from models.text_sanitizer import (
+    sanitize_text,
+    strip_html_unsafe,
+    validate_sms_message,
+)
 
 
 def test_strip_html_removes_script_blocks_and_tags():

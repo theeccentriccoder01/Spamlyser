@@ -12,7 +12,9 @@ def test_threat_classification():
 
     # Test phishing classification
     phishing_message = "URGENT: Your bank account has been locked. Click here to verify your information: http://fakebank.com"
-    threat_type, confidence, metadata = classify_threat_type(phishing_message, 0.9)
+    threat_type, confidence, metadata = classify_threat_type(
+        phishing_message, 0.9
+    )
     assert threat_type == "Phishing"
     assert confidence > 0.5
 
@@ -23,16 +25,18 @@ def test_threat_classification():
     assert confidence > 0.5
 
     # Test marketing classification
-    marketing_message = (
-        "Limited time offer! 50% off all products. Shop now at our online store."
+    marketing_message = "Limited time offer! 50% off all products. Shop now at our online store."
+    threat_type, confidence, metadata = classify_threat_type(
+        marketing_message, 0.9
     )
-    threat_type, confidence, metadata = classify_threat_type(marketing_message, 0.9)
     assert threat_type == "Unwanted Marketing"
     assert confidence > 0.3
 
     # Test other classification (ambiguous)
     other_message = "Your package delivery failed. Contact us."
-    threat_type, confidence, metadata = classify_threat_type(other_message, 0.9)
+    threat_type, confidence, metadata = classify_threat_type(
+        other_message, 0.9
+    )
     assert threat_type in THREAT_CATEGORIES.keys()
 
     # Test non-spam message
@@ -57,9 +61,9 @@ def test_threat_advice():
     # Test advice for marketing
     marketing_advice = get_threat_specific_advice("Unwanted Marketing")
     assert len(marketing_advice) > 0
-    assert "opt out" in " ".join(marketing_advice).lower() or "STOP" in " ".join(
+    assert "opt out" in " ".join(
         marketing_advice
-    )
+    ).lower() or "STOP" in " ".join(marketing_advice)
 
     # Test invalid category
     invalid_advice = get_threat_specific_advice("InvalidCategory")
