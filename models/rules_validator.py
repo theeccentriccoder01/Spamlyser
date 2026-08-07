@@ -55,3 +55,11 @@ def validate_rules_collection(rules: list[dict[str, Any]]) -> tuple[bool, str]:
         seen_names.add(name)
 
     return True, ""
+
+
+def validate_rule_expression_security(expr: str) -> tuple[bool, str]:
+    """Validate dynamic rule python expression security using AST sanitizer."""
+    from .ast_rule_sanitizer import sanitize_rule_expression
+    return sanitize_rule_expression(expr)
+
+
