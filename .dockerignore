@@ -1,0 +1,85 @@
+# =============================================================================
+# .dockerignore — Spamlyser Pro
+# Keeps the Docker build context lean and prevents secrets from leaking
+# into production images.
+# =============================================================================
+
+# Version control
+.git
+.gitattributes
+.gitignore
+
+# GitHub metadata (not needed at runtime)
+.github/
+
+# IDE / editor
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Environment & secrets
+.env
+.env.*
+.streamlit/secrets.toml
+
+# Python bytecode & caches
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.mypy_cache/
+.pytest_cache/
+.ruff_cache/
+
+# Tests & development tooling (not needed in prod image)
+tests/
+benchmarks/
+scripts/
+.pre-commit-config.yaml
+.flake8
+.editorconfig
+.prettierrc
+.prettierignore
+ruff.toml
+pyproject.toml
+requirements-dev.txt
+
+# Documentation (not needed at runtime)
+docs/
+*.md
+!README.md
+LICENSE
+
+# Patch files
+*.patch
+
+# Data directory (created at runtime)
+data/
+
+# Backup files
+.backups/
+*.bak.*.json
+
+# OS artefacts
+.DS_Store
+Thumbs.db
+
+# Docker
+Dockerfile
+.dockerignore
+docker-compose*.yml
+
+# Dev container
+.devcontainer/
+
+# Coverage & build artifacts
+htmlcov/
+coverage.xml
+.coverage
+dist/
+build/
+*.egg-info/
+
+# Images directory (large assets)
+imgs/
