@@ -1,11 +1,9 @@
-import models.redos_guard
 import html
 import logging
 import re
 import signal
 import threading
 from collections.abc import Callable
-from typing import Optional
 
 logger = logging.getLogger(__name__)
 
@@ -74,7 +72,12 @@ def safe_regex_search(
     default=None,
 ):
     return safe_regex(
-        pattern, text, method=re.search, timeout=timeout, flags=flags, default=default
+        pattern,
+        text,
+        method=re.search,
+        timeout=timeout,
+        flags=flags,
+        default=default,
     )
 
 
@@ -86,7 +89,12 @@ def safe_regex_match(
     default=None,
 ):
     return safe_regex(
-        pattern, text, method=re.match, timeout=timeout, flags=flags, default=default
+        pattern,
+        text,
+        method=re.match,
+        timeout=timeout,
+        flags=flags,
+        default=default,
     )
 
 
@@ -98,7 +106,12 @@ def safe_regex_findall(
     default=None,
 ):
     return safe_regex(
-        pattern, text, method=re.findall, timeout=timeout, flags=flags, default=default
+        pattern,
+        text,
+        method=re.findall,
+        timeout=timeout,
+        flags=flags,
+        default=default,
     )
 
 
@@ -132,7 +145,9 @@ def safe_regex_sub(
             return result
         except (TimeoutError, re.error, RecursionError, ValueError) as exc:
             logger.warning(
-                "Regex sub failed (%s): %s", exc.__class__.__name__, pattern[:60]
+                "Regex sub failed (%s): %s",
+                exc.__class__.__name__,
+                pattern[:60],
             )
             return default if default is not None else text
     finally:
@@ -151,7 +166,9 @@ def sanitize_text(text: str | None, max_length: int = MAX_SMS_LENGTH) -> str:
 
 def strip_html_unsafe(text: str) -> str:
     """Remove known HTML/script tags before display-only rendering."""
-    text = safe_regex_sub(r"<script[^>]*>.*?</script>", "", text, flags=re.IGNORECASE)
+    text = safe_regex_sub(
+        r"<script[^>]*>.*?</script>", "", text, flags=re.IGNORECASE
+    )
     text = safe_regex_sub(r"<[^>]*>", "", text, flags=re.IGNORECASE)
     return text
 

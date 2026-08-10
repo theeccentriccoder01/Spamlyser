@@ -9,12 +9,11 @@ incorrectly in UI highlighting and explanations.
 import sys
 from unittest.mock import MagicMock
 
+from models.word_analyzer import WordAnalyzer
+
 # Stub heavy dependencies before importing models
 sys.modules.setdefault("torch", MagicMock())
 sys.modules.setdefault("transformers", MagicMock())
-
-
-from models.word_analyzer import WordAnalyzer
 
 
 class TestIsHammyNoDuplicateKey:

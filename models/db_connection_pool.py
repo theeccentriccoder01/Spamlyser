@@ -18,7 +18,6 @@ import logging
 import sqlite3
 import threading
 import time
-from typing import Optional
 
 _logger = logging.getLogger(__name__)
 
@@ -82,7 +81,9 @@ class ConnectionPool:
                     conn.close()
                 except Exception:
                     pass
-                _logger.debug("Pruned stale connection (idle %.0fs)", now - last_used)
+                _logger.debug(
+                    "Pruned stale connection (idle %.0fs)", now - last_used
+                )
             else:
                 still_good.append((conn, last_used))
         self._available = still_good

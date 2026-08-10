@@ -1,5 +1,3 @@
-
-
 """
 Safe file storage with atomic writes, automatic backups, and rotation.
 
@@ -24,7 +22,7 @@ import tempfile
 from collections.abc import Callable
 from datetime import datetime, timedelta
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 _logger = logging.getLogger(__name__)
 
@@ -195,12 +193,15 @@ class StorageManager:
             if validate is None or validate(data):
                 if candidate != path:
                     _logger.warning(
-                        "Primary file corrupt; restored from backup %s.", candidate
+                        "Primary file corrupt; restored from backup %s.",
+                        candidate,
                     )
                     self.save_json(str(path), data, backup=False)
                 return data
 
-            _logger.warning("Validation failed for %s; trying next backup.", candidate)
+            _logger.warning(
+                "Validation failed for %s; trying next backup.", candidate
+            )
         return default
 
     def list_backups(self, filepath: str) -> list[Path]:
@@ -288,6 +289,7 @@ def default_json_validator(data: Any) -> bool:
 
 def verify_db_integrity(db_path) -> bool:
     import sqlite3
+
     try:
         conn = sqlite3.connect(str(db_path))
         cursor = conn.cursor()
@@ -298,8 +300,10 @@ def verify_db_integrity(db_path) -> bool:
     except Exception:
         return False
 
+
 def attempt_self_healing(primary_path, backup_path) -> bool:
     import shutil
+
     if verify_db_integrity(primary_path):
         return True
     if backup_path.exists() and verify_db_integrity(backup_path):

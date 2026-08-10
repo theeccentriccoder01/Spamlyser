@@ -1,6 +1,5 @@
 """Real-time streaming visualizer for batch SMS classification."""
 
-import time
 from collections import deque
 from datetime import datetime
 
@@ -30,9 +29,9 @@ class StreamVisualizer:
         message = result.get("message", "")[:80]
         model = result.get("method", "Ensemble")
 
-        card_html = f"""<div class="stream-card {"spam" if is_spam else "ham"}" style="
+        card_html = f"""<div class="stream-card {'spam' if is_spam else 'ham'}" style="
             animation: slideIn 0.3s ease-out;
-            background: {"linear-gradient(135deg, #ff444410, #1a1a1a)" if is_spam else "linear-gradient(135deg, #44bb4410, #1a1a1a)"};
+            background: {'linear-gradient(135deg, #ff444410, #1a1a1a)' if is_spam else 'linear-gradient(135deg, #44bb4410, #1a1a1a)'};
             border-left: 4px solid {color};
             border-radius: 8px; padding: 10px 16px; margin: 4px 0;
             display: flex; justify-content: space-between; align-items: center;">
@@ -49,7 +48,9 @@ class StreamVisualizer:
         </div>"""
 
         existing = self.card_container.markdown("", unsafe_allow_html=True)
-        combined = card_html + (existing if hasattr(self, "_card_html") else "")
+        combined = card_html + (
+            existing if hasattr(self, "_card_html") else ""
+        )
         self.card_container.markdown(combined, unsafe_allow_html=True)
         self._card_html = combined
 
@@ -86,7 +87,12 @@ class StreamVisualizer:
             col=1,
         )
         fig.add_hline(
-            y=0.5, line_dash="dash", line_color="white", opacity=0.3, row=1, col=1
+            y=0.5,
+            line_dash="dash",
+            line_color="white",
+            opacity=0.3,
+            row=1,
+            col=1,
         )
 
         throughput = (

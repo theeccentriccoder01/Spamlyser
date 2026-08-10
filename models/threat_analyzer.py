@@ -1,5 +1,8 @@
 import json
+import re
+from functools import lru_cache
 from pathlib import Path
+from typing import Any
 
 
 def load_custom_categories():
@@ -29,9 +32,6 @@ Performance Optimizations:
 - Optimized pattern matching with early exits
 """
 
-import re
-from functools import lru_cache
-from typing import Any, Dict, List, Set, Tuple
 
 # Threat category indicators
 THREAT_CATEGORIES = {
@@ -163,7 +163,8 @@ THREAT_CATEGORIES = {
 _COMPILED_PATTERNS = {
     # Phishing patterns
     "phishing_verify": re.compile(
-        r"(verify|confirm|update).{0,20}(account|password|information)", re.IGNORECASE
+        r"(verify|confirm|update).{0,20}(account|password|information)",
+        re.IGNORECASE,
     ),
     "phishing_click": re.compile(
         r"(click|tap|follow).{0,10}(link|here)", re.IGNORECASE
@@ -229,7 +230,9 @@ def _initialize_keyword_sets():
     global _KEYWORD_SETS
     for category, data in THREAT_CATEGORIES.items():
         if data["keywords"]:
-            _KEYWORD_SETS[category] = set(kw.lower() for kw in data["keywords"])
+            _KEYWORD_SETS[category] = set(
+                kw.lower() for kw in data["keywords"]
+            )
 
 
 # Initialize keyword sets on module load
@@ -256,7 +259,9 @@ def _count_keyword_matches(message_lower: str, category: str) -> int:
     # Split message into words for exact matching, stripping punctuation
     import string
 
-    cleaned_message = message_lower.translate(str.maketrans("", "", string.punctuation))
+    cleaned_message = message_lower.translate(
+        str.maketrans("", "", string.punctuation)
+    )
     message_words = set(cleaned_message.split())
 
     # Count exact word matches
@@ -353,7 +358,9 @@ def classify_threat_type(
 
     if _safe_search(
         _COMPILED_PATTERNS["marketing_buy"], message_lower
-    ) and not _safe_search(_COMPILED_PATTERNS["marketing_exclude"], message_lower):
+    ) and not _safe_search(
+        _COMPILED_PATTERNS["marketing_exclude"], message_lower
+    ):
         scores["Unwanted Marketing"] += 0.2
 
     # Find the category with the highest score

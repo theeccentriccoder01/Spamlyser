@@ -1,6 +1,5 @@
 """Tests for the central configuration module."""
 
-import os
 from pathlib import Path
 
 import config

@@ -65,7 +65,9 @@ class AnomalyDetector:
             else:
                 disagreements.append(0.0)
         scores["disagreement_score"] = disagreements
-        scores["disagreement_anomaly"] = (np.array(disagreements) > 0.5).astype(float)
+        scores["disagreement_anomaly"] = (
+            np.array(disagreements) > 0.5
+        ).astype(float)
 
         # 4. Composite anomaly score (weighted average)
         weights = {"content": 0.35, "confidence": 0.35, "disagreement": 0.30}
@@ -75,7 +77,9 @@ class AnomalyDetector:
             + weights["disagreement"] * scores["disagreement_score"]
         )
         scores["composite_anomaly"] = composite
-        scores["is_anomaly"] = (composite > np.percentile(composite, 90)).astype(int)
+        scores["is_anomaly"] = (
+            composite > np.percentile(composite, 90)
+        ).astype(int)
 
         result = df.copy()
         for k, v in scores.items():

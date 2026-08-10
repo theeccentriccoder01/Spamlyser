@@ -1,5 +1,3 @@
-
-
 """
 Module for handling batch processing of SMS messages using ensemble models.
 """
@@ -7,17 +5,22 @@ Module for handling batch processing of SMS messages using ensemble models.
 from collections.abc import Callable, Generator
 from concurrent.futures import ThreadPoolExecutor
 from datetime import datetime
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any
 
 import pandas as pd
 
-from .ensemble_classifier_method import EnsembleSpamClassifier, ModelPerformanceTracker
+from .ensemble_classifier_method import (
+    EnsembleSpamClassifier,
+    ModelPerformanceTracker,
+)
 
 
 class BatchProcessor:
     """Handles batch processing of SMS messages using ensemble models."""
 
-    def __init__(self, ensemble_classifier: EnsembleSpamClassifier | None = None):
+    def __init__(
+        self, ensemble_classifier: EnsembleSpamClassifier | None = None
+    ):
         """
         Initialize the batch processor.
 
@@ -83,7 +86,9 @@ class BatchProcessor:
                 }
 
         # Get ensemble prediction using all available methods
-        ensemble_results = self.ensemble_classifier.get_all_predictions(predictions)
+        ensemble_results = self.ensemble_classifier.get_all_predictions(
+            predictions
+        )
 
         # Analyze text for risk indicators
         risk_indicators = self._analyze_risk_indicators(message)
@@ -117,24 +122,29 @@ class BatchProcessor:
         # Common risk patterns
         patterns = {
             "urls": any(
-                x in message for x in ["http://", "https://", ".com", ".net", ".org"]
+                x in message
+                for x in ["http://", "https://", ".com", ".net", ".org"]
             ),
             "urgency": any(
                 x in message
                 for x in ["urgent", "immediately", "act now", "limited time"]
             ),
             "money": any(
-                x in message for x in ["$", "€", "£", "win", "cash", "prize", "money"]
+                x in message
+                for x in ["$", "€", "£", "win", "cash", "prize", "money"]
             ),
             "personal_info": any(
                 x in message
                 for x in ["password", "account", "login", "ssn", "credit card"]
             ),
             "all_caps": any(
-                word.isupper() and len(word) > 2 for word in original_message.split()
+                word.isupper() and len(word) > 2
+                for word in original_message.split()
             ),
             "suspicious_chars": (
-                len([c for c in message if not c.isalnum() and not c.isspace()])
+                len(
+                    [c for c in message if not c.isalnum() and not c.isspace()]
+                )
                 / len(message)
                 > 0.1
                 if message
@@ -179,7 +189,8 @@ class BatchProcessor:
         worker_count = self._normalise_batch_size(batch_size)
         with ThreadPoolExecutor(max_workers=worker_count) as executor:
             future_to_message = {
-                executor.submit(self.process_message, msg): msg for msg in messages
+                executor.submit(self.process_message, msg): msg
+                for msg in messages
             }
 
             for future in future_to_message:
@@ -188,7 +199,10 @@ class BatchProcessor:
 
                 # Update statistics
                 self.batch_stats["processed_messages"] += 1
-                if result["ensemble_predictions"]["majority_voting"]["label"] == "SPAM":
+                if (
+                    result["ensemble_predictions"]["majority_voting"]["label"]
+                    == "SPAM"
+                ):
                     self.batch_stats["spam_detected"] += 1
                 else:
                     self.batch_stats["ham_detected"] += 1
@@ -197,7 +211,9 @@ class BatchProcessor:
                 self.batch_stats["avg_confidence"] = (
                     self.batch_stats["avg_confidence"]
                     * (self.batch_stats["processed_messages"] - 1)
-                    + result["ensemble_predictions"]["majority_voting"]["confidence"]
+                    + result["ensemble_predictions"]["majority_voting"][
+                        "confidence"
+                    ]
                 ) / self.batch_stats["processed_messages"]
 
                 # Report progress if callback provided
@@ -286,7 +302,10 @@ class BatchProcessor:
             self.last_results.append(result)
 
             self.batch_stats["processed_messages"] += 1
-            if result["ensemble_predictions"]["majority_voting"]["label"] == "SPAM":
+            if (
+                result["ensemble_predictions"]["majority_voting"]["label"]
+                == "SPAM"
+            ):
                 self.batch_stats["spam_detected"] += 1
             else:
                 self.batch_stats["ham_detected"] += 1
@@ -294,7 +313,9 @@ class BatchProcessor:
             prev = self.batch_stats["processed_messages"] - 1
             self.batch_stats["avg_confidence"] = (
                 self.batch_stats["avg_confidence"] * prev
-                + result["ensemble_predictions"]["majority_voting"]["confidence"]
+                + result["ensemble_predictions"]["majority_voting"][
+                    "confidence"
+                ]
             ) / self.batch_stats["processed_messages"]
 
             yield {
@@ -337,7 +358,10 @@ class BatchProcessor:
 
         for result in results:
             # Prepare row data
-            row = {"Message": result["message"], "Timestamp": result["timestamp"]}
+            row = {
+                "Message": result["message"],
+                "Timestamp": result["timestamp"],
+            }
 
             # Add individual model predictions
             for model, pred in result["model_predictions"].items():
@@ -349,7 +373,9 @@ class BatchProcessor:
             for method, pred in result["ensemble_predictions"].items():
                 row[f"Ensemble_{method}_Classification"] = pred["label"]
                 row[f"Ensemble_{method}_Confidence"] = pred["confidence"]
-                row[f"Ensemble_{method}_SpamProbability"] = pred["spam_probability"]
+                row[f"Ensemble_{method}_SpamProbability"] = pred[
+                    "spam_probability"
+                ]
 
             # Add risk indicators
             for indicator, present in result["risk_indicators"].items():
@@ -371,8 +397,11 @@ class RateLimiter:
 
     def allow_request(self) -> bool:
         import time
+
         now = time.time()
-        self.requests = [r for r in self.requests if now - r < self.window_seconds]
+        self.requests = [
+            r for r in self.requests if now - r < self.window_seconds
+        ]
         if len(self.requests) < self.max_requests:
             self.requests.append(now)
             return True

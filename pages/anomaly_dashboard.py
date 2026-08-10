@@ -1,6 +1,7 @@
-import models.drift_tracker
+
 """Anomaly detection dashboard — surfaces outlier messages and patterns."""
 
+import numpy as np
 import pandas as pd
 import plotly.express as px
 import plotly.graph_objects as go
@@ -35,7 +36,9 @@ def render_anomaly_dashboard() -> None:
         delta=f"{anomalies / total * 100:.1f}%" if total else "0%",
     )
     cols[2].metric("Avg Content Score", f"{df['content_score'].mean():.2f}")
-    cols[3].metric("Avg Disagreement", f"{df['disagreement_score'].mean():.1%}")
+    cols[3].metric(
+        "Avg Disagreement", f"{df['disagreement_score'].mean():.1%}"
+    )
     cols[4].metric("Confidence Outliers", int(df["confidence_anomaly"].sum()))
 
     st.markdown("---")
@@ -54,17 +57,24 @@ def render_anomaly_dashboard() -> None:
         with col1:
             fig = px.scatter(
                 df,
-                x="confidence_zscore"
-                if "confidence_zscore" in df.columns
-                else df.index,
+                x=(
+                    "confidence_zscore"
+                    if "confidence_zscore" in df.columns
+                    else df.index
+                ),
                 y="composite_anomaly",
                 color="is_anomaly",
                 hover_data=["message", "disagreement_score"],
                 title="Anomaly Score Distribution",
                 color_continuous_scale=["#44bb44", "#ffa657", "#ff4444"],
-                labels={"composite_anomaly": "Anomaly Score", "index": "Message #"},
+                labels={
+                    "composite_anomaly": "Anomaly Score",
+                    "index": "Message #",
+                },
             )
-            fig.update_traces(marker=dict(size=8, line=dict(width=1, color="white")))
+            fig.update_traces(
+                marker=dict(size=8, line=dict(width=1, color="white"))
+            )
             fig.update_layout(
                 height=500,
                 paper_bgcolor="rgba(0,0,0,0)",
@@ -75,7 +85,10 @@ def render_anomaly_dashboard() -> None:
         with col2:
             st.markdown("### Filter")
             min_score = st.slider(
-                "Min Anomaly Score", 0.0, float(df["composite_anomaly"].max()), 0.0
+                "Min Anomaly Score",
+                0.0,
+                float(df["composite_anomaly"].max()),
+                0.0,
             )
             show_only = st.checkbox("Show only anomalies")
             df_display = df[df["composite_anomaly"] >= min_score]
@@ -122,7 +135,9 @@ def render_anomaly_dashboard() -> None:
         col1, col2 = st.columns(2)
         with col1:
             anomaly_counts = (
-                df["is_anomaly"].value_counts().rename({0: "Normal", 1: "Anomaly"})
+                df["is_anomaly"]
+                .value_counts()
+                .rename({0: "Normal", 1: "Anomaly"})
             )
             fig1 = px.pie(
                 values=anomaly_counts.values,
@@ -166,7 +181,10 @@ def render_anomaly_dashboard() -> None:
                     name="Anomaly Score",
                     line=dict(color="#00d4aa", width=2),
                     marker=dict(
-                        size=6, color=df["is_anomaly"].map({0: "#44bb44", 1: "#ff4444"})
+                        size=6,
+                        color=df["is_anomaly"].map(
+                            {0: "#44bb44", 1: "#ff4444"}
+                        ),
                     ),
                 )
             )

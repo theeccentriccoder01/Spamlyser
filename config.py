@@ -11,7 +11,6 @@ regardless of the current working directory when the application starts.
 
 import os
 from pathlib import Path
-from typing import Optional
 
 try:
     from dotenv import load_dotenv
@@ -92,11 +91,15 @@ CSV_EXPORT_SANITIZE_FORMULAS: bool = (
 )
 
 # ── Application ────────────────────────────────────────────────────────────
-APP_TITLE: str = os.getenv("SPAMLYSER_APP_TITLE", "Spamlyser Pro - Ensemble Edition")
+APP_TITLE: str = os.getenv(
+    "SPAMLYSER_APP_TITLE", "Spamlyser Pro - Ensemble Edition"
+)
 APP_ICON: str = os.getenv("SPAMLYSER_APP_ICON", "🛡️")
 
 # ── Feature flags ──────────────────────────────────────────────────────────
-ENABLE_TELEMETRY: bool = os.getenv("SPAMLYSER_ENABLE_TELEMETRY", "false").lower() in (
+ENABLE_TELEMETRY: bool = os.getenv(
+    "SPAMLYSER_ENABLE_TELEMETRY", "false"
+).lower() in (
     "1",
     "true",
     "yes",
@@ -111,9 +114,13 @@ MAX_CUSTOM_RULES_PER_LIST: int = int(
     os.getenv("SPAMLYSER_MAX_CUSTOM_RULES_PER_LIST", "500")
 )
 
-MODEL_COMPARISON_SAMPLE_SIZE: int = int(os.getenv("SPAMLYSER_COMPARE_SAMPLES", "5"))
+MODEL_COMPARISON_SAMPLE_SIZE: int = int(
+    os.getenv("SPAMLYSER_COMPARE_SAMPLES", "5")
+)
 MAX_COMPOUND_RULES: int = int(os.getenv("SPAMLYSER_MAX_COMPOUND_RULES", "50"))
-BENCHMARK_SAMPLE_SIZE: int = int(os.getenv("SPAMLYSER_BENCHMARK_SAMPLES", "10"))
+BENCHMARK_SAMPLE_SIZE: int = int(
+    os.getenv("SPAMLYSER_BENCHMARK_SAMPLES", "10")
+)
 
 BENCHMARK_WARMUP_RUNS: int = int(os.getenv("SPAMLYSER_BENCHMARK_WARMUP", "1"))
 
@@ -148,7 +155,9 @@ ANALYTICS_DB_PATH: str = os.getenv(
     "SPAMLYSER_ANALYTICS_DB", str(DATA_DIR / "analytics.db")
 )
 
-ANALYTICS_RETENTION_DAYS: int = int(os.getenv("SPAMLYSER_ANALYTICS_RETENTION", "90"))
+ANALYTICS_RETENTION_DAYS: int = int(
+    os.getenv("SPAMLYSER_ANALYTICS_RETENTION", "90")
+)
 
 BATCH_RATE_LIMIT = 50
 

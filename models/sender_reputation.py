@@ -6,7 +6,6 @@ allowing the system to flag messages from known spam sources faster.
 
 import json
 import os
-import time
 from datetime import datetime
 from pathlib import Path
 from threading import Lock
@@ -88,11 +87,14 @@ class SenderReputation:
             total = entry["total_messages"]
             spam_ratio = entry["spam_count"] / total if total > 0 else 0
             avg_conf = (
-                sum(entry["confidence_scores"]) / len(entry["confidence_scores"])
+                sum(entry["confidence_scores"])
+                / len(entry["confidence_scores"])
                 if entry["confidence_scores"]
                 else 0.5
             )
-            entry["reputation_score"] = 1.0 - (spam_ratio * 0.7 + avg_conf * 0.3)
+            entry["reputation_score"] = 1.0 - (
+                spam_ratio * 0.7 + avg_conf * 0.3
+            )
 
             self._dirty = True
             return entry
