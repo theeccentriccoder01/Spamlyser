@@ -1,5 +1,6 @@
 from models.webhook_queue import WebhookRetryQueue
 
+
 def test_webhook_queue():
     queue = WebhookRetryQueue()
     queue.enqueue("http://example.com", "{}")

@@ -1,6 +1,10 @@
 """Tests for the lightweight SimpleExplainer module."""
 
-from models.simple_explainer import HAM_KEYWORDS, SPAM_KEYWORDS, SimpleExplainer
+from models.simple_explainer import (
+    HAM_KEYWORDS,
+    SPAM_KEYWORDS,
+    SimpleExplainer,
+)
 
 
 def test_default_spam_keywords_are_populated():
@@ -15,7 +19,9 @@ def test_default_ham_keywords_are_populated():
 
 def test_explain_prediction_returns_expected_structure():
     explainer = SimpleExplainer()
-    result = explainer.explain_prediction("Free money! Click here to claim your prize.")
+    result = explainer.explain_prediction(
+        "Free money! Click here to claim your prize."
+    )
     assert "text" in result
     assert "features" in result
     assert len(result["features"]) == 2
@@ -88,7 +94,8 @@ def test_visualize_explanation_summary_contains_top_signal():
 def test_respects_num_features_limit():
     explainer = SimpleExplainer()
     result = explainer.explain_prediction(
-        "Free money! Urgent account verification required. Click here.", num_features=2
+        "Free money! Urgent account verification required. Click here.",
+        num_features=2,
     )
     spam_features = result["features"][1]["important_words"]
     assert len(spam_features) <= 2

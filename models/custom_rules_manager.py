@@ -1,4 +1,3 @@
-import models.rules_simulator
 from models.rules_validator import validate_rule_structure
 
 """
@@ -34,11 +33,14 @@ import re
 from typing import Any
 
 from .storage_manager import StorageManager, default_json_validator
+from .rule_version_store import RuleVersionStore
 
 _logger = logging.getLogger(__name__)
 _storage = StorageManager()
+_version_store = RuleVersionStore()
 
 _EMPTY_RULES: dict[str, list] = {"allowlist": [], "blocklist": []}
+
 
 
 def _rules_file_path() -> str:
@@ -94,7 +96,9 @@ def _compile_blocklist_pattern(pattern: str) -> re.Pattern | None:
     try:
         return re.compile(pattern, re.IGNORECASE)
     except re.error as exc:
-        _logger.warning("Skipping invalid blocklist regex %r: %s", pattern, exc)
+        _logger.warning(
+            "Skipping invalid blocklist regex %r: %s", pattern, exc
+        )
         return None
 
 
@@ -105,9 +109,13 @@ def load_custom_rules() -> dict[str, list]:
     cannot be parsed, or fails schema validation.
     """
     path = _rules_file_path()
-    rules = _storage.load_json_safe(path, default=None, validate=_validate_rules)
+    rules = _storage.load_json_safe(
+        path, default=None, validate=_validate_rules
+    )
     if rules is None:
-        _logger.info("No valid custom rules found at %s — using defaults.", path)
+        _logger.info(
+            "No valid custom rules found at %s — using defaults.", path
+        )
         return dict(_EMPTY_RULES)
     return rules
 
@@ -136,7 +144,9 @@ def save_custom_rules(rules: dict[str, list]) -> bool:
     # Warn about invalid blocklist patterns at save time so users get early
     # feedback rather than silent failures during analysis.
     invalid = [
-        p for p in rules.get("blocklist", []) if _compile_blocklist_pattern(p) is None
+        p
+        for p in rules.get("blocklist", [])
+        if _compile_blocklist_pattern(p) is None
     ]
     if invalid:
         _logger.warning(
@@ -146,7 +156,9 @@ def save_custom_rules(rules: dict[str, list]) -> bool:
         )
 
     path = _rules_file_path()
-    return _storage.save_json(path, rules, backup=True, validate=_validate_rules)
+    return _storage.save_json(
+        path, rules, backup=True, validate=_validate_rules
+    )
 
 
 def check_custom_rules(text: str) -> str | None:
@@ -198,3 +210,25 @@ def validate_rule_schema(rule: dict) -> bool:
 def validate_rule_structure(rule: dict) -> bool:
     """Validates threat rule structure - alias for schema validation."""
     return validate_rule_schema(rule)
+
+
+def save_custom_rules_versioned(rules: dict[str, list], author: str = "system", comment: str = "Rule update") -> bool:
+    """Save custom rules and commit a version snapshot."""
+    success = save_custom_rules(rules)
+    if success:
+        _version_store.commit_version(rules, author=author, comment=comment)
+    return success
+
+
+def rollback_custom_rules(version_id: int) -> bool:
+    """Rollback custom rules to a previous version ID."""
+    restored = _version_store.rollback(version_id)
+    if restored is not None:
+        return save_custom_rules(restored)
+    return False
+
+
+def get_rule_version_store() -> RuleVersionStore:
+    """Return the global rule version store instance."""
+    return _version_store
+

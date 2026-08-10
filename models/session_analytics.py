@@ -6,7 +6,6 @@ from typing import Any
 
 import numpy as np
 import pandas as pd
-from scipy.stats import entropy
 
 
 class SessionAnalytics:
@@ -21,9 +20,17 @@ class SessionAnalytics:
         if not analyses:
             return []
 
-        sorted_analyses = sorted(analyses, key=lambda a: a.get("timestamp", ""))
+        sorted_analyses = sorted(
+            analyses, key=lambda a: a.get("timestamp", "")
+        )
         sessions = []
-        current = {"id": 0, "start": None, "end": None, "analyses": [], "messages": []}
+        current = {
+            "id": 0,
+            "start": None,
+            "end": None,
+            "analyses": [],
+            "messages": [],
+        }
 
         for a in sorted_analyses:
             ts = a.get("timestamp")
@@ -66,7 +73,9 @@ class SessionAnalytics:
         spams = sum(1 for a in analyses if self._get_label(a) == "SPAM")
         hams = total - spams
         confs = [
-            self._get_confidence(a) for a in analyses if self._get_confidence(a) > 0
+            self._get_confidence(a)
+            for a in analyses
+            if self._get_confidence(a) > 0
         ]
         avg_conf = np.mean(confs) if confs else 0.0
 
@@ -102,9 +111,11 @@ class SessionAnalytics:
             rows.append(
                 {
                     "session_id": s["id"],
-                    "start": s["start"].isoformat()
-                    if hasattr(s["start"], "isoformat")
-                    else str(s["start"]),
+                    "start": (
+                        s["start"].isoformat()
+                        if hasattr(s["start"], "isoformat")
+                        else str(s["start"])
+                    ),
                     "duration_min": s["duration_seconds"] / 60,
                     "total": s["total"],
                     "spam_rate": s["spam_rate"],

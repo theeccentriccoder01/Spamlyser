@@ -59,11 +59,15 @@ def error_boundary(page_func: F, fallback_message: str | None = None) -> F:
             )
         except Exception as exc:
             logger.error(
-                "Unhandled error in %s: %s", page_func.__name__, exc, exc_info=True
+                "Unhandled error in %s: %s",
+                page_func.__name__,
+                exc,
+                exc_info=True,
             )
             render_error_panel(
                 title="⚠️ Unexpected Error",
-                message=fallback_message or "Something went wrong. Please try again.",
+                message=fallback_message
+                or "Something went wrong. Please try again.",
                 detail=traceback.format_exc(),
                 recoverable=True,
             )

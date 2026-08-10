@@ -116,7 +116,9 @@ def test_save_json_validator_aborts(tmp_path):
     target = str(tmp_path / "data.json")
     mgr = StorageManager()
 
-    result = mgr.save_json(target, "not-a-dict", validate=default_json_validator)
+    result = mgr.save_json(
+        target, "not-a-dict", validate=default_json_validator
+    )
     assert result is False
     assert not os.path.exists(target)
 
@@ -169,7 +171,8 @@ def test_load_json_safe_falls_back_to_backup_on_validation_failure(tmp_path):
     # Write a valid backup first
     mgr.save_json(target, {"status": "ok"}, backup=False)
     # Overwrite with invalid content (passes JSON parse but fails our validator)
-    mgr.save_json(target, {"status": "ok"}, backup=True)  # creates backup of good data
+    # creates backup of good data
+    mgr.save_json(target, {"status": "ok"}, backup=True)
     with open(target, "w") as f:
         f.write('"just-a-string"')  # valid JSON but not a dict/list
 

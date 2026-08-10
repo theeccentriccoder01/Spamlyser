@@ -7,7 +7,6 @@ based on content patterns, and filter analysis history by category.
 import json
 import os
 import re
-from datetime import datetime
 from pathlib import Path
 from threading import Lock
 from typing import Any
@@ -17,7 +16,15 @@ DEFAULT_CATEGORIES = {
         "label": "Personal",
         "icon": "👤",
         "color": "#4ecdc4",
-        "keywords": ["hi", "hello", "friend", "family", "mom", "dad", "how are you"],
+        "keywords": [
+            "hi",
+            "hello",
+            "friend",
+            "family",
+            "mom",
+            "dad",
+            "how are you",
+        ],
         "description": "Personal messages from friends and family",
     },
     "financial": {
@@ -73,7 +80,9 @@ class MessageCategorizer:
             config_path = os.getenv(
                 "SPAMLYSER_CATEGORIES_CONFIG",
                 str(
-                    Path(__file__).resolve().parent.parent / "data" / "categories.json"
+                    Path(__file__).resolve().parent.parent
+                    / "data"
+                    / "categories.json"
                 ),
             )
         self._config_path = Path(config_path)
@@ -106,9 +115,15 @@ class MessageCategorizer:
         for cat_id, cat_data in self._categories.items():
             keywords = cat_data.get("keywords", [])
             if keywords:
-                pattern = r"\b(?:" + "|".join(re.escape(kw) for kw in keywords) + r")\b"
+                pattern = (
+                    r"\b(?:"
+                    + "|".join(re.escape(kw) for kw in keywords)
+                    + r")\b"
+                )
                 try:
-                    self._compiled_patterns[cat_id] = re.compile(pattern, re.IGNORECASE)
+                    self._compiled_patterns[cat_id] = re.compile(
+                        pattern, re.IGNORECASE
+                    )
                 except re.error:
                     pass
 
@@ -124,7 +139,9 @@ class MessageCategorizer:
                         "label": cat_data.get("label", cat_id),
                         "icon": cat_data.get("icon", "📁"),
                         "color": cat_data.get("color", "#888888"),
-                        "confidence": min(1.0, len(pattern.findall(message)) * 0.25),
+                        "confidence": min(
+                            1.0, len(pattern.findall(message)) * 0.25
+                        ),
                     }
                 )
         return sorted(matches, key=lambda x: x["confidence"], reverse=True)

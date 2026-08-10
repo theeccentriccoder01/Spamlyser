@@ -1,11 +1,10 @@
-import models.report_generator
+
 """Cross-session trend analytics dashboard — Gantt timeline + KPI comparison."""
 
 from datetime import datetime
 
 import numpy as np
 import pandas as pd
-import plotly.express as px
 import plotly.graph_objects as go
 import streamlit as st
 
@@ -39,7 +38,9 @@ def render_trend_analytics() -> None:
     total_msgs = sum(s["total"] for s in sessions)
     avg_spam_rate = np.mean([s["spam_rate"] for s in sessions])
     latest_trend = (
-        drift_data["deltas"][-1]["direction"] if drift_data["deltas"] else "stable"
+        drift_data["deltas"][-1]["direction"]
+        if drift_data["deltas"]
+        else "stable"
     )
 
     cols = st.columns(5)
@@ -64,7 +65,9 @@ def render_trend_analytics() -> None:
         fig = go.Figure()
         for _i, s in enumerate(sessions):
             spam_pct = s["spam_rate"]
-            bar_color = f"rgb({int(255 * spam_pct)}, {int(255 * (1 - spam_pct))}, 100)"
+            bar_color = (
+                f"rgb({int(255 * spam_pct)}, {int(255 * (1 - spam_pct))}, 100)"
+            )
             fig.add_trace(
                 go.Bar(
                     name=f"Session {s['id']}",
@@ -203,7 +206,11 @@ def render_trend_analytics() -> None:
                     marker=dict(
                         size=10,
                         color=drift_df["direction"].map(
-                            {"up": "#ff4444", "down": "#44bb44", "stable": "#ffa657"}
+                            {
+                                "up": "#ff4444",
+                                "down": "#44bb44",
+                                "stable": "#ffa657",
+                            }
                         ),
                     ),
                     text=[f"{d:+.1%}" for d in drift_df["spam_rate_delta"]],

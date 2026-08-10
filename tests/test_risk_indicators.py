@@ -35,7 +35,8 @@ class _FakeEnsemble:
 
 
 def _make_processor():
-    bp = BatchProcessor.__new__(BatchProcessor)  # bypass model-loading __init__
+    # bypass model-loading __init__
+    bp = BatchProcessor.__new__(BatchProcessor)
     bp.ensemble_classifier = _FakeEnsemble()
     bp.batch_stats = {}
     return bp

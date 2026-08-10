@@ -49,9 +49,9 @@ class TestGetModelPredictionExists:
         """Return value must be a PredictionResult (or duck-type compatible)."""
         clf = _make_classifier()
         result = clf.get_model_prediction("DistilBERT", "hello world")
-        assert isinstance(result, PredictionResult), (
-            f"Expected PredictionResult, got {type(result)}"
-        )
+        assert isinstance(
+            result, PredictionResult
+        ), f"Expected PredictionResult, got {type(result)}"
 
     def test_result_has_required_attributes(self):
         """BatchProcessor accesses .label, .score, .spam_probability."""
@@ -59,30 +59,31 @@ class TestGetModelPredictionExists:
         result = clf.get_model_prediction("BERT", "win a prize now")
         assert hasattr(result, "label"), "PredictionResult missing .label"
         assert hasattr(result, "score"), "PredictionResult missing .score"
-        assert hasattr(result, "spam_probability"), (
-            "PredictionResult missing .spam_probability"
-        )
+        assert hasattr(
+            result, "spam_probability"
+        ), "PredictionResult missing .spam_probability"
 
     def test_label_is_spam_or_ham(self):
         clf = _make_classifier()
         result = clf.get_model_prediction("RoBERTa", "test message")
-        assert result.label in ("SPAM", "HAM"), (
-            f"label must be 'SPAM' or 'HAM', got '{result.label}'"
-        )
+        assert result.label in (
+            "SPAM",
+            "HAM",
+        ), f"label must be 'SPAM' or 'HAM', got '{result.label}'"
 
     def test_score_in_unit_interval(self):
         clf = _make_classifier()
         result = clf.get_model_prediction("ALBERT", "click here to claim")
-        assert 0.0 <= result.score <= 1.0, (
-            f"score must be in [0, 1], got {result.score}"
-        )
+        assert (
+            0.0 <= result.score <= 1.0
+        ), f"score must be in [0, 1], got {result.score}"
 
     def test_spam_probability_in_unit_interval(self):
         clf = _make_classifier()
         result = clf.get_model_prediction("DistilBERT", "call now")
-        assert 0.0 <= result.spam_probability <= 1.0, (
-            f"spam_probability must be in [0, 1], got {result.spam_probability}"
-        )
+        assert (
+            0.0 <= result.spam_probability <= 1.0
+        ), f"spam_probability must be in [0, 1], got {result.spam_probability}"
 
     def test_all_known_models_accepted(self):
         """Method must not raise for any of the four known model names."""
@@ -125,7 +126,9 @@ class TestBatchProcessorIntegration:
     """process_message() and process_batch() must work end-to-end after fix."""
 
     def setup_method(self):
-        self.bp = BatchProcessor(ensemble_classifier=_FakeEnsembleWithRealMethod())
+        self.bp = BatchProcessor(
+            ensemble_classifier=_FakeEnsembleWithRealMethod()
+        )
 
     def test_process_message_does_not_raise_attribute_error(self):
         """The core bug: this used to crash with AttributeError."""
@@ -146,14 +149,16 @@ class TestBatchProcessorIntegration:
             "risk_indicators",
             "timestamp",
         ):
-            assert key in result, f"Missing key '{key}' in process_message result"
+            assert (
+                key in result
+            ), f"Missing key '{key}' in process_message result"
 
     def test_process_message_has_all_model_predictions(self):
         result = self.bp.process_message("urgent: click now")
         for model in KNOWN_MODELS:
-            assert model in result["model_predictions"], (
-                f"Model '{model}' missing from model_predictions"
-            )
+            assert (
+                model in result["model_predictions"]
+            ), f"Model '{model}' missing from model_predictions"
 
     def test_process_batch_single_message(self):
         results, stats = self.bp.process_batch(["hi there"])
