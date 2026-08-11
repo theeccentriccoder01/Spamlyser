@@ -1,5 +1,5 @@
 # Core Dependencies
-streamlit>=1.60.0
+streamlit>=1.61.1
 pandas>=3.0.5,<4.0.0
 plotly>=6.9.0,<7.0.0
 transformers>=5.14.1,<6.0.0
