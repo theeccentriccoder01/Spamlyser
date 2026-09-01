@@ -1,7 +1,7 @@
 # Core Dependencies
 streamlit>=1.62.0
 pandas>=3.0.5,<4.0.0
-plotly>=6.9.0,<7.0.0
+plotly>=7.0.0,<8.0.0
 transformers>=5.16.1,<6.0.0
 torch>=2.13.0,<3.0.0
 
