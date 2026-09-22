@@ -12,7 +12,7 @@ pytest-cov>=4.1.0,<5.0.0
 
 # Type checking (optional)
 mypy>=2.3.0,<3.0.0
-types-requests>=2.33.0.20260712
+types-requests>=2.33.0.20260906
 
 # Security scanning
 bandit>=1.8.0,<2.0.0
