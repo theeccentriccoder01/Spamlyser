@@ -11,7 +11,7 @@ scikit-learn>=1.9.1,<2.0.0
 lime>=0.2.0.1
 
 # Hugging Face Ecosystem
-datasets>=5.0.1,<6.0.0
+datasets>=5.1.0,<6.0.0
 sentencepiece!=0.1.100,>=0.2.2
 protobuf>=7.36.2,<8.0.0
 
